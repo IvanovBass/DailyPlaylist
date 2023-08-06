@@ -8,6 +8,10 @@ namespace DailyPlaylist.Model
 {
     public class Genre
     {
-        public int Id { get; set; }
+        public int Id { get; }
+
+        public string Name { get; }
+
+        public string PictureURL { get; }
     }
 }

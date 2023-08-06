@@ -32,7 +32,5 @@ namespace DailyPlaylist.Model
 
         public DateOnly ReleaseDate { get; }
 
-
-
     }
 }
