@@ -3,15 +3,43 @@
     x:Class="DailyPlaylist.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:DailyPlaylist.View"   
-    Shell.FlyoutBehavior="Disabled">
-    <!-- changé de DailyPlaylist tout court -->
+    xmlns:local="clr-namespace:DailyPlaylist"
+    xmlns:view="clr-namespace:DailyPlaylist.View"  
+    Shell.FlyoutBehavior="Flyout">
+    <!-- Shell.FlyoutBehavior="Disabled"> -->
+
 
     <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:HomePage}"     
-        Route="HomePage" />
-    <!-- changé de MainPage -->
-    <!-- changer vers HomePage() -->
+        Title="Loading"
+        ContentTemplate="{DataTemplate view:LoadingPage}"     
+        Route="LoadingPage" 
+        Shell.FlyoutBehavior="Disabled"
+        Shell.FlyoutItemIsVisible="False"/>
+
+    <ShellContent
+        Title="Login"
+        ContentTemplate="{DataTemplate view:LoginPage}"     
+        Route="LoginPage" 
+        Shell.FlyoutBehavior="Disabled"/>
+
+    <TabBar   FlyoutDisplayOptions="AsMultipleItems">
+
+        <ShellContent
+            Title="Home"
+            ContentTemplate="{DataTemplate view:HomePage}"     
+            Route="HomePage" />
+
+        <ShellContent
+            Title="Search"
+            ContentTemplate="{DataTemplate view:SearchPage}"  
+            Route="SearchPage" />
+
+        <ShellContent
+            Title="PlaylistPage"
+            ContentTemplate="{DataTemplate view:PlaylistPage}"     
+            Route="PlaylistPage" />
+
+    </TabBar>
+
 
 </Shell>

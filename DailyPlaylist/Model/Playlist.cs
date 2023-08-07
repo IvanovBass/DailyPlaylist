@@ -8,17 +8,20 @@ namespace DailyPlaylist.Model
 {
     public class Playlist
     {
-        private static int CurrentId { get; set; } = 0;
-        public int Id { get; private set; }
+        public Guid Id { get; private set; }
+
+        public User User { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public int Count { get; set; }
         public List<Track> Tracks { get; set; }
-        public DateOnly DateCreation { get; set; }
+        public DateTime DateCreation { get; set; }
+
+        public DateTime DateUpdated { get; set; } = DateTime.Now;
 
         public Playlist()
         {
-            Id = CurrentId++;
+            Id = Guid.NewGuid();
         }
     }
 }

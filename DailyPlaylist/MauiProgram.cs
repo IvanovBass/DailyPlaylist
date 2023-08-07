@@ -1,4 +1,6 @@
 ﻿// using MediaManager;
+using DailyPlaylist.Services;
+using DailyPlaylist.View;
 using Microsoft.Extensions.Logging;
 
 namespace DailyPlaylist;
@@ -26,6 +28,11 @@ public static class MauiProgram
 		builder.Logging.AddDebug();
 #endif
 
-		return builder.Build();
+		builder.Services.AddTransient<AuthService>();
+
+		builder.Services.AddTransient<LoadingPage>();
+
+
+        return builder.Build();
 	}
 }

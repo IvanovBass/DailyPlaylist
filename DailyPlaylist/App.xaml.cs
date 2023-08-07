@@ -1,4 +1,5 @@
-﻿using MediaManager;
+﻿using DailyPlaylist.View;
+using MediaManager;
 
 namespace DailyPlaylist;
 

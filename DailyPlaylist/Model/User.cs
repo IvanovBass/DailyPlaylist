@@ -9,8 +9,7 @@ namespace DailyPlaylist.Model
 {
     public class User
     {
-        private static int CurrentId { get; set; } = 0;
-        public int Id { get; private set; }
+        public Guid Id { get; private set; }
         public string Username { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
@@ -21,7 +20,7 @@ namespace DailyPlaylist.Model
 
         public User()
         {
-            Id = CurrentId++;
+            Id = Guid.NewGuid();
         }
     }
 }
