@@ -17,11 +17,18 @@ public partial class LoginPage : ContentPage
 
     private async void ButtonLoginClicked(object sender, EventArgs e)
     {
-
-        _authService.Login("username", "password");  
         // aller chercher dynamiquement depuis les input/entrys et dans la fonction Login, aller API la DB à la collection User pour voir si OK
         // pas oublier de hasher le mdp
         // + check le layout Login au-dessus et résous problème labels/police ? en android
+        // Algorithmer ici ou passer le username et password en arguments de Login ?
+        _authService.Login();
         await Shell.Current.GoToAsync($"//{nameof(HomePage)}");
+    }
+
+    private void ButtonLogoutClicked(object sender, EventArgs e)
+    {
+        _authService?.Logout();
+        Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
+        // + snackbar avec message you're succesfully logged out ?
     }
 }

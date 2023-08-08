@@ -5,7 +5,8 @@ namespace DailyPlaylist.View;
 public partial class LoadingPage : ContentPage
 {
     private readonly AuthService  _authService;
-	public LoadingPage(AuthService authService)
+
+    public LoadingPage(AuthService authService)
 	{
 		InitializeComponent();
 		_authService = authService;
@@ -15,7 +16,7 @@ public partial class LoadingPage : ContentPage
 	{
 		base.OnNavigatedTo(args);
 
-		if (await _authService.IsAuthenticatedAsync())
+		if (await _authService.IsAuthenticatedAsync("username", "password"))
 		{
             await Shell.Current.GoToAsync($"//{nameof(HomePage)}");
         }

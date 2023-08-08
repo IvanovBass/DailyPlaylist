@@ -11,7 +11,6 @@ public partial class AppShell : Shell
 		InitializeComponent();
 
 
-        Routing.RegisterRoute(nameof(ListingPage), typeof(ListingPage));
         Routing.RegisterRoute(nameof(SearchPage), typeof(SearchPage));
         Routing.RegisterRoute(nameof(LoadingPage), typeof(LoadingPage));
         Routing.RegisterRoute(nameof(LoginPage), typeof(LoginPage));

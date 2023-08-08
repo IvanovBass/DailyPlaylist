@@ -32,6 +32,11 @@ public static class MauiProgram
 
 		builder.Services.AddTransient<LoadingPage>();
 
+        builder.Services.AddTransient<LoginPage>();
+
+        builder.Services.AddSingleton(new HttpClient());
+
+
 
         return builder.Build();
 	}

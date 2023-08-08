@@ -35,7 +35,7 @@
             Route="SearchPage" />
 
         <ShellContent
-            Title="PlaylistPage"
+            Title="Playlists"
             ContentTemplate="{DataTemplate view:PlaylistPage}"     
             Route="PlaylistPage" />
 

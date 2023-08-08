@@ -56,18 +56,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
+		<PackageReference Include="MongoDB.Bson" Version="2.20.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
 		<PackageReference Include="Plugin.MediaManager" Version="1.2.2" />
 		<PackageReference Include="Plugin.MediaManager.Forms" Version="1.2.2" />
+		<PackageReference Include="Realm" Version="11.3.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <MauiXaml Update="View\HomePage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="View\ListingPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="View\PlayerPage.xaml">
@@ -85,5 +85,5 @@
 	  <Folder Include="Resources\AppIcon\" />
 	  <Folder Include="Resources\Splash\" />
 	</ItemGroup>
-
+	
 </Project>
