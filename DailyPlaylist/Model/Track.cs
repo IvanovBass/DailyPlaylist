@@ -11,41 +11,78 @@ namespace DailyPlaylist.Model
     public class Track
     {
         [JsonProperty("id")]
-        public long Id { get; }
+        public long Id { get; set; }
 
-        // By using an integer Id , I got the foolowing error : Newtonsoft.Json.JsonReaderException: 'JSON integer 2284985957 is too large
-        // or small for an Int32. Path 'data[9].id', line 1, position 17174.'
+        [JsonProperty("readable")]
+        public bool Readable { get; set; }
 
         [JsonProperty("title")]
-        public string Title { get; }
+        public string Title { get; set; }
 
-        public string TitleShort { get; }
+        [JsonProperty("title_short")]
+        public string TitleShort { get; set; }
 
-        public string Url { get; }
+        [JsonProperty("title_version")]
+        public string TitleVersion { get; set; }
 
-        public string Preview { get; }
+        [JsonProperty("isrc")]
+        public string Isrc { get; set; }
+
+        [JsonProperty("link")]
+        public string Link { get; set; }
+
+        [JsonProperty("share")]
+        public string Share { get; set; }
 
         [JsonProperty("duration")]
-        public int Duration { get; }
+        public int Duration { get; set; }
 
-        public int Rank { get; }
+        [JsonProperty("track_position")]
+        public int TrackPosition { get; set; }
 
-        public DateOnly ReleaseDate { get; }
+        [JsonProperty("disk_number")]
+        public int DiskNumber { get; set; }
+
+        [JsonProperty("rank")]
+        public int Rank { get; set; }
+
+        [JsonProperty("release_date")]
+        public string ReleaseDate { get; set; }
+
+        [JsonProperty("explicit_lyrics")]
+        public bool ExplicitLyrics { get; set; }
+
+        [JsonProperty("explicit_content_lyrics")]
+        public int ExplicitContentLyrics { get; set; }
+
+        [JsonProperty("explicit_content_cover")]
+        public int ExplicitContentCover { get; set; }
+
+        [JsonProperty("preview")]
+        public string Preview { get; set; }
+
+        [JsonProperty("bpm")]
+        public double Bpm { get; set; }
+
+        [JsonProperty("gain")]
+        public double Gain { get; set; }
+
+        [JsonProperty("available_countries")]
+        public List<string> AvailableCountries { get; set; }
+
+        [JsonProperty("contributors")]
+        public List<Contributor> Contributors { get; set; }
+
+        [JsonProperty("md5_image")]
+        public string Md5Image { get; set; }
 
         [JsonProperty("artist")]
-        public Artist Artist { get; }
+        public Artist Artist { get; set; }
 
-        public Album Album { get; }
+        [JsonProperty("album")]
+        public Album Album { get; set; }
 
-        public Genre Genre
-        {
-            get
-            {
-                if (Album != null)
-                    return Album.Genre;
-                else
-                    return null; 
-            }
-        }
+        [JsonProperty("type")]
+        public string Type { get; set; }
     }
 }

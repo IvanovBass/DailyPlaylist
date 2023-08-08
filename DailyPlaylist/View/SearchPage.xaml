@@ -13,16 +13,7 @@
     <VerticalStackLayout>
         <StackLayout Spacing="10">
             <Entry Text="{Binding SearchQuery}" Placeholder="Search..." />
-            <ListView ItemsSource="{Binding SearchResults}">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <TextCell Text="{Binding Title}" Detail="{Binding Artist.Name}" />
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
         </StackLayout>
-
-
 
         <CollectionView ItemsSource="{Binding SearchResults}" Margin="10">
             <CollectionView.ItemTemplate>
@@ -56,12 +47,5 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
     </VerticalStackLayout>
-        
-
-
-        
-
-
     
-
 </ContentPage>

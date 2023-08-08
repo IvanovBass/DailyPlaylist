@@ -1,36 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Newtonsoft.Json;
+
 
 namespace DailyPlaylist.Model
 {
     public class Album
     {
-        public long Id { get; }
-        public string Title { get; }
-        public string Url { get; }
-        public string CoverUrl { get; }
-        // The url of the album's cover. Add 'size' parameter to the url to change size. Can be 'small', 'medium', 'big', 'xl'
-        // Get here to see how to use the Route parameters : https://developers.deezer.com/api
-        // You will have to concatenate the parameters to the CoverUrl
+        [JsonProperty("id")]
+        public int Id { get; set; }
 
-        public string CoverSmallUrl { get; }
+        [JsonProperty("title")]
+        public string Title { get; set; }
 
-        public string CoverMediumUrl { get; }
+        [JsonProperty("link")]
+        public string Link { get; set; }
 
-        public string CoverBigUrl { get; }
+        [JsonProperty("cover")]
+        public string Cover { get; set; }
 
-        public Genre Genre { get; }
+        [JsonProperty("cover_small")]
+        public string CoverSmall { get; set; }
 
-        public List<Genre> Genres { get; }
+        [JsonProperty("cover_medium")]
+        public string CoverMedium { get; set; }
 
-        public int NbTrack { get; }
+        [JsonProperty("cover_big")]
+        public string CoverBig { get; set; }
 
-        public int Duration { get; }  // in seconds
+        [JsonProperty("cover_xl")]
+        public string CoverXl { get; set; }
 
-        public DateOnly ReleaseDate { get; }
+        [JsonProperty("md5_image")]
+        public string Md5Image { get; set; }
 
+        [JsonProperty("release_date")]
+        public string ReleaseDate { get; set; }
+
+        [JsonProperty("tracklist")]
+        public string Tracklist { get; set; }
+
+        [JsonProperty("type")]
+        public string Type { get; set; }
     }
 }
