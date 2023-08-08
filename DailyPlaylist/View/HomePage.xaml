@@ -7,27 +7,33 @@
              NavigationPage.HasNavigationBar="False"
              Title="Home">
     <ContentPage.BindingContext>
-        <vm:HomeViewModel/>
+        <vm:TrackViewModel/>
     </ContentPage.BindingContext>
     
     <ScrollView>
         <VerticalStackLayout
-            Spacing="25"
-            Padding="30,0"
-            VerticalOptions="Center">
+            Spacing="10"
+            Padding="30,0">
 
             <Image
                 Source="icon.png"
                 HeightRequest="180"
                 HorizontalOptions="Center" />
                 <!--SemanticProperties.Description="Cute dot net bot waving hi to you!"-->
-                
+
             <Label
                 Text="Welcome to Daily Playlist !"
                 FontSize="Large"
                 HorizontalOptions="Center" />
-                <!--SemanticProperties.HeadingLevel="Level1"-->
-                 
+            <!--SemanticProperties.HeadingLevel="Level1"-->
+
+            <StackLayout Spacing="20" Padding="20">
+                <Label Text="{Binding CurrentTrack.Title}" FontSize="Large" />
+                <Image Source="{Binding CurrentTrack.Album.CoverUrl}" WidthRequest="150" HeightRequest="150" />
+                <Button Text="Play Preview" Command="{Binding PlayPreviewCommand}" />
+            </StackLayout>
+
+           
 
             <Button
                 x:Name="CounterBtn"

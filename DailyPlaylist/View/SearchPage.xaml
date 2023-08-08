@@ -1,12 +1,67 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:model="clr-namespace:DailyPlaylist.Model"
+             xmlns:vm="clr-namespace:DailyPlaylist.ViewModel"
              x:Class="DailyPlaylist.View.SearchPage"
              Title="SearchPage">
+
+    <ContentPage.BindingContext>
+        <vm:SearchViewModel/>
+    </ContentPage.BindingContext>
+
     <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
+        <StackLayout Spacing="10">
+            <Entry Text="{Binding SearchQuery}" Placeholder="Search..." />
+            <ListView ItemsSource="{Binding SearchResults}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextCell Text="{Binding Title}" Detail="{Binding Artist.Name}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackLayout>
+
+
+
+        <CollectionView ItemsSource="{Binding SearchResults}" Margin="10">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+
+                    <Grid>
+                        <!-- Define the three columns -->
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Picture (assuming you have a picture property) -->
+                        <Image Source="{Binding Artist.PictureSmall}" Aspect="AspectFill" WidthRequest="50" HeightRequest="50" Grid.Column="0" VerticalOptions="Center" />
+
+                        <!-- Title and Artist name -->
+                        <StackLayout Grid.Column="1" VerticalOptions="Center" Spacing="5">
+                            <Label Text="{Binding Title}" FontAttributes="Bold" />
+                            <Label Text="{Binding Artist.Name}" />
+                        </StackLayout>
+
+                        <!-- Duration and Favorite Star (assuming you have a boolean property IsFavorite in your Track model) -->
+                        <StackLayout Grid.Column="2" VerticalOptions="Center" Spacing="5" Orientation="Vertical">
+                            <Label Text="{Binding Duration, StringFormat='{0} seconds'}" />
+                            <Image Source="{Binding IsFavorite, Converter={StaticResource BooleanToStarImageConverter}}" WidthRequest="20" HeightRequest="20" />
+                        </StackLayout>
+                    </Grid>
+
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
     </VerticalStackLayout>
+        
+
+
+        
+
+
+    
+
 </ContentPage>

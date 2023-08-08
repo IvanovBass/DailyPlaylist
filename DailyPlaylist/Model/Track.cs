@@ -1,4 +1,5 @@
 ﻿using MediaManager.Library;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,13 @@ namespace DailyPlaylist.Model
 {
     public class Track
     {
-        public int Id { get; }
+        [JsonProperty("id")]
+        public long Id { get; }
 
+        // By using an integer Id , I got the foolowing error : Newtonsoft.Json.JsonReaderException: 'JSON integer 2284985957 is too large
+        // or small for an Int32. Path 'data[9].id', line 1, position 17174.'
+
+        [JsonProperty("title")]
         public string Title { get; }
 
         public string TitleShort { get; }
@@ -19,12 +25,14 @@ namespace DailyPlaylist.Model
 
         public string Preview { get; }
 
+        [JsonProperty("duration")]
         public int Duration { get; }
 
         public int Rank { get; }
 
         public DateOnly ReleaseDate { get; }
 
+        [JsonProperty("artist")]
         public Artist Artist { get; }
 
         public Album Album { get; }

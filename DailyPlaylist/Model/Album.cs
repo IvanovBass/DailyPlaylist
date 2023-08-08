@@ -8,7 +8,7 @@ namespace DailyPlaylist.Model
 {
     public class Album
     {
-        public int Id { get; }
+        public long Id { get; }
         public string Title { get; }
         public string Url { get; }
         public string CoverUrl { get; }

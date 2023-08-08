@@ -1,19 +1,57 @@
-﻿using System;
+﻿using MediaManager;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace DailyPlaylist.ViewModel
 {
-    internal class TrackViewModel
+    public class TrackViewModel : INotifyPropertyChanged
     {
-        public TrackViewModel() { }
+        private Track _currentTrack;
 
-        public int TrackId;
+        public Track CurrentTrack
+        {
+            get => _currentTrack;
+            set
+            {
+                _currentTrack = value;
+                OnPropertyChanged();
+            }
+        }
 
-        public int UserId;
+        //When the page is navigated to, or at some trigger, you can load the track and play its preview:
+        //var viewModel = BindingContext as TrackViewModel;
+        //await viewModel.LoadTrackByIdAsync(3135556);
+        //await viewModel.PlayPreviewAsync();
 
-        public bool IsFavorite;
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public async Task LoadTrackByIdAsync(int trackId)
+        {
+            var httpClient = new HttpClient();
+            var jsonResponse = await httpClient.GetStringAsync($"https://api.deezer.com/track/{trackId}");
+
+            var trackData = JsonConvert.DeserializeObject<Track>(jsonResponse);
+            CurrentTrack = trackData;
+        }
+
+        public async Task PlayPreviewAsync()
+        {
+            if (CurrentTrack != null)
+            {
+                await CrossMediaManager.Current.Play(CurrentTrack.Preview);
+            }
+        }
     }
+
 }
