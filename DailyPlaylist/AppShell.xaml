@@ -8,7 +8,6 @@
     Shell.FlyoutBehavior="Flyout">
     <!-- Shell.FlyoutBehavior="Disabled"> -->
 
-
     <ShellContent
         Title="Loading"
         ContentTemplate="{DataTemplate view:LoadingPage}"     
@@ -40,6 +39,16 @@
             Route="PlaylistPage" />
 
     </TabBar>
+
+    <!-- pour gérer tes flyout items : 
+    <Shell>
+        <FlyoutItem
+            Title="Logout"
+            Icon="power.png"
+            <ShellContent
+                ContentTemplate="{DataTemaplte p:StyleGuidePage}" /> là tu mets la redirection vers login et tu logout au niveau du authservice
+        </FlyoutItem>
+    </Shell>    -->
 
 
 </Shell>

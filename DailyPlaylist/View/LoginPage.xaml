@@ -2,21 +2,26 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="DailyPlaylist.View.LoginPage"
+
              Title="LoginPage">
-    <!--<VerticalStackLayout Spacing="30" Padding="30">
-        
-        <Label 
-            Text="Login Page"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-        
-        <Button Text="Login" Clicked="ButtonLoginClicked"/>
 
-        <Button Text="Logout" Clicked="ButtonLogoutClicked"/>
-        
-    </VerticalStackLayout>-->
+        <ScrollView>
+            <VerticalStackLayout  Spacing="20" VerticalOptions="Center" HorizontalOptions="Center">
+                
+            <Image Source="icon.png"   HeightRequest="150" Margin="0,50,0,20"/>
 
-    <Grid>
+            <Entry Placeholder="Email" HeightRequest="60" Opacity="0.5"/>
+
+            <Entry IsPassword="True" Placeholder="Password" HeightRequest="60" Opacity="0.5" />
+
+                <Button Text="Login" />
+
+                <Button Text="Create an account" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+    
+    <!--<Grid>
         <StackLayout Margin="20,50,20,0" Padding="10,20">
             <Image Source="icon.png" HeightRequest="100"  HorizontalOptions="Center"/>
 
@@ -62,5 +67,5 @@
                        />
             </StackLayout>
         </StackLayout>
-    </Grid>
+    </Grid>-->
 </ContentPage>

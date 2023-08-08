@@ -8,20 +8,26 @@ using System.Threading.Tasks;
 
 namespace DailyPlaylist.ViewModel
 {
-    public partial class PlaylistViewModel : BaseViewModel
+    public class PlaylistViewModel : BaseViewModel
     {
-        private Realm realm;
-        private PartitionSyncConfiguration config;
 
-        public PlaylistViewModel() 
-        {
-
-        }
-
-        [ObservableProperty]
-        ObservableCollection<Playlist> userPlaylist;
-
-        [ObservableProperty]
-        string emptyText;
     }
 }
+
+
+//public partial class PlaylistViewModel : BaseViewModel
+//{
+//    private Realm realm;
+//    private PartitionSyncConfiguration config;
+
+//    public PlaylistViewModel()
+//    {
+
+//    }
+
+//    [ObservableProperty]
+//    ObservableCollection<Playlist> userPlaylist;
+
+//    [ObservableProperty]
+//    string emptyText;
+//}
