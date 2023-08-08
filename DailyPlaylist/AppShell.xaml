@@ -9,12 +9,12 @@
     <!-- Shell.FlyoutBehavior="Disabled"> -->
 
 
-    <ShellContent
+    <!--<ShellContent
         Title="Loading"
         ContentTemplate="{DataTemplate view:LoadingPage}"     
         Route="LoadingPage" 
         Shell.FlyoutBehavior="Disabled"
-        Shell.FlyoutItemIsVisible="False"/>
+        Shell.FlyoutItemIsVisible="False"/>-->
 
     <ShellContent
         Title="Login"

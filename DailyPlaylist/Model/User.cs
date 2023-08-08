@@ -27,16 +27,17 @@ namespace DailyPlaylist.Model
         [Required]
         public string Password { get; set; }
 
+        // Realm-backed collections should only have a getter
         [MapTo("playlists")]
-        public List<Playlist> Playlists { get; set; }
+        public IList<int> Playlists { get; }
 
+        // Realm-backed collections should only have a getter
         [MapTo("favorites")]
-        public List<Track> Favorites { get; set; }
+        public IList<int> Favorites { get; }
 
         [MapTo("_partition")]
         [Required]
         public string Partition { get; set; }
-
     }
 }
 

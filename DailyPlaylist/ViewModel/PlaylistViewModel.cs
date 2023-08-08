@@ -15,13 +15,23 @@ namespace DailyPlaylist.ViewModel
 
         public PlaylistViewModel() 
         {
-
+            userPlaylists = new ObservableCollection<Playlist>();
+            Name = "My nice playlist ... ";
+            Description = "It is a playlist about love and joy... ";
         }
 
         [ObservableProperty]
-        ObservableCollection<Playlist> userPlaylist;
+        ObservableCollection<Playlist> userPlaylists;
 
         [ObservableProperty]
-        string emptyText;
+        string name;
+
+        [ObservableProperty]
+        string description;
+
+        [ObservableProperty]
+        Playlist playlist;
+
+        // ...
     }
 }

@@ -22,27 +22,25 @@ namespace DailyPlaylist.Model
         [MapTo("description")]
         public string Description { get; set; }
 
-        [MapTo("count")]
-        public int Count => Tracks?.Count ?? 0;
+        public int Count => Tracks?.Count() ?? 0;
 
+        // Realm-backed collections should only have a getter
         [MapTo("tracks")]
-        [Required]
-        public List<Track> Tracks { get; set; }
+        public IList<int> Tracks { get; }
 
         [MapTo("user")]
         [Required]
-        public User user { get; set; }
+        public string userId { get; set; }
 
         [MapTo("dateCreation")]
-        public DateTime DateCreation { get; set; }
+        public DateTimeOffset DateCreation { get; set; }
 
         [MapTo("dateUpdated")]
-        public DateTime DateUpdated { get; set; } = DateTime.Now;
+        public DateTimeOffset DateUpdated { get; set; } = DateTimeOffset.Now;
 
         [MapTo("_partition")]
         [Required]
         public string Partition { get; set; }
-
     }
 }
 //public class Playlist

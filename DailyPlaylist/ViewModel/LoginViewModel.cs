@@ -1,16 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
+﻿using Realms.Sync;
 
 namespace DailyPlaylist.ViewModel
 {
-    internal class LoginViewModel
+    public partial class LoginViewModel : BaseViewModel
     {
+        public LoginViewModel()
+        {
+            EmailText = "test@test.com";
+            PasswordText = "testtest";
+        }
+
+        [ObservableProperty]
+        ObservableCollection<Playlist> userPlaylists;
+
+        [ObservableProperty]
+        string emailText;
+
+        [ObservableProperty]
+        string passwordText;
+
+        public static async void StartPlaylist()
+        {
+            await Shell.Current.GoToAsync("//Main");
+        }
+
+        [RelayCommand]
+        async Task CreateAccount()
+        {
+            try
+            {
+                await App.RealmApp.EmailPasswordAuth.RegisterUserAsync(EmailText, PasswordText);
+
+                await Login();
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error creating account;", "Error: " + ex.Message, "OK");
+            }
+        }
+
+        [RelayCommand]
+
+        public async Task Login()
+        {
+            try
+            {
+                var user = await App.RealmApp.LogInAsync(Credentials.EmailPassword(EmailText, PasswordText));
+
+                if (user != null)
+                {
+                    await Shell.Current.GoToAsync("//Main");
+                    EmailText = "";
+                    PasswordText = "";
+                }
+                else
+                {
+                    throw new Exception();
+                }
+            } 
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error logging in ... ", ex.Message, "OK");
+            }
+        }
     }
 }
 

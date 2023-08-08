@@ -2,21 +2,31 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="DailyPlaylist.View.LoginPage"
-             Title="LoginPage">
-    <!--<VerticalStackLayout Spacing="30" Padding="30">
-        
-        <Label 
-            Text="Login Page"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-        
-        <Button Text="Login" Clicked="ButtonLoginClicked"/>
+             xmlns:vm="clr-namespace:DailyPlaylist.ViewModel"
+             x:DataType="vm:LoginViewModel"
+             BackgroundColor="{StaticResource Gray900}"
+             Shell.NavBarIsVisible="false"
+             Title="Login">
 
-        <Button Text="Logout" Clicked="ButtonLogoutClicked"/>
-        
-    </VerticalStackLayout>-->
+    <ScrollView>
+        <VerticalStackLayout Spacing="30" Padding="30, 15" VerticalOptions="Center" HorizontalOptions="Center">
+            <Image Source="icon.png"   HeightRequest="150" Margin="0,0,0,20" />
+            <Frame  Opacity="0.8"  CornerRadius="7" HeightRequest="60">
+                <Entry Placeholder="Email" Text="{Binding EmailText}" FontSize="16" BackgroundColor="Transparent"/>
+            </Frame>
+            <Frame Opacity="0.8" CornerRadius="7" Margin="0,15,0,0"  HeightRequest="60">
+                <Entry Placeholder="Password" IsPassword="True"  Text="{Binding PasswordText}" FontSize="17"
+                       BackgroundColor="Transparent"/>
+            </Frame>
+           <Button Text="Login"  Command="{Binding LoginCommand}"/>
+            <Button Text="Create Account"  Command="{Binding CreateCommand}"/>
 
-    <Grid>
+        </VerticalStackLayout>
+
+    </ScrollView>
+            
+
+    <!--<Grid>
         <StackLayout Margin="20,50,20,0" Padding="10,20">
             <Image Source="icon.png" HeightRequest="100"  HorizontalOptions="Center"/>
 
@@ -62,5 +72,5 @@
                        />
             </StackLayout>
         </StackLayout>
-    </Grid>
+    </Grid>-->
 </ContentPage>
