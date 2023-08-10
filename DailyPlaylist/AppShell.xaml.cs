@@ -17,6 +17,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(HomePage), typeof(HomePage));
         Routing.RegisterRoute(nameof(PlaylistPage), typeof(PlaylistPage));
         Routing.RegisterRoute(nameof(PlayerPage), typeof(PlayerPage));
+        Routing.RegisterRoute(nameof(PlaylistConfigPage), typeof(PlaylistConfigPage));
 
         //new NavigationPage(new HomePage());
 

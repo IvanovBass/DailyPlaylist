@@ -4,47 +4,53 @@
               xmlns:model="clr-namespace:DailyPlaylist.Model"
              xmlns:vm="clr-namespace:DailyPlaylist.ViewModel"
              x:Class="DailyPlaylist.View.HomePage"
-             NavigationPage.HasNavigationBar="False"
+             NavigationPage.HasNavigationBar="True"
              Title="Home">
     <ContentPage.BindingContext>
-        <vm:TrackViewModel/>
+        <vm:HomeViewModel/>
     </ContentPage.BindingContext>
     
     <ScrollView>
         <VerticalStackLayout
-            Spacing="10"
-            Padding="30,0">
+            Spacing="5"
+            Padding="10,100"
+            HorizontalOptions="Center"
+            VerticalOptions="StartAndExpand">
 
             <Image
                 Source="icon.png"
+                x:Name="logoImage"
                 HeightRequest="180"
-                HorizontalOptions="Center" />
-                <!--SemanticProperties.Description="Cute dot net bot waving hi to you!"-->
+                HorizontalOptions="Center" 
+                Margin="10,0,10,20"/>
+
 
             <Label
                 Text="Welcome to Daily Playlist !"
-                FontSize="Large"
+                x:Name="welcomeLabel"
+                FontSize="25"
+                FontFamily="Rajdhani-Regular"
+                HorizontalTextAlignment="Center"
                 HorizontalOptions="Center" />
-            <!--SemanticProperties.HeadingLevel="Level1"-->
 
-            <StackLayout Spacing="20" Padding="20">
-                <Label Text="{Binding CurrentTrack.Title}" FontSize="Large" />
-                <Image Source="{Binding CurrentTrack.Album.CoverUrl}" WidthRequest="150" HeightRequest="150" />
-                <Button Text="Play Preview" Command="{Binding PlayPreviewCommand}" />
-            </StackLayout>
+            <Label
+                Text="Let's start by creating a playlist ..."
+                x:Name="instructionLabel"
+                Margin="20,5,20,20"
+                FontSize="25"
+                FontFamily="Rajdhani-Regular"
+                HorizontalTextAlignment="Center"
+                HorizontalOptions="Center" />
 
-           
 
             <Button
-                x:Name="CounterBtn"
-                Text="Click me"
-                Clicked="OnCounterClicked"
+                x:Name="PlaylistGenBtn"
+                Text="Create a Playlist"
+                Command="{Binding GoToPlaylistConfigCommand}"
                 WidthRequest="150"
-                FontAttributes="Bold"
                 FontSize="16"
                 HorizontalOptions="Center" />
-                <!--SemanticProperties.Hint="Counts the number of times you click"-->
-                <!-- Clicked="OnCounterClicked" -->
+
 
         </VerticalStackLayout>
     </ScrollView>

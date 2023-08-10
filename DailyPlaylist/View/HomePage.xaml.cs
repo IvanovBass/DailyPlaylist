@@ -1,23 +1,56 @@
-namespace DailyPlaylist.View;
+using System;
+using System.Threading.Tasks;
+using Microsoft.Maui.Controls;
 
-public partial class HomePage : ContentPage
+namespace DailyPlaylist.View
 {
-	
-    int count = 0;
-    public HomePage()
-	{
-		InitializeComponent();
-	}
-
-    private void OnCounterClicked(object sender, EventArgs e)
+    public partial class HomePage : ContentPage
     {
-        count++;
+        public HomePage()
+        {
+            InitializeComponent();
+            StartAnimations();
+        }
 
-        if (count == 1)
-            CounterBtn.Text = $"Clicked {count} time";
-        else
-            CounterBtn.Text = $"Clicked {count} times";
+        private async void StartAnimations()
+        {
+            while (true)
+            {
+                await AnimateLogoImage();
+                await Task.WhenAll(AnimateButton(), AnimateSecondLabel());
+                await Task.Delay(3000); // 3 seconds delay
+            }
+        }
 
-        SemanticScreenReader.Announce(CounterBtn.Text);
+        private async Task AnimateLogoImage()
+        {
+            await logoImage.ScaleTo(1.12, 800, Easing.SinIn);
+            await logoImage.ScaleTo(1, 600, Easing.SinOut);
+            for (int i = 0; i < 2; i++)
+            {
+                await logoImage.ScaleTo(1.10, 700, Easing.SinIn);
+                await logoImage.ScaleTo(1, 500, Easing.SinOut);
+            }
+        }
+
+        private async Task AnimateButton()
+        {
+            await PlaylistGenBtn.ScaleTo(1.25, 800, Easing.SinIn);
+            await PlaylistGenBtn.ScaleTo(1, 600, Easing.SinOut);
+            for (int i = 0; i < 2; i++)
+            {
+                await PlaylistGenBtn.ScaleTo(1.15, 700, Easing.SinIn);
+                await PlaylistGenBtn.ScaleTo(1, 600, Easing.SinOut);
+            }
+        }
+
+        private async Task AnimateSecondLabel()
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                await instructionLabel.ScaleTo(1.2, 1300, Easing.SinIn); // Slower animation for the label
+                await instructionLabel.ScaleTo(1, 1100, Easing.SinOut);
+            }
+        }
     }
 }

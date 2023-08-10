@@ -1,10 +1,12 @@
-﻿using Realms;
+﻿using DailyPlaylist.View;
+using Realms;
 using Realms.Sync;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace DailyPlaylist.ViewModel
 {
@@ -14,5 +16,14 @@ namespace DailyPlaylist.ViewModel
         {
             
         }
+
+        public ICommand GoToPlaylistConfigCommand => new Command(async () => await GoToPlaylistConfigAsync());
+
+        private async Task GoToPlaylistConfigAsync()
+        {
+            await Application.Current.MainPage.Navigation.PushAsync(new PlaylistConfigPage());
+        }
+
+
     }
 }
