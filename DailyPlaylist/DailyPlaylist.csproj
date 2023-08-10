@@ -73,6 +73,9 @@
 	  <MauiXaml Update="View\PlayerPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="View\PlaylistConfigPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="View\PlaylistPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

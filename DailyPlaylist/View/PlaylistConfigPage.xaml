@@ -1,0 +1,63 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="DailyPlaylist.View.PlaylistConfigPage"
+             Title="Playlist Configuration">
+
+    <StackLayout Spacing="20" Padding="15">
+
+        <Picker Title="Select Genre" x:Name="GenrePicker">
+            <Picker.ItemsSource>
+                <x:Array Type="{x:Type x:String}">
+                    <x:String>Rock</x:String>
+                    <x:String>Pop</x:String>
+                    <x:String>Jazz</x:String>
+                    <x:String>Electronic</x:String>
+                    <x:String>Hip-hop</x:String>
+                    <x:String>Reggea</x:String>
+                    <x:String>Classic</x:String>
+                </x:Array>
+            </Picker.ItemsSource>
+        </Picker>
+
+        <Picker Title="Select Decade" x:Name="DecadePicker">
+            <Picker.ItemsSource>
+                <x:Array Type="{x:Type x:String}">
+                    <x:String>1950s</x:String>
+                    <x:String>1960s</x:String>
+                    <x:String>1970s</x:String>
+                    <x:String>1980s</x:String>
+                    <x:String>1990s</x:String>
+                    <x:String>2000s</x:String>
+                    <x:String>2010s</x:String>
+                </x:Array>
+            </Picker.ItemsSource>
+        </Picker>
+
+        <!-- it will influence the bpm range we choose-->
+        <Picker Title="Select Mood" x:Name="MoodPicker">
+            <Picker.ItemsSource>
+                <x:Array Type="{x:Type x:String}">
+                    <x:String>Depressing</x:String>
+                    <x:String>Sad</x:String>
+                    <x:String>Chill</x:String>
+                    <x:String>Energetic</x:String>
+                    <x:String>Boosted</x:String>
+                </x:Array>
+            </Picker.ItemsSource>
+        </Picker>
+
+        <!-- Explicit Content Switch -->
+        <StackLayout Orientation="Horizontal">
+            <Label Text="Exclude Explicit Content" VerticalOptions="Center"/>
+            <Switch x:Name="ExplicitContentSwitch" HorizontalOptions="EndAndExpand"/>
+        </StackLayout>
+
+        <!-- Duration Slider -->
+        <Label Text="Preferred Song Duration (in seconds)" />
+        <Slider x:Name="DurationSlider" Minimum="60" Maximum="600" Value="180" VerticalOptions="Center"/>
+        <Label x:Name="DurationLabel" Text="{Binding Source={x:Reference DurationSlider}, Path=Value, StringFormat='Duration: {0:F0} seconds'}" />
+
+        <!-- Generate Button -->
+        <Button Text="Generate Playlist" Clicked="OnGeneratePlaylist" HorizontalOptions="Center"/>
+    </StackLayout>
+</ContentPage>
