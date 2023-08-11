@@ -32,13 +32,28 @@ namespace DailyPlaylist.Model
         [JsonProperty("md5_image")]
         public string Md5Image { get; set; }
 
+        [JsonProperty("genre_id")]  // id int of the most characteristic genre
+        public int GenreId { get; set; }
+
+        [JsonProperty("genres")]  // list of the genres objects
+        public List<Genre> Genres { get; set; }
+
         [JsonProperty("release_date")]
         public string ReleaseDate { get; set; }
 
-        [JsonProperty("tracklist")]
+        [JsonProperty("fans")]
+        public int Fans { get; set; }
+
+        [JsonProperty("tracklist")]  // url to the tracklist
         public string Tracklist { get; set; }
 
-        [JsonProperty("type")]
-        public string Type { get; set; }
+        [JsonProperty("tracks")]
+        public List<Track> Tracks { get; set; }
+
+        [JsonProperty("contributors")]
+        public List<Contributor> Contributors { get; set; }
+
+        [JsonProperty("artist")]
+        public Artist Artist { get; set; }
     }
 }

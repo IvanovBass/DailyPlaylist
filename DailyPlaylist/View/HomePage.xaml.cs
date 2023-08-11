@@ -46,11 +46,9 @@ namespace DailyPlaylist.View
 
         private async Task AnimateSecondLabel()
         {
-            for (int i = 0; i < 2; i++)
-            {
-                await instructionLabel.ScaleTo(1.2, 1300, Easing.SinIn); // Slower animation for the label
-                await instructionLabel.ScaleTo(1, 1100, Easing.SinOut);
-            }
+            
+            await instructionLabel.ScaleTo(1.2, 1300, Easing.SinIn);
+            await instructionLabel.ScaleTo(1, 1100, Easing.SinOut);
         }
     }
 }

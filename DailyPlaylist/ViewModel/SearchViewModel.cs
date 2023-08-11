@@ -1,17 +1,10 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DailyPlaylist.ViewModel
 {
-    public class SearchViewModel : INotifyPropertyChanged
+    public class SearchViewModel : BaseViewModel
     {
+
         private string _searchQuery;
 
 
@@ -31,6 +24,8 @@ namespace DailyPlaylist.ViewModel
             }
         }
 
+
+
         public ObservableCollection<Track> SearchResults
         {
             get => _searchResults;
@@ -41,19 +36,13 @@ namespace DailyPlaylist.ViewModel
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
         private async void PerformSearch()
         {
             try
             {
-                var httpClient = new HttpClient();
-                var jsonResponse = await httpClient.GetStringAsync($"https://api.deezer.com/search/track?q={_searchQuery}");
+
+                var httpClient = DependencyService.Get<HttpClient>();
+                var jsonResponse = await httpClient.GetStringAsync($"https://api.deezer.com/search/track?q={_searchQuery}&limit=25");
 
                 Debug.WriteLine("JSON Response:");
                 Debug.WriteLine(jsonResponse);
