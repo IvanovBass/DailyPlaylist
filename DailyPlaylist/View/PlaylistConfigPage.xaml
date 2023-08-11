@@ -20,13 +20,13 @@
         <Picker Title="Select Decade" x:Name="DecadePicker">
             <Picker.ItemsSource>
                 <x:Array Type="{x:Type x:String}">
-                    <x:String>1950s</x:String>
-                    <x:String>1960s</x:String>
-                    <x:String>1970s</x:String>
-                    <x:String>1980s</x:String>
-                    <x:String>1990s</x:String>
-                    <x:String>2000s</x:String>
-                    <x:String>2010s</x:String>
+                    <x:String>1950</x:String>
+                    <x:String>1960</x:String>
+                    <x:String>1970</x:String>
+                    <x:String>1980</x:String>
+                    <x:String>1990</x:String>
+                    <x:String>2000</x:String>
+                    <x:String>2010</x:String>
                 </x:Array>
             </Picker.ItemsSource>
         </Picker>
