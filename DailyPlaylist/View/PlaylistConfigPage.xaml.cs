@@ -28,14 +28,26 @@ namespace DailyPlaylist.View
 
         private async void OnGeneratePlaylist(object sender, EventArgs e)
         {
-            // Logic to generate playlist based on user selections.
-            // You can access the values like GenrePicker.SelectedItem, DecadePicker.SelectedItem, etc.
 
-            // Example:
-            string selectedGenre = GenrePicker.SelectedItem?.ToString();
+            var selectedGenre = GenrePicker.SelectedItem as Genre;
+            var selectedDecade = DecadePicker.SelectedItem?.ToString();
 
-            // After processing, navigate to the generated playlist page or show results.
-            await Navigation.PushAsync(new PlaylistPage()); // Assuming you have a PlaylistPage to display the generated playlist.
+            if (selectedGenre != null && !string.IsNullOrEmpty(selectedDecade))
+            {               
+                // Pass the selected Genre Id and Decade to the ViewModel method to fetch albums
+                var albums = await _viewModel.SearchAlbumsByGenreAndDecadeAsync(selectedGenre.Id, selectedDecade);
+
+                // Do further processing if necessary. For instance, you might want to select top albums, get tracks etc.
+
+                // Navigate to the PlaylistPage to display the generated playlist, 
+                // but also consider passing the generated list or an identifier to that page to display the content.
+                await Navigation.PushAsync(new PlaylistPage(albums)); // You might modify PlaylistPage to take a list of albums or some other data structure.
+            }
+            else
+            {
+                await DisplayAlert("Selection Missing", "Please select both a genre and a decade.", "OK");
+            }
         }
+
     }
 }
