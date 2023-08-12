@@ -1,3 +1,5 @@
+using DailyPlaylist.ViewModel;
+
 namespace DailyPlaylist.View;
 
 public partial class SearchPage : ContentPage
@@ -6,5 +8,7 @@ public partial class SearchPage : ContentPage
 	{
 		InitializeComponent();
 
+
+		BindingContext = new SearchViewModel();
 	}
 }
