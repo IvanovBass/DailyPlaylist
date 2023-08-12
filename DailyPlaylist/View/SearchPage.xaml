@@ -6,10 +6,6 @@
              x:Class="DailyPlaylist.View.SearchPage"
              Title="Search">
 
-    <ContentPage.BindingContext>
-        <vm:SearchViewModel/>
-    </ContentPage.BindingContext>
-
     <ScrollView>
         <VerticalStackLayout>
             <StackLayout Orientation="Horizontal" HeightRequest="30"/>
@@ -57,10 +53,14 @@
                 <Entry Text="{Binding SearchQuery}" Placeholder="Search a song..." FontSize="25"  WidthRequest="200"
                HorizontalTextAlignment="Center"  TextColor="White" />
             </Frame>
-            
 
 
-            <CollectionView ItemsSource="{Binding SearchResults}" Margin="10">
+
+            <CollectionView 
+                Margin="10"
+                x:Name="TracksCollectionView" 
+                ItemsSource="{Binding SearchResults}" 
+                SelectedItem="{Binding SelectedTrack}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
 
@@ -96,8 +96,10 @@
                             </StackLayout>
 
                             <StackLayout Grid.Column="3" VerticalOptions="Center" Spacing="20" Orientation="Horizontal">
-                                <ImageButton Source="play.png"    Command="{Binding GetTrackCommand}"  
-                                         HeightRequest="25" WidthRequest="25"/>
+                                <ImageButton Source="play.png"    
+                                     Command="{Binding Path=BindingContext.PlayFromCollectionViewCommand, Source={x:Reference Name=TracksCollectionView}}"
+                                     CommandParameter="{Binding}"
+                                     HeightRequest="25" WidthRequest="25"/>
                                 <ImageButton   Source="non_favorite.png" x:Name="ButtonFavorite" Command="{Binding SetFavorite}" 
                                            HeightRequest="25" WidthRequest="25"/>
                             </StackLayout>

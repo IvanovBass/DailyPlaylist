@@ -7,145 +7,127 @@ namespace DailyPlaylist.ViewModel
 {
     public class SearchViewModel : BaseViewModel
     {
-
-        private string _albumCover = "music_notes2.png";  
-        public string AlbumCover
-        {
-            get { return _albumCover; }
-            set
-            {
-                _albumCover = value;
-                OnPropertyChanged(nameof(AlbumCover));
-            }
-        }
-
-        private string _artistName = "Artist";
-        public string ArtistName
-        {
-            get { return _artistName; }
-            set
-            {
-                _artistName = value;
-                OnPropertyChanged(nameof(ArtistName));
-            }
-        }
-
-        private string _trackName = "Song";
-        public string TrackName
-        {
-            get { return _trackName; }
-            set
-            {
-                _trackName = value;
-                OnPropertyChanged(nameof(TrackName));
-            }
-        }
-
-
-        private string _searchQuery;
-
         private ObservableCollection<Track> _searchResults;
+        private string _searchQuery;
+        private Track _selectedTrack;
+        private string _trackPreview;
+
+        public ObservableCollection<Track> SearchResults
+        {
+            get => _searchResults;
+            set => SetProperty(ref _searchResults, value);
+        }
 
         public string SearchQuery
         {
             get => _searchQuery;
             set
             {
-                _searchQuery = value;
-                OnPropertyChanged();
+                SetProperty(ref _searchQuery, value);
+                PerformSearch();
+            }
+        }
 
-                // Trigger the search when the query length is 5 or more.
-                if (_searchQuery.Length >= 5)
-                    PerformSearch();
+        public Track SelectedTrack
+        {
+            get => _selectedTrack;
+            set
+            {
+                _selectedTrack = value;
+
+                if (_selectedTrack != null)
+                {
+                    TrackName = _selectedTrack.Title;
+                    ArtistName = _selectedTrack.Artist.Name;
+                    AlbumCover = _selectedTrack.Album.CoverMedium;
+                    TrackPreview = _selectedTrack.Preview;
+                }
+                else
+                {
+                    AlbumCover = "music_notes2.png";
+                    TrackName = "Song";
+                    ArtistName = "Artist";
+                    TrackPreview = string.Empty;
+                }
+
+                OnPropertyChanged(nameof(TrackName));
+                OnPropertyChanged(nameof(ArtistName));
+                OnPropertyChanged(nameof(AlbumCover));
+                OnPropertyChanged(nameof(TrackPreview));
             }
         }
 
 
 
-        public ObservableCollection<Track> SearchResults
+        public string TrackName { get; set; }
+        public string ArtistName { get; set; }
+        public string AlbumCover { get; set; }
+        public string TrackPreview
         {
-            get => _searchResults;
-            set
+            get => _trackPreview;
+            set => SetProperty(ref _trackPreview, value);
+        }
+
+        public ICommand PlayPauseCommand { get; }
+        public ICommand PlayFromCollectionViewCommand { get; }
+
+        public SearchViewModel()
+        {
+            SearchResults = new ObservableCollection<Track>();
+            PlayPauseCommand = new Command(async () =>
             {
-                _searchResults = value;
-                OnPropertyChanged();
-            }
+                if (CrossMediaManager.Current.IsPlaying())
+                {
+                    await CrossMediaManager.Current.Pause();
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(TrackPreview))
+                    {
+                        await CrossMediaManager.Current.Play(TrackPreview);
+                    }
+                }
+            });
+
+            PlayFromCollectionViewCommand = new Command<Track>(track =>
+            {
+                if (track != null)
+                {
+                    SelectedTrack = track; // Setting it as the selected track
+
+                    if (!string.IsNullOrEmpty(track.Preview))
+                    {
+                        CrossMediaManager.Current.Play(track.Preview);
+                    }
+                }
+            });
+
         }
 
         private async void PerformSearch()
         {
+            if (string.IsNullOrEmpty(SearchQuery))
+                return;
+
             try
             {
-                using (var httpClient = new HttpClient()) // Create a new instance of HttpClient
-                {
-                    var jsonResponse = await httpClient.GetStringAsync($"https://api.deezer.com/search/track?q={_searchQuery}&limit=25");
-
-                    //Debug.WriteLine("JSON Response:");
-                    //Debug.WriteLine(jsonResponse);
-
-                    var searchData = JsonConvert.DeserializeObject<SearchData>(jsonResponse);
-
-                    //Debug.WriteLine("Deserialized SearchData Object:");
-                    //Debug.WriteLine(JsonConvert.SerializeObject(searchData, Formatting.Indented));
-
-                    SearchResults = new ObservableCollection<Track>(searchData.Data);
-                }
+                var httpClient = new HttpClient();
+                var jsonResponse = await httpClient.GetStringAsync($"https://api.deezer.com/search/track?q={SearchQuery}&limit=25");
+                var searchData = JsonConvert.DeserializeObject<SearchData>(jsonResponse);
+                SearchResults = new ObservableCollection<Track>(searchData.Data);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error while searching: {ex.Message}");
-                // To notify the user with a message ...
+                // Notify the user if needed...
             }
         }
+
         public class SearchData
         {
             public List<Track> Data { get; set; }
-            //... other properties you may want to capture.
+            //... other properties or objects to catch eventually
             // add a progress bar , a loading widget or a text to inform the user of the search
-        }
-
-        // ...
-
-        public ICommand GetTrackCommand => new Command<Track>(async (track) => await GetTrackDetailsAsync(track));
-
-        private async Task GetTrackDetailsAsync(Track selectedTrack)
-        {
-            try
-            {
-                string apiUrl = $"https://api.deezer.com/track/{selectedTrack.Id}";
-                using (HttpClient httpClient = new HttpClient())
-                {
-                    var response = await httpClient.GetStringAsync(apiUrl);
-                    Track detailedTrack = JsonConvert.DeserializeObject<Track>(response);
-
-                    // Here, you can update any UI bindings to display the detailed track information.
-                    // For example, if you have properties for AlbumCover, TrackName, ArtistName, etc. in your ViewModel:
-                    AlbumCover = detailedTrack.Album.Cover;
-                    TrackName = detailedTrack.Title;
-                    ArtistName = detailedTrack.Artist.Name;
-
-                    if (!string.IsNullOrEmpty(detailedTrack.Preview))
-                    {
-                        await PlayTrackAsync(detailedTrack.Preview);
-                    }
-                    else
-                    {
-                        // Handle case where preview URL is null or empty.
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error fetching track details: {ex.Message}");
-            }
-        }
-
-        private async Task PlayTrackAsync(string previewUrl)
-        {
-            await CrossMediaManager.Current.Play(previewUrl);
-            Debug.WriteLine("OK je suis rentré dedans");
-            Debug.WriteLine(previewUrl);
-            // Here you can add any additional logic if required after starting the playback.
         }
 
     }
