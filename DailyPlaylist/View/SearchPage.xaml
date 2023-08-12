@@ -8,7 +8,6 @@
 
     <ScrollView>
         <VerticalStackLayout>
-            <StackLayout Orientation="Horizontal" HeightRequest="30"/>
 
             <Grid Margin="0,10,0,20">
                 <Grid.RowDefinitions >
@@ -27,18 +26,18 @@
                 </Grid.ColumnDefinitions>
 
                 <StackLayout Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" Grid.ColumnSpan="3" Padding="10,20,20,10">
-                    <Image Source="{Binding AlbumCover}" Aspect="AspectFit" />
+                    <Image Source="{Binding AlbumCover}" Aspect="AspectFill" />
                 </StackLayout>
 
 
 
                 <Label  Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="4" FontSize="Large" Padding="0,25,0,0"
                     Text="{Binding ArtistName}" HorizontalTextAlignment="Center" TextColor="{StaticResource Primary}"/>
-                <Label  Grid.Row="1"  Grid.Column="3"  Grid.ColumnSpan="4"  FontSize="Medium"
+                <Label  Grid.Row="1"  Grid.Column="3"  Grid.ColumnSpan="4"  FontSize="Medium"  MaxLines="1" LineBreakMode="TailTruncation"
                    Text="{Binding TrackName}"  HorizontalTextAlignment="Center" TextColor="{StaticResource Tertiary}"/>
 
                 <StackLayout Grid.Row="2" Grid.Column="3" Grid.ColumnSpan="4" 
-                         Orientation="Horizontal" HorizontalOptions="Center" Spacing="5">
+                         Orientation="Horizontal" HorizontalOptions="Center" Spacing="5"  Margin="0,-20,0,0">
                     <ImageButton   HeightRequest="50" WidthRequest="50"
                          x:Name="PreviousButton" Source="previous.png" Command="{Binding PreviousCommand}" />
                     <ImageButton   HeightRequest="50" WidthRequest="50"
@@ -49,7 +48,7 @@
             </Grid>
 
             <Frame  Padding="10,0,10,0"  BackgroundColor="#363636" CornerRadius="30" HorizontalOptions="Center"
-                    Margin="20,5" MinimumWidthRequest="300">
+                    Margin="20,-10,20,5" MinimumWidthRequest="300">
                 <Entry Text="{Binding SearchQuery}" Placeholder="Search a song..." FontSize="25"  WidthRequest="200"
                HorizontalTextAlignment="Center"  TextColor="White" />
             </Frame>
@@ -79,6 +78,10 @@
                             <Image Source="{Binding Artist.PictureSmall}" Aspect="AspectFit" Grid.Column="0" />
 
                             <StackLayout Grid.Column="1" Grid.ColumnSpan="2" VerticalOptions="Center" Spacing="5">
+                                <StackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Path=BindingContext.ItemSelectedCommand, Source={x:Reference Name=TracksCollectionView}}" 
+                                    CommandParameter="{Binding}"/>
+                                </StackLayout.GestureRecognizers>
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="*"/>
@@ -88,7 +91,7 @@
                                         <ColumnDefinition Width="7*"/>
                                         <ColumnDefinition Width="2*"/>
                                     </Grid.ColumnDefinitions>
-                                    <Label Text="{Binding Title}" Grid.Row="0"  Grid.Column="0" FontSize="14"/>
+                                    <Label Text="{Binding Title}" Grid.Row="0"  Grid.Column="0" FontSize="14" MaxLines="1" LineBreakMode="TailTruncation"/>
                                     <Label Text="{Binding Artist.Name}"  Grid.Row="1"  Grid.Column="0" TextColor="{StaticResource Tertiary}"/>
                                     <Label Text="{Binding Duration, StringFormat='{0}'}"  Grid.Row="0" Grid.Column="1"/>
                                     <Label Text="sec"  Grid.Row="1" Grid.Column="1"/>
