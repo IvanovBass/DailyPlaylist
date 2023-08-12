@@ -12,7 +12,7 @@ public partial class LoginPage : ContentPage
         _authService = authService;
 
         // to check tuto indian + github Login : https://www.youtube.com/watch?v=97G-XkuENYE
-        // to check login UI : https://github.com/syazwan089/.NET-MAUI-SIMPLE-LOGIN-PAGE/blob/main/SpeedUI/MainPage.xaml
+        // to check this for UI inspiration : https://github.com/syazwan089/.NET-MAUI-SIMPLE-LOGIN-PAGE/blob/main/SpeedUI/MainPage.xaml
     }
 
     private async void ButtonLoginClicked(object sender, EventArgs e)
@@ -29,6 +29,6 @@ public partial class LoginPage : ContentPage
     {
         _authService?.Logout();
         Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
-        // + snackbar avec message you're succesfully logged out ?
+        // + snackbar avec message "you succesfully logged out" ?
     }
 }

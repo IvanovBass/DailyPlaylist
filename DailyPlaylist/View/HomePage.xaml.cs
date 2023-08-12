@@ -18,7 +18,7 @@ namespace DailyPlaylist.View
             {
                 await AnimateLogoImage();
                 await Task.WhenAll(AnimateButton(), AnimateSecondLabel());
-                await Task.Delay(3000); // 3 seconds delay
+                await Task.Delay(3000); 
             }
         }
 

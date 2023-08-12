@@ -13,7 +13,7 @@
 
         <Picker Title="Select Genre" x:Name="GenrePicker" ItemsSource="{Binding Genres}" ItemDisplayBinding="{Binding Name}">
             <Picker.Items>
-  
+                <!-- the genres are retrieved dynamically with their name and id from a 'genre query' made to the Deezer endpoint -->
              </Picker.Items>
          </Picker>
 
@@ -31,7 +31,7 @@
             </Picker.ItemsSource>
         </Picker>
 
-        <!-- it will influence the bpm range we choose-->
+        <!-- this will influence the bpm range (tempo) of the music, faster for how positive I feel -->
         <Picker Title="Select Mood" x:Name="MoodPicker">
             <Picker.ItemsSource>
                 <x:Array Type="{x:Type x:String}">
@@ -39,23 +39,23 @@
                     <x:String>Sad</x:String>
                     <x:String>Chill</x:String>
                     <x:String>Energetic</x:String>
-                    <x:String>Boosted</x:String>
+                    <x:String>Delighted</x:String>
                 </x:Array>
             </Picker.ItemsSource>
         </Picker>
 
-        <!-- Explicit Content Switch -->
+        <!-- Explicit Content can be switched on and off, not sure I'm gonna keep this one -->
         <StackLayout Orientation="Horizontal">
             <Label Text="Exclude Explicit Content" VerticalOptions="Center"/>
             <Switch x:Name="ExplicitContentSwitch" HorizontalOptions="EndAndExpand"/>
         </StackLayout>
 
-        <!-- Duration Slider -->
+        <!-- Duration Slider... that's more a school case, I'm not sure to keep this one either -->
         <Label Text="Preferred Song Duration (in seconds)" />
         <Slider x:Name="DurationSlider" Minimum="60" Maximum="600" Value="180" VerticalOptions="Center"/>
         <Label x:Name="DurationLabel" Text="{Binding Source={x:Reference DurationSlider}, Path=Value, StringFormat='Duration: {0:F0} seconds'}" />
 
-        <!-- Generate Button -->
+        <!-- Generate Palylist Button -->
         <Button Text="Generate Playlist" Clicked="OnGeneratePlaylist" HorizontalOptions="Center"/>
     </StackLayout>
 </ContentPage>

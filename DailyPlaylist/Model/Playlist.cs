@@ -1,14 +1,4 @@
-﻿using MongoDB.Bson;
-using Newtonsoft.Json;
-using Realms;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DailyPlaylist.Model
+﻿namespace DailyPlaylist.Model
 {
     public class Playlist
     {
@@ -31,7 +21,7 @@ namespace DailyPlaylist.Model
 
 }
 
-//public class Playlist
+//public class Playlist    --> this is a format I should go for if I was to import the Deezer's user's created playlist, which is not my goal
 //{
 //    [JsonProperty("id")]
 //    public long Id { get; set; }
