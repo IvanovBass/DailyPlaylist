@@ -1,7 +1,8 @@
 ﻿using MediaManager;
 using Newtonsoft.Json;
 using System.Windows.Input;
-using DailyPlaylist.View;
+using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Core;
 
 namespace DailyPlaylist.ViewModel
 {
@@ -15,6 +16,7 @@ namespace DailyPlaylist.ViewModel
         private string _albumCover = "music_notes2.png";
         private string _trackPreview;
         private readonly HttpClient _httpClient;
+        private bool _isLoading;
 
         public ObservableCollection<Track> SearchResults
         {
@@ -28,7 +30,6 @@ namespace DailyPlaylist.ViewModel
             set
             {
                 SetProperty(ref _searchQuery, value);
-                PerformSearch();
             }
         }
 
@@ -73,15 +74,26 @@ namespace DailyPlaylist.ViewModel
             }
         }
 
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set => SetProperty(ref _isLoading, value);
+        }
+
+
 
         public ICommand PlayPauseCommand { get; }
         public ICommand PlayFromCollectionViewCommand { get; }
         public ICommand ItemSelectedCommand { get; }
 
+        public ICommand SearchCommand { get; }
+
 
         public SearchViewModel()
         {
             _httpClient = new HttpClient();
+
+            SearchCommand = new Command(PerformSearch);
             SearchResults = new ObservableCollection<Track>();
             PlayPauseCommand = new Command(async () =>
             {
@@ -98,16 +110,18 @@ namespace DailyPlaylist.ViewModel
                 }
             });
 
-            PlayFromCollectionViewCommand = new Command<Track>(track =>
+            PlayFromCollectionViewCommand = new Command<Track>( async track =>
             {
                 if (track != null)
                 {
                     SelectedTrack = track; // Setting it as the selected track
 
-                    if (!string.IsNullOrEmpty(track.Preview))
+                    if (string.IsNullOrEmpty(""))
                     {
-                        CrossMediaManager.Current.Play(track.Preview);
+                        await ShowSnackBarAsync("Preview not available", "Dismiss", () => { });
+                        return;
                     }
+                    await CrossMediaManager.Current.Play(track.Preview);
                 }
             });
 
@@ -123,6 +137,8 @@ namespace DailyPlaylist.ViewModel
             if (string.IsNullOrEmpty(SearchQuery))
                 return;
 
+            IsLoading = true;
+
             try
             {
                 var jsonResponse = await _httpClient.GetStringAsync($"https://api.deezer.com/search/track?q={SearchQuery}&limit=30");
@@ -134,6 +150,11 @@ namespace DailyPlaylist.ViewModel
                 Debug.WriteLine($"Error while searching: {ex.Message}");
                 // Notify the user if needed...
             }
+            finally 
+            { 
+                await Task.Delay(2000);
+                IsLoading = false;
+            }
         }
 
         public class SearchData
@@ -142,6 +163,27 @@ namespace DailyPlaylist.ViewModel
             //... other properties or objects to catch eventually
             // add a progress bar , a loading widget or a text to inform the user of the search
         }
+
+        public async Task ShowSnackBarAsync(string message, string actionText, Action action, int durationInSeconds = 3)
+        {
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+            var snackbarOptions = new SnackbarOptions
+            {
+                BackgroundColor = Colors.Red,
+                TextColor = Colors.White,
+                ActionButtonTextColor = Colors.Yellow,
+                CornerRadius = new CornerRadius(10),
+                Font = Microsoft.Maui.Font.SystemFontOfSize(14),
+                ActionButtonFont = Microsoft.Maui.Font.SystemFontOfSize(14),
+                CharacterSpacing = 0.5
+            };
+
+            var snackbar = Snackbar.Make(message, action, actionText, TimeSpan.FromSeconds(durationInSeconds), snackbarOptions);
+
+            await snackbar.Show(cancellationTokenSource.Token);
+        }
+
 
     }
 }
