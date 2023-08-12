@@ -18,7 +18,7 @@
             VerticalOptions="StartAndExpand">
 
             <Image
-                Source="icon.png"
+                Source="music_notes.png"
                 x:Name="logoImage"
                 HeightRequest="180"
                 HorizontalOptions="Center" 

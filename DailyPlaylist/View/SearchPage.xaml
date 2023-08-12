@@ -30,18 +30,16 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <StackLayout Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" Grid.ColumnSpan="3"
-                         Padding="10,10,20,10">
-                    <Image x:Name="AlbumCoverImage" 
-                   Source="music_notes2.png" 
-                   Aspect="AspectFit" />
+                <StackLayout Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" Grid.ColumnSpan="3" Padding="10,20,20,10">
+                    <Image Source="{Binding AlbumCover}" Aspect="AspectFit" />
                 </StackLayout>
 
 
-                <Label  Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="4" FontSize="Large"
-                    x:Name="ArtistNameLabel" Text="Artist" HorizontalTextAlignment="Center" TextColor="{StaticResource Primary}"/>
+
+                <Label  Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="4" FontSize="Large" Padding="0,25,0,0"
+                    Text="{Binding ArtistName}" HorizontalTextAlignment="Center" TextColor="{StaticResource Primary}"/>
                 <Label  Grid.Row="1"  Grid.Column="3"  Grid.ColumnSpan="4"  FontSize="Medium"
-                    x:Name="TrackTitleLabel" Text="Song"  HorizontalTextAlignment="Center" TextColor="{StaticResource Tertiary}"/>
+                   Text="{Binding TrackName}"  HorizontalTextAlignment="Center" TextColor="{StaticResource Tertiary}"/>
 
                 <StackLayout Grid.Row="2" Grid.Column="3" Grid.ColumnSpan="4" 
                          Orientation="Horizontal" HorizontalOptions="Center" Spacing="5">
@@ -92,12 +90,13 @@
                                     </Grid.ColumnDefinitions>
                                     <Label Text="{Binding Title}" Grid.Row="0"  Grid.Column="0" FontSize="14"/>
                                     <Label Text="{Binding Artist.Name}"  Grid.Row="1"  Grid.Column="0" TextColor="{StaticResource Tertiary}"/>
-                                    <Label Text="{Binding Duration, StringFormat='{0} sec'}"  Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"/>
+                                    <Label Text="{Binding Duration, StringFormat='{0}'}"  Grid.Row="0" Grid.Column="1"/>
+                                    <Label Text="sec"  Grid.Row="1" Grid.Column="1"/>
                                 </Grid>
                             </StackLayout>
 
-                            <StackLayout Grid.Column="3" VerticalOptions="Center" Spacing="10" Orientation="Horizontal">
-                                <ImageButton Source="play.png"    Command="{Binding PlayPauseCommand}"  
+                            <StackLayout Grid.Column="3" VerticalOptions="Center" Spacing="20" Orientation="Horizontal">
+                                <ImageButton Source="play.png"    Command="{Binding GetTrackCommand}"  
                                          HeightRequest="25" WidthRequest="25"/>
                                 <ImageButton   Source="non_favorite.png" x:Name="ButtonFavorite" Command="{Binding SetFavorite}" 
                                            HeightRequest="25" WidthRequest="25"/>

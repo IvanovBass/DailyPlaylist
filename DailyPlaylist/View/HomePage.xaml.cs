@@ -17,7 +17,7 @@ namespace DailyPlaylist.View
             while (true)
             {
                 await AnimateLogoImage();
-                await Task.WhenAll(AnimateButton(), AnimateSecondLabel());
+                await AnimateButton();
                 await Task.Delay(3000); 
             }
         }
@@ -42,13 +42,6 @@ namespace DailyPlaylist.View
                 await PlaylistGenBtn.ScaleTo(1.15, 700, Easing.SinIn);
                 await PlaylistGenBtn.ScaleTo(1, 600, Easing.SinOut);
             }
-        }
-
-        private async Task AnimateSecondLabel()
-        {
-            
-            await instructionLabel.ScaleTo(1.2, 1300, Easing.SinIn);
-            await instructionLabel.ScaleTo(1, 1100, Easing.SinOut);
         }
     }
 }
