@@ -10,7 +10,7 @@ namespace DailyPlaylist.ViewModel
 
         private ObservableCollection<Genre> _genres;
 
-        HttpClient httpClient = DependencyService.Get<HttpClient>();
+        HttpClient httpClient = new HttpClient();
         public ObservableCollection<Genre> Genres
         {
             get => _genres;

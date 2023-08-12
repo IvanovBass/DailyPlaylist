@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace DailyPlaylist.ViewModel
 {
-    public class TrackViewModel : INotifyPropertyChanged
+    public class TrackViewModel : BaseViewModel
     {
         private Track _currentTrack;
 
@@ -29,16 +29,9 @@ namespace DailyPlaylist.ViewModel
         //await viewModel.LoadTrackByIdAsync(3135556);
         //await viewModel.PlayPreviewAsync();
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
         public async Task LoadTrackByIdAsync(int trackId)
         {
-            var httpClient = new HttpClient();
+            var httpClient = DependencyService.Get<HttpClient>();
             var jsonResponse = await httpClient.GetStringAsync($"https://api.deezer.com/track/{trackId}");
 
             var trackData = JsonConvert.DeserializeObject<Track>(jsonResponse);

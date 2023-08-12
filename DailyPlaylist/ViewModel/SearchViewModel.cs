@@ -40,28 +40,26 @@ namespace DailyPlaylist.ViewModel
         {
             try
             {
+                using (var httpClient = new HttpClient()) // Create a new instance of HttpClient
+                {
+                    var jsonResponse = await httpClient.GetStringAsync($"https://api.deezer.com/search/track?q={_searchQuery}&limit=25");
 
-                var httpClient = DependencyService.Get<HttpClient>();
-                var jsonResponse = await httpClient.GetStringAsync($"https://api.deezer.com/search/track?q={_searchQuery}&limit=25");
+                    //Debug.WriteLine("JSON Response:");
+                    //Debug.WriteLine(jsonResponse);
 
-                Debug.WriteLine("JSON Response:");
-                Debug.WriteLine(jsonResponse);
+                    var searchData = JsonConvert.DeserializeObject<SearchData>(jsonResponse);
 
-                var searchData = JsonConvert.DeserializeObject<SearchData>(jsonResponse);
+                    //Debug.WriteLine("Deserialized SearchData Object:");
+                    //Debug.WriteLine(JsonConvert.SerializeObject(searchData, Formatting.Indented));
 
-                Debug.WriteLine("Deserialized SearchData Object:");
-                Debug.WriteLine(JsonConvert.SerializeObject(searchData, Formatting.Indented));
-
-                SearchResults = new ObservableCollection<Track>(searchData.Data);
-
+                    SearchResults = new ObservableCollection<Track>(searchData.Data);
+                }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error while searching: {ex.Message}");
                 // To notify the user with a message ...
             }
-
-            
         }
     }
     // add a progress bar , aloading handler  or text to inform the user of the search
