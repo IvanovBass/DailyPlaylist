@@ -10,7 +10,11 @@ namespace DailyPlaylist.ViewModel
         private ObservableCollection<Track> _searchResults;
         private string _searchQuery;
         private Track _selectedTrack;
+        private string _trackName = "Song";
+        private string _artistName = "Artist";
+        private string _albumCover = "music_notes2.png";
         private string _trackPreview;
+        private readonly HttpClient _httpClient;
 
         public ObservableCollection<Track> SearchResults
         {
@@ -28,51 +32,56 @@ namespace DailyPlaylist.ViewModel
             }
         }
 
-        public Track SelectedTrack
+        public string TrackName
         {
-            get => _selectedTrack;
-            set
-            {
-                _selectedTrack = value;
-
-                if (_selectedTrack != null)
-                {
-                    TrackName = _selectedTrack.Title;
-                    ArtistName = _selectedTrack.Artist.Name;
-                    AlbumCover = _selectedTrack.Album.CoverMedium;
-                    TrackPreview = _selectedTrack.Preview;
-                }
-                else
-                {
-                    AlbumCover = "music_notes2.png";
-                    TrackName = "Song";
-                    ArtistName = "Artist";
-                    TrackPreview = string.Empty;
-                }
-
-                OnPropertyChanged(nameof(TrackName));
-                OnPropertyChanged(nameof(ArtistName));
-                OnPropertyChanged(nameof(AlbumCover));
-                OnPropertyChanged(nameof(TrackPreview));
-            }
+            get => _trackName;
+            set => SetProperty(ref _trackName, string.IsNullOrEmpty(value) ? "Song" : value);
         }
 
+        public string ArtistName
+        {
+            get => _artistName;
+            set => SetProperty(ref _artistName, string.IsNullOrEmpty(value) ? "Artist" : value);
+            // By doing so we no longer need :  OnPropertyChanged(nameof(ArtistName));
+        }
 
+        public string AlbumCover
+        {
+            get => _albumCover;
+            set => SetProperty(ref _albumCover, string.IsNullOrEmpty(value) ? "music_notes2.png" : value);
+        }
 
-        public string TrackName { get; set; }
-        public string ArtistName { get; set; }
-        public string AlbumCover { get; set; }
         public string TrackPreview
         {
             get => _trackPreview;
             set => SetProperty(ref _trackPreview, value);
         }
 
+        public Track SelectedTrack
+        {
+            get => _selectedTrack;
+            set
+            {
+                SetProperty(ref _selectedTrack, value);
+                if (value != null)
+                {
+                    AlbumCover = value.Album?.CoverMedium;
+                    TrackName = value.Title;
+                    ArtistName = value.Artist?.Name;
+                    TrackPreview = value.Preview;
+                }
+            }
+        }
+
+
         public ICommand PlayPauseCommand { get; }
         public ICommand PlayFromCollectionViewCommand { get; }
+        public ICommand ItemSelectedCommand { get; }
+
 
         public SearchViewModel()
         {
+            _httpClient = new HttpClient();
             SearchResults = new ObservableCollection<Track>();
             PlayPauseCommand = new Command(async () =>
             {
@@ -102,6 +111,11 @@ namespace DailyPlaylist.ViewModel
                 }
             });
 
+            ItemSelectedCommand = new Command<Track>(track =>
+            {
+                SelectedTrack = track;
+            });
+
         }
 
         private async void PerformSearch()
@@ -111,8 +125,7 @@ namespace DailyPlaylist.ViewModel
 
             try
             {
-                var httpClient = new HttpClient();
-                var jsonResponse = await httpClient.GetStringAsync($"https://api.deezer.com/search/track?q={SearchQuery}&limit=25");
+                var jsonResponse = await _httpClient.GetStringAsync($"https://api.deezer.com/search/track?q={SearchQuery}&limit=30");
                 var searchData = JsonConvert.DeserializeObject<SearchData>(jsonResponse);
                 SearchResults = new ObservableCollection<Track>(searchData.Data);
             }
