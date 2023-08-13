@@ -52,11 +52,11 @@ namespace DailyPlaylist.ViewModel
 //    {
 //        if (await _authService.IsAuthenticatedAsync(Username, Password))
 //        {
-//            // succès ...
+//            // success ...
 //        }
 //        else
 //        {
-//            // echec .
+//            // failure ...
 //        }
 //    }
 

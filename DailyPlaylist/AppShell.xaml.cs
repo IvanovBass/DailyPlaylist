@@ -1,6 +1,4 @@
-﻿// using MediaManager;
-
-using DailyPlaylist.View;
+﻿using DailyPlaylist.View;
 
 namespace DailyPlaylist;
 
@@ -19,8 +17,5 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(PlayerPage), typeof(PlayerPage));
         Routing.RegisterRoute(nameof(PlaylistConfigPage), typeof(PlaylistConfigPage));
 
-        //new NavigationPage(new HomePage());
-
-        // CrossMediaManager.Current.Init();
     }
 }

@@ -31,7 +31,7 @@
             </Picker.ItemsSource>
         </Picker>
 
-        <!-- this will influence the bpm range (tempo) of the music, faster for how positive I feel -->
+        <!-- this will influence the bpm range (tempo) of the music, it will be faster depnedeing on  how positive I feel -->
         <Picker Title="Select Mood" x:Name="MoodPicker">
             <Picker.ItemsSource>
                 <x:Array Type="{x:Type x:String}">

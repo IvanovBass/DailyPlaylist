@@ -1,7 +1,4 @@
-﻿using DailyPlaylist.View;
-using MediaManager;
-
-namespace DailyPlaylist;
+﻿namespace DailyPlaylist;
 
 public partial class App : Application
 {
@@ -9,8 +6,8 @@ public partial class App : Application
 	{
 		InitializeComponent();
 
-        CrossMediaManager.Current.Init();
-
         MainPage = new AppShell();
-	}
+
+        CrossMediaManager.Current.Init();
+    }
 }

@@ -1,10 +1,4 @@
-﻿using MediaManager;
-using Newtonsoft.Json;
-using System.Windows.Input;
-using CommunityToolkit.Maui.Alerts;
-using CommunityToolkit.Maui.Core;
-
-namespace DailyPlaylist.ViewModel
+﻿namespace DailyPlaylist.ViewModel
 {
     public class SearchViewModel : BaseViewModel
     {
@@ -95,35 +89,64 @@ namespace DailyPlaylist.ViewModel
 
             SearchCommand = new Command(PerformSearch);
             SearchResults = new ObservableCollection<Track>();
+
             PlayPauseCommand = new Command(async () =>
             {
-                if (CrossMediaManager.Current.IsPlaying())
+                var currentMediaItem = CrossMediaManager.Current.Queue.Current;
+
+                // Will check if a track is currently playing and if it's the same as the selected track !
+                if (CrossMediaManager.Current.IsPlaying() && currentMediaItem != null && currentMediaItem.MediaUri == SelectedTrack.Preview)
                 {
                     await CrossMediaManager.Current.Pause();
                 }
                 else
                 {
+                    // Stops the current track (if a track is currently playing)
+                    if (currentMediaItem != null)
+                    {
+                        await CrossMediaManager.Current.Stop();
+                    }
+
+                    // Play the selected track
                     if (!string.IsNullOrEmpty(TrackPreview))
                     {
-                        await CrossMediaManager.Current.Play(TrackPreview);
+                        try
+                        {
+                            await CrossMediaManager.Current.Play(TrackPreview);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"Error playing track: {ex.Message}");
+                            await ShowSnackBarAsync("Unable to play track", "Dismiss", () => { });
+                        }
                     }
-                }
-            });
-
-            PlayFromCollectionViewCommand = new Command<Track>( async track =>
-            {
-                if (track != null)
-                {
-                    SelectedTrack = track; // Setting it as the selected track
-
-                    if (string.IsNullOrEmpty(track.Preview))
+                    else
                     {
                         await ShowSnackBarAsync("Preview not available", "Dismiss", () => { });
-                        return;
                     }
-                    await CrossMediaManager.Current.Play(track.Preview);
                 }
             });
+
+
+            PlayFromCollectionViewCommand = new Command<Track>(async track =>
+            {
+                SelectedTrack = track;
+                if (string.IsNullOrEmpty(track.Preview))
+                {
+                    await ShowSnackBarAsync("Preview not available", "Dismiss", () => { });
+                    return;
+                }
+                try
+                {
+                    await CrossMediaManager.Current.Play(track.Preview);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error playing track: {ex.Message}");
+                    await ShowSnackBarAsync("Unable to play track", "Dismiss", () => { });
+                }
+            });
+
 
             ItemSelectedCommand = new Command<Track>(track =>
             {
