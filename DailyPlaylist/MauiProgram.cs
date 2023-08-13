@@ -16,7 +16,7 @@ public static class MauiProgram
             .UseMauiCommunityToolkit()
             // I did this based on this example : https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/alerts/snackbar?tabs=android
             // It basically enable the MAUI snackbar
-            // After initializing the .NET MAUI Community Toolkit, optionally add additional fonts
+
             .ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
