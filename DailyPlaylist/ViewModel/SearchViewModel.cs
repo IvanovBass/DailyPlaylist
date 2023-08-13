@@ -116,7 +116,7 @@ namespace DailyPlaylist.ViewModel
                 {
                     SelectedTrack = track; // Setting it as the selected track
 
-                    if (string.IsNullOrEmpty(""))
+                    if (string.IsNullOrEmpty(track.Preview))
                     {
                         await ShowSnackBarAsync("Preview not available", "Dismiss", () => { });
                         return;
@@ -170,13 +170,14 @@ namespace DailyPlaylist.ViewModel
 
             var snackbarOptions = new SnackbarOptions
             {
-                BackgroundColor = Colors.Red,
+                BackgroundColor = Colors.DarkSlateBlue,
                 TextColor = Colors.White,
-                ActionButtonTextColor = Colors.Yellow,
+                ActionButtonTextColor = Colors.Orange,
                 CornerRadius = new CornerRadius(10),
-                Font = Microsoft.Maui.Font.SystemFontOfSize(14),
-                ActionButtonFont = Microsoft.Maui.Font.SystemFontOfSize(14),
-                CharacterSpacing = 0.5
+                
+                Font = Microsoft.Maui.Font.SystemFontOfSize(13),
+                ActionButtonFont = Microsoft.Maui.Font.SystemFontOfSize(13),
+                CharacterSpacing = 0.1
             };
 
             var snackbar = Snackbar.Make(message, action, actionText, TimeSpan.FromSeconds(durationInSeconds), snackbarOptions);
@@ -191,4 +192,5 @@ namespace DailyPlaylist.ViewModel
 // https://api.deezer.com/search?q={your_query}
 // https://api.deezer.com/search/artist?q={your_query}
 //  https://api.deezer.com/search/track?q={your_query}
+// ...
 
