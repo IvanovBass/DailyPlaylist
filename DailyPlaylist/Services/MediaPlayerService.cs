@@ -5,6 +5,8 @@
         private readonly List<Track> _tracks;
         private readonly List<string> _trackUris;
         private int _currentIndex = 0;
+        public event Action TrackFinished;
+
 
         public MediaPlayerService(List<Track> tracks, int index=0)
         {
@@ -12,9 +14,19 @@
             _trackUris = _tracks.Select(t => t.Preview).ToList();
 
             _currentIndex = index;
-
+            CrossMediaManager.Current.AutoPlay = false;
             CrossMediaManager.Current.Play(_trackUris);
-            CrossMediaManager.Current.Stop();  
+
+            CrossMediaManager.Current.MediaItemFinished += (sender, args) =>
+            {
+                _currentIndex++;
+                if (_currentIndex >= _trackUris.Count)
+                {
+                    _currentIndex = 0;
+                }
+                TrackFinished?.Invoke();
+            };
+
         }
 
         public async Task PlayPauseTaskAsync(int index)
