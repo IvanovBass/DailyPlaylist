@@ -15,6 +15,7 @@ namespace DailyPlaylist.ViewModel
         private readonly HttpClient _httpClient;
         private bool _isLoading;
 
+
         public ObservableCollection<Track> SearchResults
         {
             get => _searchResults;
@@ -119,6 +120,18 @@ namespace DailyPlaylist.ViewModel
 
         }
 
+        private void HandleTrackFinished()
+        {
+            var currentIndex = SearchResults.IndexOf(SelectedTrack);
+            currentIndex++;
+            if (currentIndex >= SearchResults.Count)
+            {
+                currentIndex = 0;
+            }
+            _selectedTrack = SearchResults[currentIndex];
+        }
+
+
         private async void PerformSearch()
         {
             if (string.IsNullOrEmpty(SearchQuery))
@@ -131,7 +144,9 @@ namespace DailyPlaylist.ViewModel
                 var jsonResponse = await _httpClient.GetStringAsync($"https://api.deezer.com/search/track?q={SearchQuery}&limit=30");
                 var searchData = JsonConvert.DeserializeObject<SearchData>(jsonResponse);
                 SearchResults = new ObservableCollection<Track>(searchData.Data);
-                _mediaPlayerService = new MediaPlayerService(searchData.Data, -1);
+                _mediaPlayerService = new MediaPlayerService(searchData.Data);
+                _mediaPlayerService.TrackFinished += HandleTrackFinished;  // by doing that our SearchVM subscribes to the event
+                SelectedTrack = SearchResults[0];
             }
             catch (Exception ex)
             {
