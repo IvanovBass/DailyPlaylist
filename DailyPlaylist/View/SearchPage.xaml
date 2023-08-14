@@ -43,12 +43,12 @@
 
                 <StackLayout Grid.Row="2" Grid.Column="3" Grid.ColumnSpan="4" 
                          Orientation="Horizontal" HorizontalOptions="Center" Spacing="5"  Margin="0,-20,0,0">
-                    <ImageButton   HeightRequest="50" WidthRequest="50"
-                         x:Name="PreviousButton" Source="previous.png" Command="{Binding PreviousCommand}" />
-                    <ImageButton   HeightRequest="50" WidthRequest="50"
-                         x:Name="PlayPauseButton" Source="play.png" Command="{Binding PlayPauseCommand}" />
-                    <ImageButton   HeightRequest="50" WidthRequest="50"
-                         x:Name="ForwardButton" Source="forward.png" Command="{Binding NextCommand}" />
+                    <ImageButton   HeightRequest="50" WidthRequest="50"  Source="previous.png" Command="{Binding PreviousCommand}" 
+                                   x:Name="PreviousButton" Clicked="PreviousButton_Clicked"/>
+                    <ImageButton   HeightRequest="50" WidthRequest="50"  Source="play.png" Command="{Binding PlayPauseCommand}" 
+                                   x:Name="PlayPauseButton" Clicked="PlayPauseButton_Clicked"/>
+                    <ImageButton   HeightRequest="50" WidthRequest="50"  Source="forward.png" Command="{Binding NextCommand}" 
+                                   x:Name="ForwardButton" Clicked="ForwardButton_Clicked"/>
                 </StackLayout>
             </Grid>
 
@@ -85,7 +85,7 @@
                                     <RowDefinition Height="65"/>
                                 </Grid.RowDefinitions>
 
-                                <Image Source="{Binding Artist.PictureMedium}" Aspect="AspectFit" Grid.Column="0" />
+                                <Image Source="{Binding Album.Cover}" Aspect="AspectFit" Grid.Column="0" />
 
                                 <StackLayout Grid.Column="1" Grid.ColumnSpan="2" VerticalOptions="Center" Spacing="5">
                                     <StackLayout.GestureRecognizers>
@@ -112,7 +112,7 @@
                                 <StackLayout Grid.Column="3" VerticalOptions="Center" Spacing="20" Orientation="Horizontal">
                                     <ImageButton Source="play.png"    
                                              Command="{Binding Path=BindingContext.PlayFromCollectionViewCommand, Source={x:Reference Name=TracksCollectionView}}"
-                                             CommandParameter="{Binding}"
+                                             CommandParameter="{Binding}"  x:Name="CollectionPlayButton" Clicked="CollectionPlayButton_Clicked"
                                              HeightRequest="25" WidthRequest="25"/>
                                     <ImageButton   Source="non_favorite.png" x:Name="ButtonFavorite" Command="{Binding SetFavorite}" 
                                                    HeightRequest="25" WidthRequest="25"/>

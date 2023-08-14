@@ -92,8 +92,16 @@ namespace DailyPlaylist.ViewModel
 
             PlayPauseCommand = new Command(async track =>
             {
-                await _mediaPlayerService.PlayPauseTaskAsync(_preStoredIndex);
-                Debug.WriteLine("le _preStoredIndex est : " + _preStoredIndex.ToString());
+                if (SearchResults == null || !SearchResults.Any() || _mediaPlayerService == null)
+                {
+                    await ShowSnackBarAsync("No track to play", "Dismiss", () => { });
+                    return;
+                }
+                else
+                {
+                    await _mediaPlayerService.PlayPauseTaskAsync(_preStoredIndex);
+                    Debug.WriteLine("le _preStoredIndex est : " + _preStoredIndex.ToString());
+                }
             });
 
             PlayFromCollectionViewCommand = new Command<Track>(async track =>
@@ -105,12 +113,28 @@ namespace DailyPlaylist.ViewModel
 
             NextCommand = new Command<Track>(async track =>
             {
-                SelectedTrack = await _mediaPlayerService.PlayNextAsync();
+                if (SearchResults == null || !SearchResults.Any() || _mediaPlayerService == null)
+                {
+                    await ShowSnackBarAsync("No tracklist to be forwarded", "Dismiss", () => { });
+                    return;
+                }
+                else
+                {
+                    SelectedTrack = await _mediaPlayerService.PlayNextAsync();
+                }
             });
 
             PreviousCommand = new Command<Track>(async track =>
             {
-                SelectedTrack = await _mediaPlayerService.PlayPreviousAsync();
+                if (SearchResults == null || !SearchResults.Any() || _mediaPlayerService == null)
+                {
+                    await ShowSnackBarAsync("No tracklist to be backwarded", "Dismiss", () => { });
+                    return;
+                } 
+                else
+                {
+                    SelectedTrack = await _mediaPlayerService.PlayPreviousAsync();
+                }
             });
 
             ItemSelectedCommand = new Command<Track>(track =>
@@ -165,6 +189,27 @@ namespace DailyPlaylist.ViewModel
             public List<Track> Data { get; set; }
             //... other properties or objects to catch eventually
             // add a progress bar , a loading widget or a text to inform the user of the search
+        }
+
+        public async Task ShowSnackBarAsync(string message, string actionText, Action action, int durationInSeconds = 2)
+        {
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+            var snackbarOptions = new SnackbarOptions
+            {
+                BackgroundColor = Colors.DarkSlateBlue,
+                TextColor = Colors.White,
+                ActionButtonTextColor = Colors.Orange,
+                CornerRadius = new CornerRadius(10),
+
+                Font = Microsoft.Maui.Font.SystemFontOfSize(13),
+                ActionButtonFont = Microsoft.Maui.Font.SystemFontOfSize(13),
+                CharacterSpacing = 0.1
+            };
+
+            var snackbar = Snackbar.Make(message, action, actionText, TimeSpan.FromSeconds(durationInSeconds), snackbarOptions);
+
+            await snackbar.Show(cancellationTokenSource.Token);
         }
 
     }
