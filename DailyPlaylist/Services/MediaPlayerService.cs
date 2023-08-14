@@ -14,7 +14,7 @@
             _currentIndex = index;
 
             CrossMediaManager.Current.Play(_trackUris);
-            CrossMediaManager.Current.Stop();
+            CrossMediaManager.Current.Stop();  
         }
 
         public async Task PlayPauseTaskAsync(int index)
