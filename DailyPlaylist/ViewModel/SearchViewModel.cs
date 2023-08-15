@@ -14,6 +14,7 @@ namespace DailyPlaylist.ViewModel
         private string _albumCover = "music_notes2.png";
         private readonly HttpClient _httpClient;
         private bool _isLoading;
+        private PlaylistViewModel _playlistViewModel;  // I'm adding a ref to the PlaylistVM for the SetFavoriteCommand
 
 
         public ObservableCollection<Track> SearchResults
@@ -76,6 +77,7 @@ namespace DailyPlaylist.ViewModel
 
         public ICommand PlayPauseCommand { get; }
         public ICommand PlayFromCollectionViewCommand { get; }
+        public ICommand SetFavoriteCommand { get; }
         public ICommand NextCommand { get; }
         public ICommand PreviousCommand { get; }  
         public ICommand ItemSelectedCommand { get; }
@@ -108,6 +110,32 @@ namespace DailyPlaylist.ViewModel
             {
                 SelectedTrack = track;
                 await _mediaPlayerService.PlayPauseTaskAsync(_preStoredIndex);
+            });
+
+            SetFavoriteCommand = new Command<Track>(track =>
+            {
+                SelectedTrack = track;
+
+                var activePlaylist = _playlistViewModel.ActivePlaylist;
+
+                if (activePlaylist == null)
+                {
+                    activePlaylist = new Playlist
+                    {
+                        User = new User(),
+                        Name = "Name",
+                        Description = "Description",
+                        Tracks = new List<Track>()
+                    };
+
+                    _playlistViewModel.ActivePlaylist = activePlaylist;
+                }
+
+                if (!activePlaylist.Tracks.Contains(track))
+                {
+                    activePlaylist.Tracks.Add(track);
+                }
+
             });
 
 
@@ -175,7 +203,7 @@ namespace DailyPlaylist.ViewModel
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error while searching: {ex.Message}");
-                // Notify the user if needed...
+                await ShowSnackBarAsync("Search gives no result, please retry...", "Dismiss", () => { });
             }
             finally 
             { 
@@ -188,7 +216,6 @@ namespace DailyPlaylist.ViewModel
         {
             public List<Track> Data { get; set; }
             //... other properties or objects to catch eventually
-            // add a progress bar , a loading widget or a text to inform the user of the search
         }
 
         public async Task ShowSnackBarAsync(string message, string actionText, Action action, int durationInSeconds = 2)

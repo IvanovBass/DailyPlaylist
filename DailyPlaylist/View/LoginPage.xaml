@@ -2,22 +2,23 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="DailyPlaylist.View.LoginPage"
-
-             Title="LoginPage">
+             Title="Log in">
 
         <VerticalStackLayout  Spacing="20" VerticalOptions="Center" HorizontalOptions="Center"
                                               MinimumWidthRequest="200" WidthRequest="250">
 
             <Image Source="icon.png"   HeightRequest="160" Margin="0,30,0,15"/>
 
-            <Entry Placeholder="Email" FontSize="Large" TextColor="White" HeightRequest="60" Opacity="0.5"/>
+            <Entry Placeholder="Email" Text="{Binding Email}" FontSize="Large" TextColor="White" HeightRequest="60" Opacity="0.5"/>
 
-            <Entry IsPassword="True" Placeholder="Password" FontSize="Large"  TextColor="White"
+        <Entry IsPassword="True" Placeholder="Password" Text="{Binding Password}" FontSize="Large"  TextColor="White"
                            HeightRequest="60" Opacity="0.5" />
 
-            <Button  Margin="0,20,0,15" Text="Login" Clicked="ButtonLoginClicked" FontSize="Large" FontFamily="Rajdhani-SemiBold"/>
+            <Button  Margin="0,20,0,15" Text="Login" Clicked="ButtonLoginClicked" x:Name="ButtonLogin"
+                     FontSize="Medium" FontFamily="Rajdhani-SemiBold"/>
 
-            <Button Text="Create an account"  FontSize="Large" FontFamily="Rajdhani-SemiBold"/>
+            <Button Text="Create an account"  FontSize="Medium" FontFamily="Rajdhani-SemiBold" x:Name="ButtonCreateAccount"
+                    Clicked="ButtonCreateAccountClicked"/>
 
          </VerticalStackLayout>
     

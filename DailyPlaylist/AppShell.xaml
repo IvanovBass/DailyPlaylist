@@ -4,11 +4,12 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:DailyPlaylist"
-    xmlns:view="clr-namespace:DailyPlaylist.View"  
-    Shell.FlyoutBehavior="Flyout">
-    <!-- Shell.FlyoutBehavior="Disabled"> -->
+    xmlns:vm="clr-namespace:DailyPlaylist.ViewModel"
+    xmlns:view="clr-namespace:DailyPlaylist.View"
+    FlyoutBehavior="Flyout"
+    FlyoutHeader="Daily Playlist">
 
-    <ShellContent
+<ShellContent
         Title="Loading"
         ContentTemplate="{DataTemplate view:LoadingPage}"     
         Route="LoadingPage" 
@@ -19,36 +20,37 @@
         Title="Login"
         ContentTemplate="{DataTemplate view:LoginPage}"     
         Route="LoginPage" 
-        Shell.FlyoutBehavior="Disabled"/>
+        Shell.FlyoutBehavior="Disabled"
+        Shell.FlyoutItemIsVisible="False"/>
+    
+    <MenuItem Text="Log out"
+              IconImageSource="logout.png"
+              Command="{Binding LogoutCommand}"
+              CommandParameter="{Binding}" />
 
     <TabBar   FlyoutDisplayOptions="AsMultipleItems">
 
         <ShellContent
             Title="Home"
+            Icon="home.png"
             ContentTemplate="{DataTemplate view:HomePage}"     
             Route="HomePage" />
 
         <ShellContent
             Title="Search"
+            Icon="search.png"
             ContentTemplate="{DataTemplate view:SearchPage}"  
             Route="SearchPage" />
 
         <ShellContent
             Title="Playlists"
+            Icon="playlists.png"
             ContentTemplate="{DataTemplate view:PlaylistPage}"     
             Route="PlaylistPage" />
 
     </TabBar>
 
-    <!-- pour gérer tes flyout items : 
-    <Shell>
-        <FlyoutItem
-            Title="Logout"
-            Icon="power.png"
-            <ShellContent
-                ContentTemplate="{DataTemaplte p:StyleGuidePage}" /> là tu mets la redirection vers login et tu logout au niveau du authservice
-        </FlyoutItem>
-    </Shell>    -->
-
-
 </Shell>
+
+<!-- Shell.FlyoutBehavior="Flyout">
+    Shell.FlyoutBehavior="Disabled"> -->

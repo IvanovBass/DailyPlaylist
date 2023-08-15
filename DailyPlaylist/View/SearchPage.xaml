@@ -5,11 +5,6 @@
              xmlns:vm="clr-namespace:DailyPlaylist.ViewModel"
              x:Class="DailyPlaylist.View.SearchPage"
              Title="Search">
-    <ContentPage.Resources>
-        <ResourceDictionary>
-            <vm:SearchViewModel x:Key="InverseBooleanConverter" />
-        </ResourceDictionary>
-    </ContentPage.Resources>
 
     <ScrollView>
         <VerticalStackLayout>
@@ -38,7 +33,7 @@
 
                 <Label  Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="4" FontSize="Large" Padding="0,25,0,0" MaxLines="1" LineBreakMode="TailTruncation"
                     Text="{Binding ArtistName}" HorizontalTextAlignment="Center" TextColor="{StaticResource Primary}"/>
-                <Label  Grid.Row="1"  Grid.Column="3"  Grid.ColumnSpan="4"  FontSize="Small"  MaxLines="2"  Padding="0,0,10,0"
+                <Label  Grid.Row="1"  Grid.Column="3"  Grid.ColumnSpan="4"  FontSize="Medium"  MaxLines="2"  Padding="0,0,10,0"
                    Text="{Binding TrackName}"  HorizontalTextAlignment="Center" TextColor="{StaticResource Tertiary}"/>
 
                 <StackLayout Grid.Row="2" Grid.Column="3" Grid.ColumnSpan="4" 
@@ -114,8 +109,9 @@
                                              Command="{Binding Path=BindingContext.PlayFromCollectionViewCommand, Source={x:Reference Name=TracksCollectionView}}"
                                              CommandParameter="{Binding}"  x:Name="CollectionPlayButton" Clicked="CollectionPlayButton_Clicked"
                                              HeightRequest="25" WidthRequest="25"/>
-                                    <ImageButton   Source="non_favorite.png" x:Name="ButtonFavorite" Command="{Binding SetFavorite}" 
-                                                   HeightRequest="25" WidthRequest="25"/>
+                                    <ImageButton Source="non_favorite.png"
+                                             Command="{Binding Path=BindingContext.SetFavoriteCommand, Source={x:Reference Name=TracksCollectionView}}"
+                                             CommandParameter="{Binding}"   HeightRequest="25" WidthRequest="25" />
                                 </StackLayout>
                             </Grid>
                         </DataTemplate>

@@ -1,4 +1,5 @@
 ﻿using DailyPlaylist.Services;
+using DailyPlaylist.ViewModel;
 
 namespace DailyPlaylist.View;
 
@@ -10,25 +11,21 @@ public partial class LoginPage : ContentPage
 	{
 		InitializeComponent();
         _authService = authService;
+        BindingContext = new LoginViewModel(authService);
 
-        // to check tuto indian + github Login : https://www.youtube.com/watch?v=97G-XkuENYE
-        // to check this for UI inspiration : https://github.com/syazwan089/.NET-MAUI-SIMPLE-LOGIN-PAGE/blob/main/SpeedUI/MainPage.xaml
+    }
+    private async Task AnimatePressedButton(Button button)
+    {
+        await button.ScaleTo(0.8, 130, Easing.Linear);
+        await button.ScaleTo(1, 70, Easing.Linear);
     }
 
     private async void ButtonLoginClicked(object sender, EventArgs e)
     {
-        // aller chercher dynamiquement depuis les input/entrys et dans la fonction Login, aller API la DB à la collection User pour voir si OK
-        // pas oublier de hasher le mdp
-        // + check le layout Login au-dessus et résous problème labels/police ? en android
-        // Algorithmer ici ou passer le username et password en arguments de Login ?
-        _authService.Login();
-        await Shell.Current.GoToAsync($"//{nameof(HomePage)}");
+        await AnimatePressedButton(ButtonLogin);
     }
-
-    private void ButtonLogoutClicked(object sender, EventArgs e)
+    private async void PlayPauseButton_Clicked(object sender, EventArgs e)
     {
-        _authService?.Logout();
-        Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
-        // + snackbar avec message "you succesfully logged out" ?
+        await AnimatePressedButton(ButtonCreateAccount);
     }
 }

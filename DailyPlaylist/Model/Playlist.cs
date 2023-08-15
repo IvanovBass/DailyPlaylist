@@ -7,7 +7,7 @@
         public User User { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public int Count { get; set; }
+        public int Count { get; set; }  // iamgine a method in the get that would simply retrieve the Count of List<Track> Tracks dynamically
         public List<Track> Tracks { get; set; }
         public DateTime DateCreation { get; set; }
 
