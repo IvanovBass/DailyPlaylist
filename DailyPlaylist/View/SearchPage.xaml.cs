@@ -23,7 +23,6 @@ public partial class SearchPage : ContentPage
     {
         await AnimatePressedButton(PreviousButton);
     }
-
     private async void PlayPauseButton_Clicked(object sender, EventArgs e)
     {
         await AnimatePressedButton(PlayPauseButton);
@@ -39,5 +38,4 @@ public partial class SearchPage : ContentPage
         var button = sender as ImageButton;
         await AnimatePressedButton(button);
     }
-
 }

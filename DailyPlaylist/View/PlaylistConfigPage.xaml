@@ -11,13 +11,14 @@
 
         <StackLayout Spacing="20" Padding="15">
 
-        <Picker Title="Select Genre" x:Name="GenrePicker" ItemsSource="{Binding Genres}" ItemDisplayBinding="{Binding Name}">
+        <Picker Title="Select Genre" x:Name="GenrePicker" ItemsSource="{Binding Genres}" ItemDisplayBinding="{Binding Name}"
+                FontSize="Medium">
             <Picker.Items>
                 <!-- the genres are retrieved dynamically with their name and id from a 'genre query' made to the Deezer endpoint -->
              </Picker.Items>
          </Picker>
 
-        <Picker Title="Select Decade" x:Name="DecadePicker">
+        <Picker Title="Select Decade" x:Name="DecadePicker" FontSize="Medium">
             <Picker.ItemsSource>
                 <x:Array Type="{x:Type x:String}">
                     <x:String>1950</x:String>
@@ -32,9 +33,9 @@
         </Picker>
 
         <!-- this will influence the bpm range (tempo) of the music, it will be faster depnedeing on  how positive I feel -->
-        <Picker Title="Select Mood" x:Name="MoodPicker">
+        <Picker Title="Select Mood" x:Name="MoodPicker" FontSize="Medium">
             <Picker.ItemsSource>
-                <x:Array Type="{x:Type x:String}">
+                <x:Array Type="{x:Type x:String}" >
                     <x:String>Depressing</x:String>
                     <x:String>Sad</x:String>
                     <x:String>Chill</x:String>
@@ -46,16 +47,18 @@
 
         <!-- Explicit Content can be switched on and off, not sure I'm gonna keep this one -->
         <StackLayout Orientation="Horizontal">
-            <Label Text="Exclude Explicit Content" VerticalOptions="Center"/>
+            <Label Text="Exclude Explicit Content" VerticalOptions="Center" FontSize="Medium"/>
             <Switch x:Name="ExplicitContentSwitch" HorizontalOptions="EndAndExpand"/>
         </StackLayout>
 
         <!-- Duration Slider... that's more a school case, I'm not sure to keep this one either -->
-        <Label Text="Preferred Song Duration (in seconds)" />
+        <Label Text="Preferred Song Duration (in seconds)" FontSize="Medium"/>
         <Slider x:Name="DurationSlider" Minimum="60" Maximum="600" Value="180" VerticalOptions="Center"/>
-        <Label x:Name="DurationLabel" Text="{Binding Source={x:Reference DurationSlider}, Path=Value, StringFormat='Duration: {0:F0} seconds'}" />
+        <Label x:Name="DurationLabel"  FontSize="Medium"
+               Text="{Binding Source={x:Reference DurationSlider}, Path=Value, StringFormat='Duration: {0:F0} seconds'}" />
 
         <!-- Generate Palylist Button -->
-        <Button Text="Generate Playlist" Clicked="OnGeneratePlaylist" HorizontalOptions="Center"/>
+        <Button Text="Generate Playlist" FontSize="Large" Margin="0,40,0,0"
+                Clicked="OnGeneratePlaylist" HorizontalOptions="Center"/>
     </StackLayout>
 </ContentPage>
