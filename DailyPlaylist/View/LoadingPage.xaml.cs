@@ -17,10 +17,10 @@ public partial class LoadingPage : ContentPage
 	{
 		base.OnNavigatedTo(args);
 
-		if (await _authService.IsAuthenticatedAsync())
+		if (await _authService.IsAuthenticatedAsync())  // attente de deux seecondes pour authentifier
 		{
-            await Shell.Current.GoToAsync($"//{nameof(HomePage)}");
-        }
+			await Shell.Current.GoToAsync($"//{nameof(HomePage)}");
+		}
 		else
 		{
 			await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");

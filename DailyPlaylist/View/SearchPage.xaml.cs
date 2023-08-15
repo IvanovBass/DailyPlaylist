@@ -4,12 +4,13 @@ namespace DailyPlaylist.View;
 
 public partial class SearchPage : ContentPage
 {
+    public SearchViewModel _bindingContext {get; set;}
 	public SearchPage()
 	{
 		InitializeComponent();
 
 
-		BindingContext = new SearchViewModel();
+		_bindingContext = new SearchViewModel();
 
     }
 

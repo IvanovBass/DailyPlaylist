@@ -16,15 +16,15 @@ public partial class LoginPage : ContentPage
     }
     private async Task AnimatePressedButton(Button button)
     {
-        await button.ScaleTo(0.8, 130, Easing.Linear);
-        await button.ScaleTo(1, 70, Easing.Linear);
+        await button.ScaleTo(0.9, 100, Easing.Linear);
+        await button.ScaleTo(1, 50, Easing.Linear);
     }
 
     private async void ButtonLoginClicked(object sender, EventArgs e)
     {
         await AnimatePressedButton(ButtonLogin);
     }
-    private async void PlayPauseButton_Clicked(object sender, EventArgs e)
+    private async void ButtonCreateAccountClicked(object sender, EventArgs e)
     {
         await AnimatePressedButton(ButtonCreateAccount);
     }

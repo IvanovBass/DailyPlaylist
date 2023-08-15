@@ -66,6 +66,7 @@
 		<PackageReference Include="Plugin.MediaManager" Version="1.2.2" />
 		<PackageReference Include="Plugin.MediaManager.Forms" Version="1.2.2" />
 		<PackageReference Include="Realm" Version="11.3.0" />
+		<PackageReference Include="RestSharp" Version="110.2.0" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -5,7 +5,7 @@ namespace DailyPlaylist.ViewModel
     public class SearchViewModel : BaseViewModel
     {
         private ObservableCollection<Track> _searchResults;
-        private int _preStoredIndex; 
+        private int _preStoredIndex;
         private MediaPlayerService _mediaPlayerService;
         private string _searchQuery;
         private Track _selectedTrack;
@@ -79,7 +79,7 @@ namespace DailyPlaylist.ViewModel
         public ICommand PlayFromCollectionViewCommand { get; }
         public ICommand SetFavoriteCommand { get; }
         public ICommand NextCommand { get; }
-        public ICommand PreviousCommand { get; }  
+        public ICommand PreviousCommand { get; }
         public ICommand ItemSelectedCommand { get; }
 
         public ICommand SearchCommand { get; }
@@ -87,7 +87,6 @@ namespace DailyPlaylist.ViewModel
 
         public SearchViewModel()
         {
-            _httpClient = new HttpClient();
 
             SearchCommand = new Command(PerformSearch);
             SearchResults = new ObservableCollection<Track>();
@@ -158,7 +157,7 @@ namespace DailyPlaylist.ViewModel
                 {
                     await ShowSnackBarAsync("No tracklist to be backwarded", "Dismiss", () => { });
                     return;
-                } 
+                }
                 else
                 {
                     SelectedTrack = await _mediaPlayerService.PlayPreviousAsync();
@@ -169,6 +168,8 @@ namespace DailyPlaylist.ViewModel
             {
                 SelectedTrack = track;
             });
+
+            LogoutViewModel.OnLogout += Reset;
 
         }
 
@@ -203,10 +204,10 @@ namespace DailyPlaylist.ViewModel
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error while searching: {ex.Message}");
-                await ShowSnackBarAsync("Search gives no result, please retry...", "Dismiss", () => { });
+                await ShowSnackBarAsync("Search gives no result, please retry", "Dismiss", () => { });
             }
-            finally 
-            { 
+            finally
+            {
                 await Task.Delay(2000);
                 IsLoading = false;
             }
@@ -239,6 +240,19 @@ namespace DailyPlaylist.ViewModel
             await snackbar.Show(cancellationTokenSource.Token);
         }
 
+        public void Reset()
+        {
+            SearchResults = new ObservableCollection<Track>();
+            _mediaPlayerService = null; 
+            _preStoredIndex = 0;
+            SearchQuery = string.Empty;
+            SelectedTrack = null;
+            TrackName = "Song";
+            ArtistName = "Artist";
+            AlbumCover = "music_notes2.png";
+            IsLoading = false;
+        }
+
     }
 }
 
@@ -246,4 +260,3 @@ namespace DailyPlaylist.ViewModel
 // https://api.deezer.com/search/artist?q={your_query}
 //  https://api.deezer.com/search/track?q={your_query}
 // ...
-
