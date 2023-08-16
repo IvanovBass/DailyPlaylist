@@ -63,7 +63,9 @@ namespace DailyPlaylist.ViewModel
             }
             else
             {
-                // aller check si username existe etcetera ....
+                // aller check si username existe etcetera .... pour l'instant je mets ceci:
+                _authService.Login();
+                await Shell.Current.GoToAsync($"//{nameof(LoadingPage)}");
             }
         }
 
