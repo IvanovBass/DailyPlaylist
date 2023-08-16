@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Maui.Converters;
-using DailyPlaylist.Services;
+﻿using DailyPlaylist.Services;
 using DailyPlaylist.View;
 using System.Text.RegularExpressions;
 
@@ -11,6 +10,7 @@ namespace DailyPlaylist.ViewModel
         private string _email;
         private string _password;
         public User _activeUser;
+        public static PlaylistViewModel _playlistVM;
 
         public string Email
         {
@@ -69,11 +69,15 @@ namespace DailyPlaylist.ViewModel
 
             if (authUser != null && authUser is User)
             {
-                _authService.Login();
-                ActiveUser = authUser;
-                _activeUser = authUser;
-                await Shell.Current.GoToAsync($"//{nameof(LoadingPage)}");
-                await ShowSnackBarAsync("Succesfully logged in", "Dismiss", () => { });
+                _authService.Login();  // on log dans le système
+
+                await Shell.Current.GoToAsync($"//{nameof(LoadingPage)}"); // on navigue vers la page intermédiaire de loading
+
+                _activeUser = authUser; // le User actif devient l'utilisateur authentifié, comment en fait un Service centralisé qu'on peut injecter dans les VM ?
+
+                await ShowSnackBarAsync("Succesfully logged in", "Dismiss", () => { });  // self-explanatory
+
+                _playlistVM = new PlaylistViewModel(_activeUser); // on instantie ici un PlaylistViewModel en faisant passer l'User authentifié en DI, fonctionnel mais pas top
             }
             else
             {
@@ -99,11 +103,11 @@ namespace DailyPlaylist.ViewModel
 
             if (createdUser != null && createdUser is User)
             {
-                _authService.Login();
-                ActiveUser = createdUser;
-                _activeUser = createdUser;
+                _authService.Login(); // cfr explications ci-dessus
                 await Shell.Current.GoToAsync($"//{nameof(LoadingPage)}");
+                _activeUser = createdUser;
                 await ShowSnackBarAsync("User created succesfully!", "Dismiss", () => { });
+                var playlistVM = new PlaylistViewModel(_activeUser);
             }
             else
             {

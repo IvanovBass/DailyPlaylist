@@ -12,9 +12,7 @@ namespace DailyPlaylist.ViewModel
         private string _trackName = "Song";
         private string _artistName = "Artist";
         private string _albumCover = "music_notes2.png";
-        private readonly HttpClient _httpClient;
         private bool _isLoading;
-        private PlaylistViewModel _playlistViewModel;  // I'm adding a ref to the PlaylistVM for the SetFavoriteCommand
 
 
         public ObservableCollection<Track> SearchResults
@@ -113,27 +111,26 @@ namespace DailyPlaylist.ViewModel
 
             SetFavoriteCommand = new Command<Track>(track =>
             {
-                SelectedTrack = track;
+                //SelectedTrack = track;
 
-                var activePlaylist = _playlistViewModel.ActivePlaylist;
+                //var activePlaylist = _playlistViewModel.ActivePlaylist;
 
-                if (activePlaylist == null)
-                {
-                    activePlaylist = new Playlist
-                    {
-                        User = new User(),
-                        Name = "Name",
-                        Description = "Description",
-                        Tracks = new List<Track>()
-                    };
+                //if (activePlaylist == null)
+                //{
+                //    activePlaylist = new Playlist
+                //    {
+                //        User = new User(),
+                //        Name = "Name",
+                //        DeezerTrackIds = new List<long>()
+                //    };
 
-                    _playlistViewModel.ActivePlaylist = activePlaylist;
-                }
+                //    _playlistViewModel.ActivePlaylist = activePlaylist;
+                //}
 
-                if (!activePlaylist.Tracks.Contains(track))
-                {
-                    activePlaylist.Tracks.Add(track);
-                }
+                //if (!activePlaylist.DeezerTrackIds.Contains(track.Id))
+                //{
+                //    activePlaylist.DeezerTrackIds.Add(track.Id);
+                //}
 
             });
 
@@ -187,29 +184,32 @@ namespace DailyPlaylist.ViewModel
 
         private async void PerformSearch()
         {
-            if (string.IsNullOrEmpty(SearchQuery))
-                return;
+            using (HttpClient httpClient = new HttpClient())
+            {
+                if (string.IsNullOrEmpty(SearchQuery))
+                    return;
 
-            IsLoading = true;
+                IsLoading = true;
 
-            try
-            {
-                var jsonResponse = await _httpClient.GetStringAsync($"https://api.deezer.com/search/track?q={SearchQuery}&limit=30");
-                var searchData = JsonConvert.DeserializeObject<SearchData>(jsonResponse);
-                SearchResults = new ObservableCollection<Track>(searchData.Data);
-                _mediaPlayerService = new MediaPlayerService(searchData.Data);
-                _mediaPlayerService.TrackFinished += HandleTrackFinished;  // by doing that our SearchVM subscribes to the event
-                SelectedTrack = SearchResults[0];
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error while searching: {ex.Message}");
-                await ShowSnackBarAsync("Search gives no result, please retry", "Dismiss", () => { });
-            }
-            finally
-            {
-                await Task.Delay(2000);
-                IsLoading = false;
+                try
+                {
+                    var jsonResponse = await httpClient.GetStringAsync($"https://api.deezer.com/search/track?q={SearchQuery}&limit=30");
+                    var searchData = JsonConvert.DeserializeObject<SearchData>(jsonResponse);
+                    SearchResults = new ObservableCollection<Track>(searchData.Data);
+                    _mediaPlayerService = new MediaPlayerService(searchData.Data);
+                    _mediaPlayerService.TrackFinished += HandleTrackFinished;  // by doing that our SearchVM subscribes to the event
+                    SelectedTrack = SearchResults[0];
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error while searching: {ex.Message}");
+                    await ShowSnackBarAsync("Search gives no result, please retry", "Dismiss", () => { });
+                }
+                finally
+                {
+                    await Task.Delay(2000);
+                    IsLoading = false;
+                }
             }
         }
 

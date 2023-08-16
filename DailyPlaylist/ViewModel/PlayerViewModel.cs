@@ -9,6 +9,6 @@ namespace DailyPlaylist.ViewModel
     public class PlayerViewModel : BaseViewModel
     {
 
-        // I will rather create a service : MediaPlayerService  for instance
+        // this one's going to get abandoned
     }
 }

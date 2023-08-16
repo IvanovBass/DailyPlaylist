@@ -5,7 +5,6 @@ namespace DailyPlaylist.View;
 public partial class LoadingPage : ContentPage
 {
     private readonly AuthService  _authService;
-	private readonly User _activeUser;
 
     public LoadingPage(AuthService authService)
 	{

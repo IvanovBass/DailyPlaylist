@@ -3,7 +3,7 @@
     public class User
     {
         [JsonProperty(PropertyName = "_id")]
-        public Guid Id { get; private set; }
+        public string Id { get; private set; }
 
         [JsonProperty(PropertyName = "email")]
         public string Email { get; set; }
@@ -16,7 +16,7 @@
 
         public User()
         {
-            Id = Guid.NewGuid();
+            Id = Guid.NewGuid().ToString();
             // automatically creates a GUID Id so that we don't have to code it each time
         }
     }

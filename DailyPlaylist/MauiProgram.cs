@@ -40,7 +40,7 @@ public static class MauiProgram
 
         builder.Services.AddSingleton(new HttpClient());
 
-
+        // demander à Jerem comment utiliser ces services, ce qu'ils font + comment s'y prendre avec l'utilisateur connecté
 
         return builder.Build();
 	}
