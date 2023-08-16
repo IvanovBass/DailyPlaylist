@@ -8,9 +8,11 @@ namespace DailyPlaylist.ViewModel
     {
         private readonly AuthService _authService;
 
+        public static event Action OnLogout;
+
         public ICommand LogoutCommand { get; }
 
-        public LogoutViewModel()
+        public LogoutViewModel( )
         {
             _authService = new AuthService();
 
@@ -20,6 +22,9 @@ namespace DailyPlaylist.ViewModel
                 if (result)
                 {
                     _authService.Logout();
+
+                    OnLogout?.Invoke();
+
                     await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
                 }
             });

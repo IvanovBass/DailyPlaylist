@@ -12,9 +12,9 @@ namespace DailyPlaylist.ViewModel
         private string _trackName = "Song";
         private string _artistName = "Artist";
         private string _albumCover = "music_notes2.png";
-        private readonly HttpClient _httpClient;
+        private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
         private bool _isLoading;
-        private PlaylistViewModel _playlistViewModel;  // I'm adding a ref to the PlaylistVM for the SetFavoriteCommand
+        // private PlaylistViewModel _playlistViewModel;  // I'm adding a ref to the PlaylistVM for the SetFavoriteCommand
 
 
         public ObservableCollection<Track> SearchResults
@@ -85,9 +85,8 @@ namespace DailyPlaylist.ViewModel
         public ICommand SearchCommand { get; }
 
 
-        public SearchViewModel()
+        public SearchViewModel()  // will probably have to put the Active Playlist or the PlaylisVM in DI
         {
-            _httpClient = new HttpClient();
 
             SearchCommand = new Command(PerformSearch);
             SearchResults = new ObservableCollection<Track>();
@@ -102,7 +101,6 @@ namespace DailyPlaylist.ViewModel
                 else
                 {
                     await _mediaPlayerService.PlayPauseTaskAsync(_preStoredIndex);
-                    Debug.WriteLine("le _preStoredIndex est : " + _preStoredIndex.ToString());
                 }
             });
 
@@ -114,27 +112,27 @@ namespace DailyPlaylist.ViewModel
 
             SetFavoriteCommand = new Command<Track>(track =>
             {
-                SelectedTrack = track;
+                //SelectedTrack = track;
 
-                var activePlaylist = _playlistViewModel.ActivePlaylist;
+                //var activePlaylist = _playlistViewModel.ActivePlaylist;
 
-                if (activePlaylist == null)
-                {
-                    activePlaylist = new Playlist
-                    {
-                        User = new User(),
-                        Name = "Name",
-                        Description = "Description",
-                        Tracks = new List<Track>()
-                    };
+                //if (activePlaylist == null)
+                //{
+                //    activePlaylist = new Playlist
+                //    {
+                //        User = new User(),
+                //        Name = "Name",
+                //        Description = "Description",
+                //        Tracks = new List<Track>()
+                //    };
 
-                    _playlistViewModel.ActivePlaylist = activePlaylist;
-                }
+                //    _playlistViewModel.ActivePlaylist = activePlaylist;
+                //}
 
-                if (!activePlaylist.Tracks.Contains(track))
-                {
-                    activePlaylist.Tracks.Add(track);
-                }
+                //if (!activePlaylist.Tracks.Contains(track))
+                //{
+                //    activePlaylist.Tracks.Add(track);
+                //}
 
             });
 
@@ -170,6 +168,8 @@ namespace DailyPlaylist.ViewModel
                 SelectedTrack = track;
             });
 
+            LogoutViewModel.OnLogout += Reset;
+
         }
 
         private void HandleTrackFinished()
@@ -193,12 +193,15 @@ namespace DailyPlaylist.ViewModel
 
             try
             {
-                var jsonResponse = await _httpClient.GetStringAsync($"https://api.deezer.com/search/track?q={SearchQuery}&limit=30");
-                var searchData = JsonConvert.DeserializeObject<SearchData>(jsonResponse);
-                SearchResults = new ObservableCollection<Track>(searchData.Data);
-                _mediaPlayerService = new MediaPlayerService(searchData.Data);
-                _mediaPlayerService.TrackFinished += HandleTrackFinished;  // by doing that our SearchVM subscribes to the event
-                SelectedTrack = SearchResults[0];
+                using (var client = _httpClient.Value)
+                {
+                    var jsonResponse = await client.GetStringAsync($"https://api.deezer.com/search/track?q={SearchQuery}&limit=30");
+                    var searchData = JsonConvert.DeserializeObject<SearchData>(jsonResponse);
+                    SearchResults = new ObservableCollection<Track>(searchData.Data);
+                    _mediaPlayerService = new MediaPlayerService(searchData.Data);
+                    _mediaPlayerService.TrackFinished += HandleTrackFinished;  // by doing that our SearchVM subscribes to the event
+                    SelectedTrack = SearchResults[0];
+                }
             }
             catch (Exception ex)
             {
@@ -237,6 +240,20 @@ namespace DailyPlaylist.ViewModel
             var snackbar = Snackbar.Make(message, action, actionText, TimeSpan.FromSeconds(durationInSeconds), snackbarOptions);
 
             await snackbar.Show(cancellationTokenSource.Token);
+        }
+
+        public void Reset()
+        {
+            SearchResults = new ObservableCollection<Track>();
+            _mediaPlayerService = null;
+            _httpClient = new Lazy<HttpClient>();
+            _preStoredIndex = 0;
+            SearchQuery = string.Empty;
+            SelectedTrack = null;
+            TrackName = "Song";
+            ArtistName = "Artist";
+            AlbumCover = "music_notes2.png";
+            IsLoading = false;
         }
 
     }

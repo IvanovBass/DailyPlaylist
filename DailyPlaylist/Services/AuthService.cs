@@ -1,4 +1,6 @@
 ﻿using BCrypt.Net;
+using Newtonsoft.Json.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace DailyPlaylist.Services
@@ -7,13 +9,15 @@ namespace DailyPlaylist.Services
     public class AuthService
     {
         private const string AuthStateKey = "AuthState";
-        private readonly HttpClient _httpClient;
-        private readonly string _apiKey = "pUpHMasJWKjApIU8HZwTHToI4HsLm2NyrEjoW79HKNQ5PFJpyW8ZAB2RpJKLf2Vq";
+        private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
+        private readonly string _apiKey = "tviGbZrm0b4nfxTgVGvKB0skS4VIkV8xpjJ0qB5hcXZ9VwqAYDnXHPg6ZgAyXKh5";
+
+        public User ActiveUser { get; set; }
 
         public async Task<bool> IsAuthenticatedAsync()
         {
 
-            await Task.Delay(2000);
+            await Task.Delay(1000);
 
             var authState = Preferences.Default.Get<bool>(AuthStateKey, false);
             // on essaye d'aller chercher la valeur bool de la clé authstate dans les préférences,
@@ -24,57 +28,136 @@ namespace DailyPlaylist.Services
             return authState;
         }
 
-        public void Login()
+        public void Login(User user)
         {
 
             Preferences.Default.Set<bool>(AuthStateKey, true);
+            ActiveUser = user;
 
         }
         public void Logout()
         {
             Preferences.Default.Remove(AuthStateKey);
+            ActiveUser = null;
         }
 
-        public async Task<bool> CreateAccountAsync(string email, string password)
+        public async Task<User> CreateAccountAsync(string email, string userPassword)
         {
             
-            password = HashPassword(password);
-
-            using (_httpClient)
+            using ( var client = _httpClient.Value )
             {
-                var requestUri = "https://eu-central-1.aws.data.mongodb-api.com/app/data-httpe/endpoint/data/v1/action/findOne";
+                var existingUser = await RetrieveUserAsync(email);
+                if (existingUser != null)
+                {
+                    return null;
+                }
+                userPassword = HashPassword(userPassword);
+                User createdUser = new User() { Email = email };
+
+                var requestUri = "https://eu-central-1.aws.data.mongodb-api.com/app/data-httpe/endpoint/data/v1/action/insertOne";
                 var payload = new
                 {
                     collection = "User",
                     database = "DailyPlaylistDB",
                     dataSource = "DailyPlaylistMongoDB",
-                    projection = new
+                    document = new
                     {
-                        _id = Guid.NewGuid().ToString(),
-                        email = email,
-                        password = password, 
-                        playlistIds = new List<string>() 
+                        _id = createdUser.Id,
+                        email = createdUser.Email,
+                        password = userPassword,
                     }
                 };
 
                 var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
 
-                _httpClient.DefaultRequestHeaders.Add("Content-Type", "application/json");
-                _httpClient.DefaultRequestHeaders.Add("Access-Control-Request-Headers", "*");
-                _httpClient.DefaultRequestHeaders.Add("api-key", _apiKey);
+                client.DefaultRequestHeaders.Clear();
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                client.DefaultRequestHeaders.Add("Access-Control-Request-Headers", "*");
+                client.DefaultRequestHeaders.Add("api-key", _apiKey);
 
-                var response = await _httpClient.PostAsync(requestUri, content);
+                var response = await client.PostAsync(requestUri, content);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    return true;
+                    return createdUser;
                 }
                 else
                 {
-                    return false;
+                    // Afficher le statut de l'erreur dans le debug si échec
+                    var error = await response.Content.ReadAsStringAsync();
+                    Debug.WriteLine($"Error: {error}");
+                    return null;
                 }
             }
         }
+
+        public async Task<User> LoginAsync(string userEmail, string userPassword)
+        {
+
+            var existingUser = await RetrieveUserAsync(userEmail);
+
+            if (existingUser == null)
+            {
+                return null;
+            }
+            else
+            {
+                if (VerifyPassword(userPassword, existingUser.Password))
+                {
+                    return existingUser;
+                }
+                else { return null; }
+            }
+        }
+
+
+        public async Task<User> RetrieveUserAsync(string userEmail)
+        {
+
+            var requestUri = "https://eu-central-1.aws.data.mongodb-api.com/app/data-httpe/endpoint/data/v1/action/findOne";
+            var payload = new
+            {
+                collection = "User",
+                database = "DailyPlaylistDB",
+                dataSource = "DailyPlaylistMongoDB",
+                filter = new { email = userEmail }
+            };
+
+            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
+
+            using ( var client = _httpClient.Value )
+            {
+                client.DefaultRequestHeaders.Clear();
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                client.DefaultRequestHeaders.Add("Access-Control-Request-Headers", "*");
+                client.DefaultRequestHeaders.Add("api-key", _apiKey);
+
+                var response = await client.PostAsync(requestUri, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    var jsonObject = JObject.Parse(responseData);
+                    var userJson = jsonObject["document"]?.ToString();
+                    Debug.WriteLine($"Retrieved User from server: {userJson}");
+
+                    if (userJson.Contains(userEmail)) // we make sure that we don't get a result such as {"document" : null}
+                                                      // but rather an object containing the email address we were looking for, it's a double check
+                    {
+                        var retrievedUser = JsonConvert.DeserializeObject<User>(userJson);
+
+                        if (retrievedUser != null && retrievedUser is User)
+                        {
+                            return retrievedUser;
+                        }
+                    }
+                }
+            } 
+            return null;
+        }
+
+
+
         public string HashPassword(string password)
         {
             return BCrypt.Net.BCrypt.HashPassword(password);
