@@ -24,7 +24,7 @@ public partial class LoginPage : ContentPage
     {
         await AnimatePressedButton(ButtonLogin);
     }
-    private async void PlayPauseButton_Clicked(object sender, EventArgs e)
+    private async void ButtonCreateAccountClicked(object sender, EventArgs e)
     {
         await AnimatePressedButton(ButtonCreateAccount);
     }
