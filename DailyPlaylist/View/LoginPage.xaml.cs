@@ -5,13 +5,12 @@ namespace DailyPlaylist.View;
 
 public partial class LoginPage : ContentPage
 {
-    private readonly AuthService _authService; 
-    
-    public LoginPage(AuthService authService)
+    private AuthService _authService = new AuthService();
+    public LoginPage()
 	{
 		InitializeComponent();
-        _authService = authService;
-        BindingContext = new LoginViewModel(authService);
+        
+        BindingContext = new LoginViewModel(_authService);
 
     }
     private async Task AnimatePressedButton(Button button)

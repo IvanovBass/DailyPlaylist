@@ -38,6 +38,8 @@ public static class MauiProgram
 
         builder.Services.AddTransient<LoginPage>();
 
+        builder.Services.AddTransient<PlaylistPage>();
+
         builder.Services.AddSingleton(new HttpClient());
 
 
