@@ -39,11 +39,11 @@
                 <StackLayout Grid.Row="2" Grid.Column="3" Grid.ColumnSpan="4" 
                          Orientation="Horizontal" HorizontalOptions="Center" Spacing="5"  Margin="0,-20,0,0">
                     <ImageButton   HeightRequest="50" WidthRequest="50"  Source="previous.png" Command="{Binding PreviousCommand}" 
-                                   x:Name="PreviousButton" Clicked="PreviousButton_Clicked"/>
+                                   x:Name="PreviousButton" Clicked="ImageButtonClicked"/>
                     <ImageButton   HeightRequest="50" WidthRequest="50"  Source="play.png" Command="{Binding PlayPauseCommand}" 
-                                   x:Name="PlayPauseButton" Clicked="PlayPauseButton_Clicked"/>
+                                   x:Name="PlayPauseButton" Clicked="ImageButtonClicked"/>
                     <ImageButton   HeightRequest="50" WidthRequest="50"  Source="forward.png" Command="{Binding NextCommand}" 
-                                   x:Name="ForwardButton" Clicked="ForwardButton_Clicked"/>
+                                   x:Name="ForwardButton" Clicked="ImageButtonClicked"/>
                 </StackLayout>
             </Grid>
 
@@ -107,11 +107,11 @@
                                 <StackLayout Grid.Column="3" VerticalOptions="Center" Spacing="20" Orientation="Horizontal">
                                     <ImageButton Source="play.png"    
                                              Command="{Binding Path=BindingContext.PlayFromCollectionViewCommand, Source={x:Reference Name=TracksCollectionView}}"
-                                             CommandParameter="{Binding}"  x:Name="CollectionPlayButton" Clicked="CollectionPlayButton_Clicked"
+                                             CommandParameter="{Binding}"  x:Name="CollectionPlayButton" Clicked="ImageButtonClicked"
                                              HeightRequest="25" WidthRequest="25"/>
                                     <ImageButton Source="non_favorite.png"
                                              Command="{Binding Path=BindingContext.SetFavoriteCommand, Source={x:Reference Name=TracksCollectionView}}"
-                                             CommandParameter="{Binding}"   HeightRequest="25" WidthRequest="25" />
+                                             CommandParameter="{Binding}"   Clicked="ImageButtonClicked"  HeightRequest="25" WidthRequest="25" />
                                 </StackLayout>
                             </Grid>
                         </DataTemplate>

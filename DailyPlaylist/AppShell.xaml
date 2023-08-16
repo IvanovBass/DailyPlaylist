@@ -6,8 +6,7 @@
     xmlns:local="clr-namespace:DailyPlaylist"
     xmlns:vm="clr-namespace:DailyPlaylist.ViewModel"
     xmlns:view="clr-namespace:DailyPlaylist.View"
-    FlyoutBehavior="Flyout"
-    FlyoutHeader="Daily Playlist">
+    FlyoutBehavior="Flyout">
 
 <ShellContent
         Title="Loading"

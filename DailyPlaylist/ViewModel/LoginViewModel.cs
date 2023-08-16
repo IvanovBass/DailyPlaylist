@@ -9,7 +9,6 @@ namespace DailyPlaylist.ViewModel
         private readonly AuthService _authService;
         private string _email;
         private string _password;
-        private User _activeUser;
 
         public string Email
         {
@@ -31,16 +30,6 @@ namespace DailyPlaylist.ViewModel
             }
         }
 
-        public User ActiveUser
-        {
-            get => _activeUser;
-            set
-            {
-                _activeUser = value;
-                OnPropertyChanged();
-            }
-        }
-
         public ICommand LoginCommand { get; }
 
         public ICommand CreateAccountCommand { get; }
@@ -57,15 +46,27 @@ namespace DailyPlaylist.ViewModel
 
         private async Task ExecuteLoginCommand()
         {
-            if (await _authService.IsAuthenticatedAsync())
+
+            if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
             {
-                await ShowSnackBarAsync("You're already logged in", "Dismiss", () => { });
+                await ShowSnackBarAsync("Please fill in the fields correctly", "Dismiss", () => { });
+                return;
+            }
+
+            var authUser = await _authService.LoginAsync(Email, Password);
+
+            if (authUser != null && authUser is User)
+            {
+                _authService.Login(authUser);  // on log le User dans le système, qui va devenir le User actif
+
+                await Shell.Current.GoToAsync($"//{nameof(LoadingPage)}"); // on navigue vers la page intermédiaire de loading
+
+                await ShowSnackBarAsync("Succesfully logged in", "Dismiss", () => { });  // self-explanatory
             }
             else
             {
-                // aller check si username existe etcetera .... pour l'instant je mets ceci:
-                _authService.Login();
-                await Shell.Current.GoToAsync($"//{nameof(LoadingPage)}");
+                await ShowSnackBarAsync("Wrong credentials or user, please retry", "Dismiss", () => { });
+                return;
             }
         }
 
@@ -81,20 +82,20 @@ namespace DailyPlaylist.ViewModel
                 await ShowSnackBarAsync("Password must contains 7 characters and at least 1 digit", "Dismiss", () => { });
                 return;
             }
-            
-            bool succes = await _authService.CreateAccountAsync(Email, Password);
 
-            if (succes)
+            User createdUser = await _authService.CreateAccountAsync(Email, Password);
+
+            if (createdUser != null && createdUser is User)
             {
 
-                _activeUser = new User { Email = Email };
-                _authService.Login();
+                _authService.Login(createdUser);
                 await Shell.Current.GoToAsync($"//{nameof(HomePage)}");
-                // to the homepage with a succes snackbar
+                await ShowSnackBarAsync("User created succesfully!", "Dismiss", () => { });
             }
             else
             {
-                // something wrent wrong or user already exists , please retry
+                await ShowSnackBarAsync("Something wrent wrong. Make sure the Email doesn't already exist and retry", "Dismiss", () => { });
+                return;
             }
         }
 
@@ -107,7 +108,7 @@ namespace DailyPlaylist.ViewModel
 
         private bool IsValidPassword(string password)
         {
-            // makes sure that the password has at least 7 characters, from which at least one digit and one letter
+            // ensures that the password has at least 7 characters, from which at least one digit and one letter
             return password.Length >= 7 && Regex.IsMatch(password, @"\d") && Regex.IsMatch(password, @"[a-zA-Z]");
         }
 
@@ -121,9 +122,9 @@ namespace DailyPlaylist.ViewModel
                 TextColor = Colors.White,
                 ActionButtonTextColor = Colors.Orange,
                 CornerRadius = new CornerRadius(10),
-                Font = Microsoft.Maui.Font.SystemFontOfSize(12),
-                ActionButtonFont = Microsoft.Maui.Font.SystemFontOfSize(12),
-                CharacterSpacing = 0.5
+                Font = Microsoft.Maui.Font.SystemFontOfSize(14),
+                ActionButtonFont = Microsoft.Maui.Font.SystemFontOfSize(14),
+                CharacterSpacing = 0
             };
 
             var snackbar = Snackbar.Make(message, action, actionText, TimeSpan.FromSeconds(durationInSeconds), snackbarOptions);

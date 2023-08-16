@@ -1,20 +1,26 @@
 ﻿// using Realms.Sync;
 // using Realms;
 
+using DailyPlaylist.Services;
+
 namespace DailyPlaylist.ViewModel
 {
     public class PlaylistViewModel : BaseViewModel
     {
+        private readonly AuthService _authService;
         private User _activeUser;
         private Playlist _activePlaylist;
         private ObservableCollection<Playlist> _userPlaylists;
 
-        public PlaylistViewModel()
+        public PlaylistViewModel(AuthService authService)
         {
-            _activeUser = new User();
-            LoadUserPlaylists();
-            SetActivePlaylist();
+            _authService = authService;
+
+            _activeUser = _authService.ActiveUser;
+
         }
+
+        public User ActiveUser { get { return _activeUser; } }
 
         public ObservableCollection<Playlist> UserPlaylists
         {

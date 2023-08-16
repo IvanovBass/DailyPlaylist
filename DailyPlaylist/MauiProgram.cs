@@ -32,17 +32,15 @@ public static class MauiProgram
 		builder.Logging.AddDebug();
 #endif
 
-		builder.Services.AddTransient<AuthService>();
-
-		builder.Services.AddTransient<LoadingPage>();
+        builder.Services.AddTransient<LoadingPage>();
 
         builder.Services.AddTransient<LoginPage>();
 
         builder.Services.AddTransient<PlaylistPage>();
 
-        builder.Services.AddSingleton(new HttpClient());
+        builder.Services.AddSingleton<AuthService>();
 
-
+        builder.Services.AddSingleton<HttpClient>();
 
         return builder.Build();
 	}
