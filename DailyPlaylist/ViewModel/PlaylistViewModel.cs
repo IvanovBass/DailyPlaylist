@@ -100,6 +100,12 @@ namespace DailyPlaylist.ViewModel
 
         // METHODS //
 
+        public ICommand PlayPauseCommand { get; }
+        public ICommand PlayFromCollectionViewCommand { get; }
+        public ICommand NextCommand { get; }
+        public ICommand PreviousCommand { get; }
+        public ICommand ItemSelectedCommand { get; }
+
         private async void LoadUserPlaylists()
         {
             _userPlaylists = new ObservableCollection<Playlist>(await RetrievePlaylistsAsync(_activeUser.Id));

@@ -5,19 +5,101 @@
              xmlns:vm="clr-namespace:DailyPlaylist.ViewModel"
              x:Class="DailyPlaylist.View.PlaylistPage"
              Title="Playlists">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!  This is the playlist page"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
 
-        <StackLayout VerticalOptions="Center" HorizontalOptions="Center">
-            <Label Text="{Binding SelectedTrackTitle}" />
-            <Label Text="{Binding SelectedTrackArtist}" />
-            <Image Source="{Binding SelectedTrackCover}"  HeightRequest="200"/>
-            <Label  Text="{Binding ActiveUser.Email}" />
-        </StackLayout>
-        
-            
-    </VerticalStackLayout>
+    <ScrollView>
+        <VerticalStackLayout Margin="12,12,12,0"  Spacing="0">
+
+            <Grid Margin="0,10,0,20">
+                <Grid.RowDefinitions >
+                    <RowDefinition Height="70" />
+                    <RowDefinition Height="70" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackLayout Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Padding="0">
+                    <Image Source="{Binding SelectedTrackCover}" Aspect="AspectFit" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"/>
+                </StackLayout>
+
+                <Label  Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" FontSize="32" Padding="0,25,0,0" MaxLines="1" LineBreakMode="TailTruncation"
+                    Text="{Binding SelectedTrackArtist}" HorizontalTextAlignment="Center" TextColor="{StaticResource Tertiary}" VerticalTextAlignment="End"/>
+                <Label  Grid.Row="1"  Grid.Column="1"  Grid.ColumnSpan="2"  FontSize="28"  MaxLines="2"  Padding="10,0" VerticalTextAlignment="Start"
+                   Text="{Binding SelectedTrackTitle}"  HorizontalTextAlignment="Center" TextColor="{StaticResource Primary}"/>
+            </Grid>
+
+            <StackLayout
+                         Orientation="Horizontal" HorizontalOptions="Center" Spacing="10"  Margin="0,-20,0,20">
+                <ImageButton   HeightRequest="65" WidthRequest="65"  Source="previous.png" Command="{Binding PreviousCommand}" 
+                                   x:Name="PreviousButton" Clicked="ImageButtonClicked"/>
+                <ImageButton   HeightRequest="65" WidthRequest="65"  Source="play.png" Command="{Binding PlayPauseCommand}" 
+                                   x:Name="PlayPauseButton" Clicked="ImageButtonClicked"/>
+                <ImageButton   HeightRequest="65" WidthRequest="65"  Source="forward.png" Command="{Binding NextCommand}" 
+                                   x:Name="ForwardButton" Clicked="ImageButtonClicked"/>
+            </StackLayout>
+
+            <Picker Title="Select Playlist" x:Name="PlaylistPicker" ItemsSource="{Binding UserPlaylists}" ItemDisplayBinding="{Binding Name}"
+                FontSize="Large" HorizontalOptions="Center"  MinimumWidthRequest="250" HorizontalTextAlignment="Center">
+            <Picker.Items>
+
+                </Picker.Items>
+            </Picker>
+
+            <StackLayout >
+
+                <CollectionView 
+                        x:Name="PlaylistCollectionView" 
+                        ItemsSource="{Binding PlaylistTracks}" >
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="36"/>
+                                    <RowDefinition Height="36" />
+                                </Grid.RowDefinitions>
+
+                                <Image Source="{Binding Album.Cover}" Aspect="AspectFit" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2"/>
+
+                                <StackLayout Grid.Column="1" Grid.ColumnSpan="2"  Grid.Row="0" Grid.RowSpan="2" HorizontalOptions="Center">
+                                    <StackLayout.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Path=BindingContext.ItemSelectedCommand, Source={x:Reference Name=PlaylistCollectionView}}" 
+                                            CommandParameter="{Binding}"/>
+                                    </StackLayout.GestureRecognizers>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        <Label Text="{Binding Title}" Grid.Row="0"  FontSize="15" MaxLines="1" LineBreakMode="TailTruncation" HorizontalTextAlignment="Center"
+                                               VerticalTextAlignment="End"  Padding="15,5"/>
+                                        <Label Text="{Binding Artist.Name}"  Grid.Row="1"  FontSize="15"  VerticalTextAlignment="Start" HorizontalTextAlignment="Center"
+                                               TextColor="{StaticResource Primary}" MaxLines="1" LineBreakMode="TailTruncation" Padding="20,5"/>
+                                    </Grid>
+                                </StackLayout>
+
+                                <StackLayout Grid.Column="3" Grid.Row="0" Grid.RowSpan="2"  VerticalOptions="Center" HorizontalOptions="Center">
+                                    <ImageButton Source="play.png"    
+                                             Command="{Binding Path=BindingContext.PlayFromPlaylistCollectionCommand, Source={x:Reference Name=PlaylistCollectionView}}"
+                                             CommandParameter="{Binding}"  x:Name="CollectionPlayButton" Clicked="ImageButtonClicked"
+                                             HeightRequest="25" WidthRequest="25"/>
+                                </StackLayout>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </StackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
 </ContentPage>
