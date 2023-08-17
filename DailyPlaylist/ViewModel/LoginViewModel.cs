@@ -49,7 +49,7 @@ namespace DailyPlaylist.ViewModel
 
             if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
             {
-                await ShowSnackBarAsync("Please fill in the fields correctly", "Dismiss", () => { });
+                await SnackBarVM.ShowSnackBarAsync("Please fill in the fields correctly", "Dismiss", () => { });
                 return;
             }
 
@@ -59,11 +59,11 @@ namespace DailyPlaylist.ViewModel
             if (authUser != null && authUser is User)
             {
                 _authService.Login(authUser);  // on log le User dans le système, qui va devenir le User actif
-                await ShowSnackBarAsync("Succesfully logged in", "Dismiss", () => { });  // self-explanatory
+                await SnackBarVM.ShowSnackBarAsync("Succesfully logged in", "Dismiss", () => { });  // self-explanatory
             }
             else
             {
-                await ShowSnackBarAsync("Wrong credentials/user. Please retry", "Dismiss", () => { });
+                await SnackBarVM.ShowSnackBarAsync("Wrong credentials/user. Please retry", "Dismiss", () => { });
                 return;
             }
         }
@@ -72,12 +72,12 @@ namespace DailyPlaylist.ViewModel
         {
             if (!IsValidEmail(Email))
             {
-                await ShowSnackBarAsync("Invalid Email format...", "Dismiss", () => { });
+                await SnackBarVM.ShowSnackBarAsync("Invalid Email format...", "Dismiss", () => { });
                 return;
             }
             if (!IsValidPassword(Password))
             {
-                await ShowSnackBarAsync("Password must contains 7 characters and at least 1 digit", "Dismiss", () => { });
+                await SnackBarVM.ShowSnackBarAsync("Password must contains 7 characters and at least 1 digit", "Dismiss", () => { });
                 return;
             }
 
@@ -88,11 +88,11 @@ namespace DailyPlaylist.ViewModel
             {
 
                 _authService.Login(createdUser);
-                await ShowSnackBarAsync("User created succesfully!", "Dismiss", () => { });
+                await SnackBarVM.ShowSnackBarAsync("User created succesfully!", "Dismiss", () => { });
             }
             else
             {
-                await ShowSnackBarAsync("Something wrent wrong. Make sure the Email doesn't already exist and retry", "Dismiss", () => { });
+                await SnackBarVM.ShowSnackBarAsync("Something wrent wrong. Make sure the Email doesn't already exist and retry", "Dismiss", () => { });
                 return;
             }
         }
@@ -110,24 +110,5 @@ namespace DailyPlaylist.ViewModel
             return password.Length >= 7 && Regex.IsMatch(password, @"\d") && Regex.IsMatch(password, @"[a-zA-Z]");
         }
 
-        public async Task ShowSnackBarAsync(string message, string actionText, Action action, int durationInSeconds = 3)
-        {
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-
-            var snackbarOptions = new SnackbarOptions
-            {
-                BackgroundColor = Colors.DarkSlateBlue,
-                TextColor = Colors.White,
-                ActionButtonTextColor = Colors.Orange,
-                CornerRadius = new CornerRadius(10),
-                Font = Microsoft.Maui.Font.SystemFontOfSize(14),
-                ActionButtonFont = Microsoft.Maui.Font.SystemFontOfSize(14),
-                CharacterSpacing = 0
-            };
-
-            var snackbar = Snackbar.Make(message, action, actionText, TimeSpan.FromSeconds(durationInSeconds), snackbarOptions);
-
-            await snackbar.Show(cancellationTokenSource.Token);
-        }
     }
 }

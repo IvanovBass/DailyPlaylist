@@ -10,7 +10,7 @@ namespace DailyPlaylist.ViewModel
 
         private ObservableCollection<Genre> _genres;
 
-        HttpClient httpClient = new HttpClient();
+        Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
         public ObservableCollection<Genre> Genres
         {
             get => _genres;
@@ -31,10 +31,11 @@ namespace DailyPlaylist.ViewModel
 
         private async Task LoadGenres()
         {
+            var client = _httpClient.Value;
             try
             {
         
-                var jsonResponse = await httpClient.GetStringAsync($"https://api.deezer.com/genre");
+                var jsonResponse = await client.GetStringAsync($"https://api.deezer.com/genre");
                 var genresData = JsonConvert.DeserializeObject<GenreData>(jsonResponse);
                 Genres = new ObservableCollection<Genre>(genresData.Data);
             
@@ -43,18 +44,17 @@ namespace DailyPlaylist.ViewModel
             {
                 // We handle here network-related errors, like connectivity issues, time-outs etc.....
                 Debug.WriteLine($"Network error while fetching genres: {httpEx.Message}");
-                MessagingCenter.Send(this, "Error", "There was a problem fetching the genres. Please check your internet connection and" +
-                    " try again.");
+                await SnackBarVM.ShowSnackBarAsync("There is an error while fetching the genres, please check your Internet connexion", "Dismiss", () => { });
             }
             catch (JsonException jsonEx)
             {
                 Debug.WriteLine($"Error parsing genre data: {jsonEx.Message}");
-                MessagingCenter.Send(this, "Error", "There was a problem fetching the genres.");
+                await SnackBarVM.ShowSnackBarAsync("Error with the genres data format, please contact the support", "Dismiss", () => { });
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Unexpected error while fetching genres: {ex.Message}");
-                MessagingCenter.Send(this, "Error", "Unexpected error while fetching the genres. Please retry...");
+                await SnackBarVM.ShowSnackBarAsync("Unexpected error, please retry", "Dismiss", () => { });
             }
         }
 
@@ -63,7 +63,8 @@ namespace DailyPlaylist.ViewModel
             var years = GenerateYearsForDecade(decade);
             var yearsQuery = string.Join(",", years);
 
-            var jsonResponse = await httpClient.GetStringAsync($"https://api.deezer.com/search/album?q=genre_id:\"{genreId}\" release_date:{yearsQuery} &order=FANS_DESC");
+            var client = _httpClient.Value;
+            var jsonResponse = await client.GetStringAsync($"https://api.deezer.com/search/album?q=genre_id:\"{genreId}\" release_date:{yearsQuery} &order=FANS_DESC");
             var searchResults = JsonConvert.DeserializeObject<SearchAlbumsResponse>(jsonResponse);
 
             return searchResults.Albums;
@@ -93,9 +94,11 @@ namespace DailyPlaylist.ViewModel
 
             List<Track> tracks = new List<Track>();
 
+            var client = _httpClient.Value;
+
             foreach (var album in selectedAlbums)
             {
-                var trackResponse = await httpClient.GetStringAsync(album.Tracklist);
+                var trackResponse = await client.GetStringAsync(album.Tracklist);
                 var trackData = JsonConvert.DeserializeObject<TracksResponse>(trackResponse);
 
                 tracks.AddRange(trackData.Tracks.OrderBy(x => rng.Next()).Take(3));

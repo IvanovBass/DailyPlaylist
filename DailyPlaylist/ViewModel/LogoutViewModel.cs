@@ -25,7 +25,7 @@ namespace DailyPlaylist.ViewModel
 
                     await CrossMediaManager.Current.Stop();
                     CrossMediaManager.Current.MediaPlayer = null;
-                    CrossMediaManager.Current.Dispose();
+                    //CrossMediaManager.Current.Dispose();
 
                     OnLogout?.Invoke();
 
