@@ -18,4 +18,10 @@ public partial class PlaylistPage : ContentPage
         BindingContext = new PlaylistViewModel(_authService);
 
     }
+
+    private async void ImageButtonClicked(object sender, EventArgs e)
+    {
+        var button = sender as ImageButton;
+        await AnimationHelper.AnimatePressedImageButton(button);
+    }
 }
