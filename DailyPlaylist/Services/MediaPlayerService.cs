@@ -1,10 +1,12 @@
-﻿namespace DailyPlaylist.Services
+﻿using DailyPlaylist.ViewModel;
+
+namespace DailyPlaylist.Services
 {
     public class MediaPlayerService
     {
-        private readonly List<Track> _tracks;
-        private readonly List<string> _trackUris;
-        private int _currentIndex = 0;
+        public List<Track> _tracks;
+        public List<string> _trackUris;
+        public int _currentIndex = 0;
         public event Action TrackFinished;
 
 
@@ -25,7 +27,6 @@
                     _currentIndex = 0;
                 }
                 TrackFinished?.Invoke();
-
             };
         }
 
