@@ -181,21 +181,40 @@ namespace DailyPlaylist.ViewModel
                 SelectedTrack = track;
             });
 
+
+            CrossMediaManager.Current.PositionChanged += (sender, args) =>
+            {
+                if (args.Position.TotalSeconds >= 29)
+                {
+                    HandleTrackFinished();
+                }
+            };
+
             LogoutViewModel.OnLogout += Reset;
 
         }
 
-        private void HandleTrackFinished()
+        public void HandleTrackFinished()
         {
-            var currentIndex = SearchResults.IndexOf(SelectedTrack);
+            var currentMediaUri = CrossMediaManager.Current.Queue.Current.MediaUri.ToString();
+
+            var currentTrack = SearchResults.FirstOrDefault(t => t.Preview == currentMediaUri);
+            if (currentTrack == null)
+            {
+                _preStoredIndex = 0;
+                SelectedTrack = SearchResults[0];
+                return;
+            }
+
+            var currentIndex = SearchResults.IndexOf(currentTrack);
             currentIndex++;
             if (currentIndex >= SearchResults.Count)
             {
                 currentIndex = 0;
             }
-            _selectedTrack = SearchResults[currentIndex];
+            _preStoredIndex = currentIndex;
+            SelectedTrack = SearchResults[currentIndex];
         }
-
 
         private async void PerformSearch()
         {
@@ -215,7 +234,6 @@ namespace DailyPlaylist.ViewModel
                 if (SearchResults.Any())
                 {
                     _mediaPlayerService = new MediaPlayerService(searchData.Data);
-                    _mediaPlayerService.TrackFinished += HandleTrackFinished;
                     SelectedTrack = SearchResults[0];
                 }
                 else
