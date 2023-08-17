@@ -23,6 +23,9 @@ namespace DailyPlaylist.ViewModel
                 {
                     _authService.Logout();
 
+                    await CrossMediaManager.Current.Stop();
+                    CrossMediaManager.Current.Dispose();
+
                     OnLogout?.Invoke();
 
                     await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");

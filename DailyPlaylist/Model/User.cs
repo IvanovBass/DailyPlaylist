@@ -1,25 +1,23 @@
-﻿using MongoDB.Bson;
-using Realms;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-
-namespace DailyPlaylist.Model
+﻿namespace DailyPlaylist.Model
 {
     public class User
-    { 
-        public Guid Id { get; private set; }
+    {
+        [JsonProperty(PropertyName = "_id")]
+        public string Id { get; private set; }
+
+        [JsonProperty(PropertyName = "email")]
         public string Email { get; set; }
+
+        [JsonProperty(PropertyName = "password")]
         public string Password { get; set; }
 
-        public List<Playlist> Playlists { get; set; }
+        [JsonProperty(PropertyName = "playlistIds")]
+        public List<Guid> playlistIds { get; set; }
 
         public User()
         {
-            Id = Guid.NewGuid();
+            Id = Guid.NewGuid().ToString();
+            // automatically creates a GUID Id so that we don't have to code it each time
         }
     }
 }

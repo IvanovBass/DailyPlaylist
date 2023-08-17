@@ -25,8 +25,8 @@
                     _currentIndex = 0;
                 }
                 TrackFinished?.Invoke();
-            };
 
+            };
         }
 
         public async Task PlayPauseTaskAsync(int index)
