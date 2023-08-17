@@ -41,7 +41,7 @@ namespace DailyPlaylist.View
                 List<Track> MyAlgorithmedPlaylist = new();
                 // I don't know how I'm gonna deal with that since Deezer's GET API is less smart than I though , I won't be able to parameter a search query
         
-                await Navigation.PushAsync(new PlaylistPage(MyAlgorithmedPlaylist)); 
+                await Navigation.PushAsync(new PlaylistPage()); 
             }
             else
             {

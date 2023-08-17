@@ -1,18 +1,34 @@
-﻿using BCrypt.Net;
+﻿using MauiAppDI.Helpers;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using System.Text;
+using DailyPlaylist.ViewModel;
 
 namespace DailyPlaylist.Services
 {
 
-    public class AuthService
+    public class AuthService : BaseViewModel
     {
         private const string AuthStateKey = "AuthState";
+        private User _activeUser;
         private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
         private readonly string _apiKey = "tviGbZrm0b4nfxTgVGvKB0skS4VIkV8xpjJ0qB5hcXZ9VwqAYDnXHPg6ZgAyXKh5";
 
-        public User ActiveUser { get; set; }
+        public User ActiveUser
+        {
+            get => _activeUser;
+            set
+            {
+                SetProperty(ref _activeUser, value);
+            }
+        }
+
+        public AuthService( ) 
+        {
+            _activeUser = new User();
+            // we could create a dummy User which would have a couple of default playlists to play with
+            // ActiveUser = new User { playlistIds = [23, 27, 59] }
+        }
 
         public bool IsAuthenticatedAsync()
         {
@@ -30,13 +46,15 @@ namespace DailyPlaylist.Services
         {
 
             Preferences.Default.Set<bool>(AuthStateKey, true);
-            ActiveUser = user;
+            var authService = ServiceHelper.GetService<AuthService>();
+            authService._activeUser = user;
 
         }
         public void Logout()
         {
             Preferences.Default.Remove(AuthStateKey);
-            ActiveUser = null;
+            var authService = ServiceHelper.GetService<AuthService>();
+            authService._activeUser = null;
         }
 
         public async Task<User> CreateAccountAsync(string email, string userPassword)
