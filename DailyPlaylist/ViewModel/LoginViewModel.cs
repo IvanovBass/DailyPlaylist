@@ -53,19 +53,17 @@ namespace DailyPlaylist.ViewModel
                 return;
             }
 
-            var authUser = await _authService.LoginAsync(Email, Password);
+            var authUser = await _authService.LoginAsync(Email, Password);  // on check si Login OK
 
             if (authUser != null && authUser is User)
             {
                 _authService.Login(authUser);  // on log le User dans le système, qui va devenir le User actif
-
                 await Shell.Current.GoToAsync($"//{nameof(LoadingPage)}"); // on navigue vers la page intermédiaire de loading
-
                 await ShowSnackBarAsync("Succesfully logged in", "Dismiss", () => { });  // self-explanatory
             }
             else
             {
-                await ShowSnackBarAsync("Wrong credentials or user, please retry", "Dismiss", () => { });
+                await ShowSnackBarAsync("Wrong credentials/user. Please retry", "Dismiss", () => { });
                 return;
             }
         }

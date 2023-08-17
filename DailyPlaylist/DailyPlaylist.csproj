@@ -66,7 +66,6 @@
 		<PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
 		<PackageReference Include="Plugin.MediaManager" Version="1.2.2" />
 		<PackageReference Include="Plugin.MediaManager.Forms" Version="1.2.2" />
-		<PackageReference Include="Realm" Version="11.3.0" />
 	</ItemGroup>
 
 	<ItemGroup>

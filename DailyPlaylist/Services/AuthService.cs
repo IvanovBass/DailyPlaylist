@@ -43,51 +43,50 @@ namespace DailyPlaylist.Services
 
         public async Task<User> CreateAccountAsync(string email, string userPassword)
         {
+
+            var client = _httpClient.Value;
             
-            using ( var client = _httpClient.Value )
+            var existingUser = await RetrieveUserAsync(email);
+            if (existingUser != null)
             {
-                var existingUser = await RetrieveUserAsync(email);
-                if (existingUser != null)
+                return null;
+            }
+            userPassword = HashPassword(userPassword);
+            User createdUser = new User() { Email = email };
+
+            var requestUri = "https://eu-central-1.aws.data.mongodb-api.com/app/data-httpe/endpoint/data/v1/action/insertOne";
+            var payload = new
+            {
+                collection = "User",
+                database = "DailyPlaylistDB",
+                dataSource = "DailyPlaylistMongoDB",
+                document = new
                 {
-                    return null;
+                    _id = createdUser.Id,
+                    email = createdUser.Email,
+                    password = userPassword,
                 }
-                userPassword = HashPassword(userPassword);
-                User createdUser = new User() { Email = email };
+            };
 
-                var requestUri = "https://eu-central-1.aws.data.mongodb-api.com/app/data-httpe/endpoint/data/v1/action/insertOne";
-                var payload = new
-                {
-                    collection = "User",
-                    database = "DailyPlaylistDB",
-                    dataSource = "DailyPlaylistMongoDB",
-                    document = new
-                    {
-                        _id = createdUser.Id,
-                        email = createdUser.Email,
-                        password = userPassword,
-                    }
-                };
+            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
 
-                var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
+            client.DefaultRequestHeaders.Clear();
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            client.DefaultRequestHeaders.Add("Access-Control-Request-Headers", "*");
+            client.DefaultRequestHeaders.Add("api-key", _apiKey);
 
-                client.DefaultRequestHeaders.Clear();
-                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                client.DefaultRequestHeaders.Add("Access-Control-Request-Headers", "*");
-                client.DefaultRequestHeaders.Add("api-key", _apiKey);
+            var response = await client.PostAsync(requestUri, content);
 
-                var response = await client.PostAsync(requestUri, content);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    return createdUser;
-                }
-                else
-                {
-                    // Afficher le statut de l'erreur dans le debug si échec
-                    var error = await response.Content.ReadAsStringAsync();
-                    Debug.WriteLine($"Error: {error}");
-                    return null;
-                }
+            if (response.IsSuccessStatusCode)
+            {
+                return createdUser;
+            }
+            else
+            {
+                // Afficher le statut de l'erreur dans le debug si échec
+                var error = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"Error: {error}");
+                return null;
             }
         }
 
@@ -125,34 +124,34 @@ namespace DailyPlaylist.Services
 
             var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
 
-            using ( var client = _httpClient.Value )
+            var client = _httpClient.Value;
+      
+            client.DefaultRequestHeaders.Clear();
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            client.DefaultRequestHeaders.Add("Access-Control-Request-Headers", "*");
+            client.DefaultRequestHeaders.Add("api-key", _apiKey);
+
+            var response = await client.PostAsync(requestUri, content);
+
+            if (response.IsSuccessStatusCode)
             {
-                client.DefaultRequestHeaders.Clear();
-                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                client.DefaultRequestHeaders.Add("Access-Control-Request-Headers", "*");
-                client.DefaultRequestHeaders.Add("api-key", _apiKey);
+                var responseData = await response.Content.ReadAsStringAsync();
+                var jsonObject = JObject.Parse(responseData);
+                var userJson = jsonObject["document"]?.ToString();
+                Debug.WriteLine($"Retrieved User from server: {userJson}");
 
-                var response = await client.PostAsync(requestUri, content);
-
-                if (response.IsSuccessStatusCode)
+                if (userJson.Contains(userEmail)) // we make sure that we don't get a result such as {"document" : null}
+                                                    // but rather an object containing the email address we were looking for, it's a double check
                 {
-                    var responseData = await response.Content.ReadAsStringAsync();
-                    var jsonObject = JObject.Parse(responseData);
-                    var userJson = jsonObject["document"]?.ToString();
-                    Debug.WriteLine($"Retrieved User from server: {userJson}");
+                    var retrievedUser = JsonConvert.DeserializeObject<User>(userJson);
 
-                    if (userJson.Contains(userEmail)) // we make sure that we don't get a result such as {"document" : null}
-                                                      // but rather an object containing the email address we were looking for, it's a double check
+                    if (retrievedUser != null && retrievedUser is User)
                     {
-                        var retrievedUser = JsonConvert.DeserializeObject<User>(userJson);
-
-                        if (retrievedUser != null && retrievedUser is User)
-                        {
-                            return retrievedUser;
-                        }
+                        return retrievedUser;
                     }
                 }
-            } 
+            }
+       
             return null;
         }
 

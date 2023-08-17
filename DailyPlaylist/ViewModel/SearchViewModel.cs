@@ -32,6 +32,19 @@ namespace DailyPlaylist.ViewModel
             }
         }
 
+        public MediaPlayerService MediaPlayerService
+        {
+            get => _mediaPlayerService;
+            set
+            {
+                SetProperty(ref _mediaPlayerService, value);
+                if (value != null)
+                {
+                    _mediaPlayerService.TrackFinished += HandleTrackFinished;
+                }
+            }
+        }
+
         public string TrackName
         {
             get => _trackName;
@@ -191,25 +204,33 @@ namespace DailyPlaylist.ViewModel
 
             IsLoading = true;
 
+            var client = _httpClient.Value;
+
             try
             {
-                using (var client = _httpClient.Value)
+                var jsonResponse = await client.GetStringAsync($"https://api.deezer.com/search/track?q={SearchQuery}&limit=30");
+                var searchData = JsonConvert.DeserializeObject<SearchData>(jsonResponse);
+                SearchResults = new ObservableCollection<Track>(searchData.Data);
+
+                if (SearchResults.Any())
                 {
-                    var jsonResponse = await client.GetStringAsync($"https://api.deezer.com/search/track?q={SearchQuery}&limit=30");
-                    var searchData = JsonConvert.DeserializeObject<SearchData>(jsonResponse);
-                    SearchResults = new ObservableCollection<Track>(searchData.Data);
                     _mediaPlayerService = new MediaPlayerService(searchData.Data);
-                    _mediaPlayerService.TrackFinished += HandleTrackFinished;  // by doing that our SearchVM subscribes to the event
                     SelectedTrack = SearchResults[0];
                 }
+                else
+                {
+                    await ShowSnackBarAsync("No tracks found for your search query", "Dismiss", () => { });
+                }
+
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error while searching: {ex.Message}");
-                await ShowSnackBarAsync("Search gives no result, please retry...", "Dismiss", () => { });
+                IsLoading = false;
+                await ShowSnackBarAsync("Connexion can't be made, please retry", "Dismiss", () => { });
             }
-            finally 
-            { 
+            finally
+            {
                 await Task.Delay(2000);
                 IsLoading = false;
             }
@@ -246,7 +267,7 @@ namespace DailyPlaylist.ViewModel
         {
             SearchResults = new ObservableCollection<Track>();
             _mediaPlayerService = null;
-            _httpClient = new Lazy<HttpClient>();
+            _mediaPlayerService = new MediaPlayerService(new List<Track>());
             _preStoredIndex = 0;
             SearchQuery = string.Empty;
             SelectedTrack = null;
