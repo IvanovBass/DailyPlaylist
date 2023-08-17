@@ -16,13 +16,20 @@ public partial class LoadingPage : ContentPage
 	{
 		base.OnNavigatedTo(args);
 
-		if (await _authService.IsAuthenticatedAsync())
+        await Task.Delay(4000);
+
+		if (_authService.IsAuthenticatedAsync())
 		{
             await Shell.Current.GoToAsync($"//{nameof(HomePage)}");
         }
 		else
 		{
 			await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
-		}
+			await Task.Delay(3500);
+            if(_authService.IsAuthenticatedAsync())
+			{
+                await Shell.Current.GoToAsync($"//{nameof(HomePage)}");
+            }
+        }
 	}
 }

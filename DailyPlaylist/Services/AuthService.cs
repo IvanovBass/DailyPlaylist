@@ -14,10 +14,8 @@ namespace DailyPlaylist.Services
 
         public User ActiveUser { get; set; }
 
-        public async Task<bool> IsAuthenticatedAsync()
+        public bool IsAuthenticatedAsync()
         {
-
-            await Task.Delay(1000);
 
             var authState = Preferences.Default.Get<bool>(AuthStateKey, false);
             // on essaye d'aller chercher la valeur bool de la clé authstate dans les préférences,
