@@ -32,18 +32,18 @@ namespace DailyPlaylist.ViewModel
             }
         }
 
-        public MediaPlayerService MediaPlayerService
-        {
-            get => _mediaPlayerService;
-            set
-            {
-                SetProperty(ref _mediaPlayerService, value);
-                if (value != null)
-                {
-                    _mediaPlayerService.TrackFinished += HandleTrackFinished;
-                }
-            }
-        }
+        //public MediaPlayerService MediaPlayerService
+        //{
+        //    get => _mediaPlayerService;
+        //    set
+        //    {
+        //        SetProperty(ref _mediaPlayerService, value);
+        //        if (value != null)
+        //        {
+        //            _mediaPlayerService.TrackFinished += HandleTrackFinished;
+        //        }
+        //    }
+        //}
 
         public string TrackName
         {
@@ -215,6 +215,7 @@ namespace DailyPlaylist.ViewModel
                 if (SearchResults.Any())
                 {
                     _mediaPlayerService = new MediaPlayerService(searchData.Data);
+                    _mediaPlayerService.TrackFinished += HandleTrackFinished;
                     SelectedTrack = SearchResults[0];
                 }
                 else
@@ -266,9 +267,8 @@ namespace DailyPlaylist.ViewModel
         public void Reset()
         {
             SearchResults = new ObservableCollection<Track>();
-            _mediaPlayerService = null;
-            _mediaPlayerService = new MediaPlayerService(new List<Track>());
             _preStoredIndex = 0;
+            _mediaPlayerService = null;
             SearchQuery = string.Empty;
             SelectedTrack = null;
             TrackName = "Song";

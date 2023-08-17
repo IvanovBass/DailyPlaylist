@@ -53,12 +53,12 @@ namespace DailyPlaylist.ViewModel
                 return;
             }
 
+            await Shell.Current.GoToAsync($"//{nameof(LoadingPage)}"); // on navigue vers la page intermédiaire de loading
             var authUser = await _authService.LoginAsync(Email, Password);  // on check si Login OK
 
             if (authUser != null && authUser is User)
             {
                 _authService.Login(authUser);  // on log le User dans le système, qui va devenir le User actif
-                await Shell.Current.GoToAsync($"//{nameof(LoadingPage)}"); // on navigue vers la page intermédiaire de loading
                 await ShowSnackBarAsync("Succesfully logged in", "Dismiss", () => { });  // self-explanatory
             }
             else
@@ -81,13 +81,13 @@ namespace DailyPlaylist.ViewModel
                 return;
             }
 
+            await Shell.Current.GoToAsync($"//{nameof(LoadingPage)}");
             User createdUser = await _authService.CreateAccountAsync(Email, Password);
 
             if (createdUser != null && createdUser is User)
             {
 
                 _authService.Login(createdUser);
-                await Shell.Current.GoToAsync($"//{nameof(HomePage)}");
                 await ShowSnackBarAsync("User created succesfully!", "Dismiss", () => { });
             }
             else
