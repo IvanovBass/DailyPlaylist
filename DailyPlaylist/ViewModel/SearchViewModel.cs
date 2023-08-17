@@ -14,7 +14,6 @@ namespace DailyPlaylist.ViewModel
         private string _albumCover = "music_notes2.png";
         private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
         private bool _isLoading;
-        // private PlaylistViewModel _playlistViewModel;  // I'm adding a ref to the PlaylistVM for the SetFavoriteCommand
 
 
         public ObservableCollection<Track> SearchResults
@@ -31,19 +30,6 @@ namespace DailyPlaylist.ViewModel
                 SetProperty(ref _searchQuery, value);
             }
         }
-
-        //public MediaPlayerService MediaPlayerService
-        //{
-        //    get => _mediaPlayerService;
-        //    set
-        //    {
-        //        SetProperty(ref _mediaPlayerService, value);
-        //        if (value != null)
-        //        {
-        //            _mediaPlayerService.TrackFinished += HandleTrackFinished;
-        //        }
-        //    }
-        //}
 
         public string TrackName
         {
@@ -146,6 +132,7 @@ namespace DailyPlaylist.ViewModel
                 //{
                 //    activePlaylist.Tracks.Add(track);
                 //}
+                // we'll need the PLaylistVM as a singleton to call it ?
 
             });
 

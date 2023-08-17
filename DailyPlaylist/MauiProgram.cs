@@ -1,4 +1,5 @@
 ﻿using DailyPlaylist.Services;
+using DailyPlaylist.ViewModel;
 using DailyPlaylist.View;
 using Microsoft.Extensions.Logging;
 using CommunityToolkit.Maui;
@@ -37,6 +38,8 @@ public static class MauiProgram
         builder.Services.AddTransient<LoginPage>();
 
         builder.Services.AddTransient<PlaylistPage>();
+
+        builder.Services.AddTransient<PlaylistViewModel>();
 
         builder.Services.AddSingleton<AuthService>();
 
