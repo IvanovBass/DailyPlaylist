@@ -29,7 +29,7 @@ namespace DailyPlaylist.Services
 
             CrossMediaManager.Current.PositionChanged += async (sender, args) =>
             {
-                if (args.Position.TotalSeconds >= 29)
+                if (args.Position.TotalSeconds >= 28)
                 {
                     await PlayNextAsync();
                 }

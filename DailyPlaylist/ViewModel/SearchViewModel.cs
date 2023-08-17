@@ -108,7 +108,7 @@ namespace DailyPlaylist.ViewModel
             {
                 if (SearchResults == null || !SearchResults.Any() || _mediaPlayerService == null)
                 {
-                    await ShowSnackBarAsync("No track to play", "Dismiss", () => { });
+                    await SnackBarVM.ShowSnackBarAsync("No track to play", "Dismiss", () => { });
                     return;
                 }
                 else
@@ -154,7 +154,7 @@ namespace DailyPlaylist.ViewModel
             {
                 if (SearchResults == null || !SearchResults.Any() || _mediaPlayerService == null)
                 {
-                    await ShowSnackBarAsync("No tracklist to be forwarded", "Dismiss", () => { });
+                    await SnackBarVM.ShowSnackBarAsync("No tracklist to be forwarded", "Dismiss", () => { });
                     return;
                 }
                 else
@@ -167,7 +167,7 @@ namespace DailyPlaylist.ViewModel
             {
                 if (SearchResults == null || !SearchResults.Any() || _mediaPlayerService == null)
                 {
-                    await ShowSnackBarAsync("No tracklist to be backwarded", "Dismiss", () => { });
+                    await SnackBarVM.ShowSnackBarAsync("No tracklist to be backwarded", "Dismiss", () => { });
                     return;
                 } 
                 else
@@ -184,7 +184,7 @@ namespace DailyPlaylist.ViewModel
 
             CrossMediaManager.Current.PositionChanged += (sender, args) =>
             {
-                if (args.Position.TotalSeconds >= 29)
+                if (args.Position.TotalSeconds >= 28)
                 {
                     HandleTrackFinished();
                 }
@@ -238,7 +238,7 @@ namespace DailyPlaylist.ViewModel
                 }
                 else
                 {
-                    await ShowSnackBarAsync("No tracks found for your search query", "Dismiss", () => { });
+                    await SnackBarVM.ShowSnackBarAsync("No tracks found for your search query", "Dismiss", () => { });
                 }
 
             }
@@ -246,7 +246,7 @@ namespace DailyPlaylist.ViewModel
             {
                 Debug.WriteLine($"Error while searching: {ex.Message}");
                 IsLoading = false;
-                await ShowSnackBarAsync("Connexion can't be made, please retry", "Dismiss", () => { });
+                await SnackBarVM.ShowSnackBarAsync("Connexion can't be made, please retry", "Dismiss", () => { });
             }
             finally
             {
@@ -259,27 +259,6 @@ namespace DailyPlaylist.ViewModel
         {
             public List<Track> Data { get; set; }
             //... other properties or objects to catch eventually
-        }
-
-        public async Task ShowSnackBarAsync(string message, string actionText, Action action, int durationInSeconds = 2)
-        {
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-
-            var snackbarOptions = new SnackbarOptions
-            {
-                BackgroundColor = Colors.DarkSlateBlue,
-                TextColor = Colors.White,
-                ActionButtonTextColor = Colors.Orange,
-                CornerRadius = new CornerRadius(10),
-
-                Font = Microsoft.Maui.Font.SystemFontOfSize(13),
-                ActionButtonFont = Microsoft.Maui.Font.SystemFontOfSize(13),
-                CharacterSpacing = 0.1
-            };
-
-            var snackbar = Snackbar.Make(message, action, actionText, TimeSpan.FromSeconds(durationInSeconds), snackbarOptions);
-
-            await snackbar.Show(cancellationTokenSource.Token);
         }
 
         public void Reset()
