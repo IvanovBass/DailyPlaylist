@@ -12,7 +12,7 @@
         public string Password { get; set; }
 
         [JsonProperty(PropertyName = "playlistIds")]
-        public List<Guid> playlistIds { get; set; }
+        public List<string> playlistIds { get; set; }
 
         public User()
         {

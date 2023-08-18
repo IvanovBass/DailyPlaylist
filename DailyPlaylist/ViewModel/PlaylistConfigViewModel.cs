@@ -24,7 +24,7 @@ namespace DailyPlaylist.ViewModel
 
         public PlaylistConfigViewModel()
         {
-            // we can invoke an async LoadGenres in the constructor ... so ....
+            // we can't invoke an async LoadGenres in the constructor ... so ....
             LoadGenresCommand = new Command(async () => await LoadGenres());
         }
 

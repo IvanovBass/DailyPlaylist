@@ -10,9 +10,10 @@ namespace DailyPlaylist.Services
     public class AuthService : BaseViewModel
     {
         private const string AuthStateKey = "AuthState";
+        private const string AuthUserKey = "AuthUser";
         private User _activeUser;
         private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
-        private readonly string _apiKey = "tviGbZrm0b4nfxTgVGvKB0skS4VIkV8xpjJ0qB5hcXZ9VwqAYDnXHPg6ZgAyXKh5";
+        private readonly string _apiKey = "BhSU3Kx9cS7norilVbrWO6JicjdihtQUnYZOhrU7Js8GYSYIqQOka0uh1znKlf7H";
 
         public User ActiveUser
         {
@@ -42,10 +43,18 @@ namespace DailyPlaylist.Services
             return authState;
         }
 
+        public string WhoIsAuthenticatedAsync()
+        {
+
+            var authUser = Preferences.Default.Get<string>(AuthUserKey, null);
+            return authUser;
+        }
+
         public void Login(User user)
         {
 
             Preferences.Default.Set<bool>(AuthStateKey, true);
+            Preferences.Default.Set<string>(AuthUserKey, user.Email);
             var authService = ServiceHelper.GetService<AuthService>();
             authService._activeUser = user;
 
@@ -53,6 +62,7 @@ namespace DailyPlaylist.Services
         public void Logout()
         {
             Preferences.Default.Remove(AuthStateKey);
+            Preferences.Default.Remove(AuthUserKey);
             var authService = ServiceHelper.GetService<AuthService>();
             authService._activeUser = null;
         }
@@ -128,6 +138,7 @@ namespace DailyPlaylist.Services
 
         public async Task<User> RetrieveUserAsync(string userEmail)
         {
+            if (string.IsNullOrEmpty(userEmail)) { return null; }
 
             var requestUri = "https://eu-central-1.aws.data.mongodb-api.com/app/data-httpe/endpoint/data/v1/action/findOne";
             var payload = new

@@ -1,6 +1,6 @@
-using System;
-using System.Threading.Tasks;
-using Microsoft.Maui.Controls;
+using DailyPlaylist.Services;
+using MauiAppDI.Helpers;
+
 
 namespace DailyPlaylist.View
 {
@@ -10,7 +10,32 @@ namespace DailyPlaylist.View
         {
             InitializeComponent();
             StartAnimations();
+
+            _ = InitializeAsync();
         }
+
+        private async Task InitializeAsync()
+        {
+            try
+            {
+                var authService = ServiceHelper.GetService<AuthService>();
+                if (authService != null)
+                {
+                    string emailUser = authService.WhoIsAuthenticatedAsync();
+                    User authUser = await authService.RetrieveUserAsync(emailUser);
+
+                    if (authUser != null && authUser is User)
+                    {
+                        authService.ActiveUser = authUser;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+        }
+
 
         private async void StartAnimations()
         {
