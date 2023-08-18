@@ -12,6 +12,8 @@ namespace DailyPlaylist.ViewModel
         private ObservableCollection<Playlist> _userPlaylists;
         private Playlist _selectedPlaylist;
         private ObservableCollection<Track> _playlistTracks;
+        private Track _selectedTrack;
+        private int _preStoredIndex;
         private string _selectedTrackTitle = "Title";
         private string _selectedTrackArtist = "Artist";
         private string _selectedTrackCover = "music_notes.png";
@@ -31,23 +33,6 @@ namespace DailyPlaylist.ViewModel
 
             _ = InitializationAsync();
 
-            //string jsonPlaylists = @"[
-            //    {
-            //        ""_id"": ""550e8400-e29b-41d4-a716-446655440023"",
-            //        ""userId"": ""3794bd26-9b0a-4ff3-b3bb-83a2d2dc8030"",
-            //        ""name"": ""Late 90's"",
-            //        ""description"": ""All the best from the late 90's in every genre"",
-            //        ""deezerTrackIds"": [
-            //        ""3135556""
-            //        ],
-            //        ""dateCreation"": ""2023-07-29T14:48:00Z"",
-            //        ""dateUpdated"": ""2023-07-29T14:48:00Z""
-            //    }
-            //]";
-
-            //List<Playlist> playlists = JsonConvert.DeserializeObject<List<Playlist>>(jsonPlaylists);
-            //UserPlaylists = new ObservableCollection<Playlist>(playlists);
-
         }
 
         // PROPERTIES //
@@ -61,8 +46,7 @@ namespace DailyPlaylist.ViewModel
             {
                 if (_userPlaylists != value)
                 {
-                    _userPlaylists = value;
-                    OnPropertyChanged();
+                    SetProperty(ref _userPlaylists, value);
                 }
             }
         }
@@ -72,13 +56,12 @@ namespace DailyPlaylist.ViewModel
             get => _selectedPlaylist;
             set
             {
-                if (value != _selectedPlaylist)
+                if (value != _selectedPlaylist && value != null)
                 {
-                    _selectedPlaylist = value;
-                    OnPropertyChanged();
-                    Description = _selectedPlaylist.Description;
-                    Name = _selectedPlaylist.Name;
-                    LoadTracksForPlaylist(_selectedPlaylist);
+                    _name = value.Name;
+                    _description = value.Description;
+                    SetProperty(ref _selectedPlaylist, value);
+                    LoadTracksForPlaylist(value);
                 }
             }
         }
@@ -86,8 +69,29 @@ namespace DailyPlaylist.ViewModel
         public ObservableCollection<Track> PlaylistTracks
         {
             get => _playlistTracks;
-            set => SetProperty(ref _playlistTracks, value);
+            set
+            {
+                SetProperty(ref _playlistTracks, value);
+            }
         }
+
+        //public Track SelectedTrack
+        //{
+        //    get => _selectedTrack;
+        //    set
+        //    {
+        //        SetProperty(ref _selectedTrack, value);
+        //        if (value != null)
+        //        {
+        //            int selectedIndex = PlaylistTracks.IndexOf(value);
+        //            _preStoredIndex = selectedIndex;
+
+        //            SetProperty(ref _selectedTrackCover, value.Album?.CoverMedium);
+        //            SetProperty(ref _selectedTrackTitle, value.Title);
+        //            SetProperty(ref _selectedTrackArtist, value.Artist?.Name);
+        //        }
+        //    }
+        //}
 
         public string SelectedTrackTitle
         {
@@ -121,6 +125,7 @@ namespace DailyPlaylist.ViewModel
 
         public ICommand PlayPauseCommand { get; }
         public ICommand PlayFromCollectionViewCommand { get; }
+        public ICommand DeleteFromCollectionViewCommand { get; }
         public ICommand NextCommand { get; }
         public ICommand PreviousCommand { get; }
         public ICommand ItemSelectedCommand { get; }
@@ -130,18 +135,19 @@ namespace DailyPlaylist.ViewModel
         {
             await LoadUserPlaylists();
 
-            OrderPlaylistByDate(_userPlaylists);
+            OrderPlaylistByDate(UserPlaylists);
 
             if (_userPlaylists != null && _userPlaylists.Any())
             {
-                SelectedPlaylist = _userPlaylists.First();
+                SelectedPlaylist = _selectedPlaylist = _userPlaylists.First();
             }
-            UserPlaylists = _userPlaylists;
+
+            LoadTracksForPlaylist(_selectedPlaylist);
         }
 
         private async Task LoadUserPlaylists()
         {
-            _userPlaylists = new ObservableCollection<Playlist>(await RetrievePlaylistsAsync(_activeUser.Id));
+            UserPlaylists = new ObservableCollection<Playlist>(await RetrievePlaylistsAsync(_activeUser.Id));
         }
 
         private void OrderPlaylistByDate(ObservableCollection<Playlist> playlistsToOrder)
@@ -149,8 +155,7 @@ namespace DailyPlaylist.ViewModel
             if (playlistsToOrder != null)
             {
                 playlistsToOrder = new ObservableCollection<Playlist>(
-                playlistsToOrder.OrderByDescending(p =>
-                    p.DateCreation > p.DateUpdated ? p.DateCreation : p.DateUpdated));
+                playlistsToOrder.OrderByDescending(p => p.DateUpdated));  // because DateUpdated is initialized with the CreateDate = DateTimeNow and will evovle at each change
             }
         }
 
@@ -158,17 +163,17 @@ namespace DailyPlaylist.ViewModel
         {
             if (playlist == null) { return; }
 
-            _playlistTracks = new ObservableCollection<Track>();
+            var cachePlaylist = new ObservableCollection<Track>();
 
             foreach (var trackId in playlist.DeezerTrackIds)
             {
                 var track = await FetchTrackFromDeezer(trackId);
                 if (track != null)
                 {
-                    _playlistTracks.Add(track);
-                    PlaylistTracks.Add(track);
+                    cachePlaylist.Add(track);
                 }
             }
+            PlaylistTracks = cachePlaylist;
         }
 
         private async Task<Track> FetchTrackFromDeezer(long trackId)
