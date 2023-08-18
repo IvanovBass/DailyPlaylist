@@ -47,13 +47,13 @@
                 </Picker.Items>
             </Picker>
 
-            <StackLayout >
+            <StackLayout  Padding="10,0">
 
                 <CollectionView 
                         x:Name="PlaylistCollectionView" 
                         ItemsSource="{Binding PlaylistTracks}" >
 
-                    <CollectionView.ItemTemplate>
+                    <!--<CollectionView.ItemTemplate>
                         <DataTemplate>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -63,13 +63,12 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="36"/>
-                                    <RowDefinition Height="36" />
+                                    <RowDefinition Height="70" />
                                 </Grid.RowDefinitions>
 
-                                <Image Source="{Binding Album.Cover}" Aspect="AspectFit" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2"/>
+                                <Image Source="{Binding Album.Cover}" Aspect="AspectFit" Grid.Column="0" />
 
-                                <StackLayout Grid.Column="1" Grid.ColumnSpan="2"  Grid.Row="0" Grid.RowSpan="2" HorizontalOptions="Center">
+                                <StackLayout Grid.Column="1" Grid.ColumnSpan="2"   HorizontalOptions="Center">
                                     <StackLayout.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding Path=BindingContext.ItemSelectedCommand, Source={x:Reference Name=PlaylistCollectionView}}" 
                                             CommandParameter="{Binding}"/>
@@ -86,7 +85,7 @@
                                     </Grid>
                                 </StackLayout>
 
-                                <StackLayout Grid.Column="3" Grid.Row="0" Grid.RowSpan="2"  VerticalOptions="Center" HorizontalOptions="Center">
+                                <StackLayout Grid.Column="3"   VerticalOptions="Center" HorizontalOptions="Center">
                                     <ImageButton Source="play.png"    
                                              Command="{Binding Path=BindingContext.PlayFromPlaylistCollectionCommand, Source={x:Reference Name=PlaylistCollectionView}}"
                                              CommandParameter="{Binding}"  x:Name="CollectionPlayButton" Clicked="ImageButtonClicked"
@@ -94,7 +93,7 @@
                                 </StackLayout>
                             </Grid>
                         </DataTemplate>
-                    </CollectionView.ItemTemplate>
+                    </CollectionView.ItemTemplate>-->
                 </CollectionView>
 
             </StackLayout>

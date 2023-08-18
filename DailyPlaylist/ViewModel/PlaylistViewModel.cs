@@ -17,7 +17,7 @@ namespace DailyPlaylist.ViewModel
         private string _selectedTrackCover = "music_notes.png";
         private string _description = "Describe what makes this playlist special ...";
         private string _name = "Name ...";
-        private readonly string _apiKey = "tviGbZrm0b4nfxTgVGvKB0skS4VIkV8xpjJ0qB5hcXZ9VwqAYDnXHPg6ZgAyXKh5";
+        private readonly string _apiKey = "BhSU3Kx9cS7norilVbrWO6JicjdihtQUnYZOhrU7Js8GYSYIqQOka0uh1znKlf7H";
         private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
 
 
@@ -29,27 +29,42 @@ namespace DailyPlaylist.ViewModel
 
             _activeUser = _authService.ActiveUser;
 
-            //LoadUserPlaylists();
+            _ = InitializationAsync();
 
-            //if (_userPlaylists != null)
-            //{
-            //    _userPlaylists = new ObservableCollection<Playlist>(
-            //    _userPlaylists.OrderByDescending(p =>
-            //        p.DateCreation > p.DateUpdated ? p.DateCreation : p.DateUpdated));
-            //}
+            //string jsonPlaylists = @"[
+            //    {
+            //        ""_id"": ""550e8400-e29b-41d4-a716-446655440023"",
+            //        ""userId"": ""3794bd26-9b0a-4ff3-b3bb-83a2d2dc8030"",
+            //        ""name"": ""Late 90's"",
+            //        ""description"": ""All the best from the late 90's in every genre"",
+            //        ""deezerTrackIds"": [
+            //        ""3135556""
+            //        ],
+            //        ""dateCreation"": ""2023-07-29T14:48:00Z"",
+            //        ""dateUpdated"": ""2023-07-29T14:48:00Z""
+            //    }
+            //]";
 
-            // LoadDefaultPlaylistTracks();
+            //List<Playlist> playlists = JsonConvert.DeserializeObject<List<Playlist>>(jsonPlaylists);
+            //UserPlaylists = new ObservableCollection<Playlist>(playlists);
 
         }
 
         // PROPERTIES //
 
-        public User ActiveUser { get { return _activeUser; } }
+        // public User ActiveUser { get { return _activeUser; } }
 
         public ObservableCollection<Playlist> UserPlaylists
         {
             get => _userPlaylists;
-            set => SetProperty(ref _userPlaylists, value);
+            set
+            {
+                if (_userPlaylists != value)
+                {
+                    _userPlaylists = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         public Playlist SelectedPlaylist
@@ -57,10 +72,14 @@ namespace DailyPlaylist.ViewModel
             get => _selectedPlaylist;
             set
             {
-                SetProperty(ref _selectedPlaylist, value);
-                SetProperty(ref _description, value.Description);
-                SetProperty(ref _name, value.Name);
-                LoadTracksForPlaylist(value);
+                if (value != _selectedPlaylist)
+                {
+                    _selectedPlaylist = value;
+                    OnPropertyChanged();
+                    Description = _selectedPlaylist.Description;
+                    Name = _selectedPlaylist.Name;
+                    LoadTracksForPlaylist(_selectedPlaylist);
+                }
             }
         }
 
@@ -106,22 +125,39 @@ namespace DailyPlaylist.ViewModel
         public ICommand PreviousCommand { get; }
         public ICommand ItemSelectedCommand { get; }
 
-        private async void LoadUserPlaylists()
+
+        private async Task InitializationAsync()
+        {
+            await LoadUserPlaylists();
+
+            OrderPlaylistByDate(_userPlaylists);
+
+            if (_userPlaylists != null && _userPlaylists.Any())
+            {
+                SelectedPlaylist = _userPlaylists.First();
+            }
+            UserPlaylists = _userPlaylists;
+        }
+
+        private async Task LoadUserPlaylists()
         {
             _userPlaylists = new ObservableCollection<Playlist>(await RetrievePlaylistsAsync(_activeUser.Id));
         }
 
-        private void LoadDefaultPlaylistTracks()
+        private void OrderPlaylistByDate(ObservableCollection<Playlist> playlistsToOrder)
         {
-            var defaultPlaylist = _userPlaylists.OrderByDescending(p => p.DateUpdated).FirstOrDefault();
-            if (defaultPlaylist != null)
+            if (playlistsToOrder != null)
             {
-                SelectedPlaylist = defaultPlaylist;
+                playlistsToOrder = new ObservableCollection<Playlist>(
+                playlistsToOrder.OrderByDescending(p =>
+                    p.DateCreation > p.DateUpdated ? p.DateCreation : p.DateUpdated));
             }
         }
 
         private async void LoadTracksForPlaylist(Playlist playlist)
         {
+            if (playlist == null) { return; }
+
             _playlistTracks = new ObservableCollection<Track>();
 
             foreach (var trackId in playlist.DeezerTrackIds)
@@ -130,6 +166,7 @@ namespace DailyPlaylist.ViewModel
                 if (track != null)
                 {
                     _playlistTracks.Add(track);
+                    PlaylistTracks.Add(track);
                 }
             }
         }
@@ -158,12 +195,22 @@ namespace DailyPlaylist.ViewModel
 
             var client = _httpClient.Value;
 
-            client.DefaultRequestHeaders.Clear();
+            // client.DefaultRequestHeaders.Clear();
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             client.DefaultRequestHeaders.Add("Access-Control-Request-Headers", "*");
             client.DefaultRequestHeaders.Add("api-key", _apiKey);
 
-            var response = await client.PostAsync(requestUri, content);
+            var response = new HttpResponseMessage();
+            try
+            {
+                response = await client.PostAsync(requestUri, content);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error while fetching the Playlists on the MongoDB server : " + ex.Message);
+                await SnackBarVM.ShowSnackBarAsync("Problem while fetching the playlists", "Dismiss", () => { });
+                return null;
+            }
 
             var playlists = new List<Playlist>();
 
@@ -188,7 +235,5 @@ namespace DailyPlaylist.ViewModel
 
             return null;
         }
-
-
     }
 }
