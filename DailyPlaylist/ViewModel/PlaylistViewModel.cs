@@ -8,6 +8,7 @@ namespace DailyPlaylist.ViewModel
     public class PlaylistViewModel : BaseViewModel
     {
         private readonly AuthService _authService ;
+        private MediaPlayerService _mediaPlayerService;
         private User _activeUser;
         private ObservableCollection<Playlist> _userPlaylists;
         private Playlist _selectedPlaylist;
@@ -33,21 +34,77 @@ namespace DailyPlaylist.ViewModel
 
             _ = InitializationAsync();
 
+            ItemSelectedCommand = new Command<Track>(track =>
+            {
+                SelectedTrack = track;
+            });
+
+            PlayPauseCommand = new Command(async track =>
+            {
+                if (PlaylistTracks == null || !PlaylistTracks.Any() || _mediaPlayerService == null)
+                {
+                    await SnackBarVM.ShowSnackBarAsync("No track to play", "Dismiss", () => { });
+                    return;
+                }
+                else
+                {
+                    await _mediaPlayerService.PlayPauseTaskAsync(_preStoredIndex);
+                }
+            });
+
+            PlayFromCollectionViewCommand = new Command<Track>(async track =>
+            {
+                SelectedTrack = track;
+                await _mediaPlayerService.PlayPauseTaskAsync(_preStoredIndex);
+            });
+
+            NextCommand = new Command<Track>(async track =>
+            {
+                if (PlaylistTracks == null || !PlaylistTracks.Any() || _mediaPlayerService == null)
+                {
+                    await SnackBarVM.ShowSnackBarAsync("No tracklist to be forwarded", "Dismiss", () => { });
+                    return;
+                }
+                else
+                {
+                    SelectedTrack = await _mediaPlayerService.PlayNextAsync();
+                }
+            });
+
+            PreviousCommand = new Command<Track>(async track =>
+            {
+                if (PlaylistTracks == null || !PlaylistTracks.Any() || _mediaPlayerService == null)
+                {
+                    await SnackBarVM.ShowSnackBarAsync("No tracklist to be backwarded", "Dismiss", () => { });
+                    return;
+                }
+                else
+                {
+                    SelectedTrack = await _mediaPlayerService.PlayPreviousAsync();
+                }
+            });
+
+            CrossMediaManager.Current.PositionChanged += (sender, args) =>
+            {
+                if (args.Position.TotalSeconds >= 28)
+                {
+                    HandleTrackFinished();
+                }
+            };
+
+            LogoutViewModel.OnLogout += Reset;
+
         }
 
         // PROPERTIES //
-
-        // public User ActiveUser { get { return _activeUser; } }
 
         public ObservableCollection<Playlist> UserPlaylists
         {
             get => _userPlaylists;
             set
             {
-                if (_userPlaylists != value)
-                {
-                    SetProperty(ref _userPlaylists, value);
-                }
+                _userPlaylists = value;
+                OnPropertyChanged(nameof(UserPlaylists));
             }
         }
 
@@ -60,7 +117,8 @@ namespace DailyPlaylist.ViewModel
                 {
                     _name = value.Name;
                     _description = value.Description;
-                    SetProperty(ref _selectedPlaylist, value);
+                    _selectedPlaylist = value;
+                    OnPropertyChanged(nameof(SelectedPlaylist));
                     LoadTracksForPlaylist(value);
                 }
             }
@@ -71,57 +129,82 @@ namespace DailyPlaylist.ViewModel
             get => _playlistTracks;
             set
             {
-                SetProperty(ref _playlistTracks, value);
+                _playlistTracks = value;
+                OnPropertyChanged(nameof(PlaylistTracks));
             }
         }
 
-        //public Track SelectedTrack
-        //{
-        //    get => _selectedTrack;
-        //    set
-        //    {
-        //        SetProperty(ref _selectedTrack, value);
-        //        if (value != null)
-        //        {
-        //            int selectedIndex = PlaylistTracks.IndexOf(value);
-        //            _preStoredIndex = selectedIndex;
+        public Track SelectedTrack
+        {
+            get => _selectedTrack;
+            set
+            {
+                _selectedTrack = value;
+                OnPropertyChanged(nameof(SelectedTrack));
+                if (value != null)
+                {
+                    int selectedIndex = PlaylistTracks.IndexOf(value);
+                    _preStoredIndex = selectedIndex;
 
-        //            SetProperty(ref _selectedTrackCover, value.Album?.CoverMedium);
-        //            SetProperty(ref _selectedTrackTitle, value.Title);
-        //            SetProperty(ref _selectedTrackArtist, value.Artist?.Name);
-        //        }
-        //    }
-        //}
+                    SelectedTrackCover = value.Album?.CoverMedium;
+                    SelectedTrackTitle = value.Title;
+                    SelectedTrackArtist = value.Artist?.Name;
+                }
+            }
+        }
 
         public string SelectedTrackTitle
         {
             get => _selectedTrackTitle;
-            set => SetProperty(ref _selectedTrackTitle, string.IsNullOrEmpty(value) ? "Title" : value);
+            set
+            {
+                _selectedTrackTitle = string.IsNullOrEmpty(value) ? "Title" : value;
+                OnPropertyChanged(nameof(SelectedTrackTitle));
+            }
         }
+
         public string SelectedTrackArtist
         {
             get => _selectedTrackArtist;
-            set => SetProperty(ref _selectedTrackArtist, string.IsNullOrEmpty(value) ? "Artist" : value);
+            set
+            {
+                _selectedTrackArtist = string.IsNullOrEmpty(value) ? "Artist" : value;
+                OnPropertyChanged(nameof(SelectedTrackArtist));
+            }
         }
+
         public string SelectedTrackCover
         {
             get => _selectedTrackCover;
-            set => SetProperty(ref _selectedTrackCover, string.IsNullOrEmpty(value) ? "music_notes.png" : value);
+            set
+            {
+                _selectedTrackCover = string.IsNullOrEmpty(value) ? "music_notes.png" : value;
+                OnPropertyChanged(nameof(SelectedTrackCover));
+            }
         }
 
         public string Description
         {
             get => _description;
-            set => SetProperty(ref _description, value);
+            set
+            {
+                _description = value;
+                OnPropertyChanged(nameof(Description));
+            }
         }
 
         public string Name
         {
             get => _name;
-            set => SetProperty(ref _name, value);
+            set
+            {
+                _name = value;
+                OnPropertyChanged(nameof(Name));
+            }
         }
 
-        // METHODS //
+
+        // COMMANDS //
 
         public ICommand PlayPauseCommand { get; }
         public ICommand PlayFromCollectionViewCommand { get; }
@@ -130,6 +213,7 @@ namespace DailyPlaylist.ViewModel
         public ICommand PreviousCommand { get; }
         public ICommand ItemSelectedCommand { get; }
 
+        // METHODS //
 
         private async Task InitializationAsync()
         {
@@ -163,17 +247,25 @@ namespace DailyPlaylist.ViewModel
         {
             if (playlist == null) { return; }
 
-            var cachePlaylist = new ObservableCollection<Track>();
+            var cachedPlaylist = new ObservableCollection<Track>();
 
             foreach (var trackId in playlist.DeezerTrackIds)
             {
                 var track = await FetchTrackFromDeezer(trackId);
                 if (track != null)
                 {
-                    cachePlaylist.Add(track);
+                    cachedPlaylist.Add(track);
                 }
             }
-            PlaylistTracks = cachePlaylist;
+            PlaylistTracks = cachedPlaylist;
+
+            _mediaPlayerService = new MediaPlayerService(cachedPlaylist.ToList());
+
+            //if (PlaylistTracks.Any())
+            //{
+            //    SelectedTrack = PlaylistTracks[0];
+            //    _preStoredIndex = 0;
+            //}
         }
 
         private async Task<Track> FetchTrackFromDeezer(long trackId)
@@ -239,6 +331,33 @@ namespace DailyPlaylist.ViewModel
             }
 
             return null;
+        }
+
+        public void HandleTrackFinished()
+        {
+            var currentMediaUri = CrossMediaManager.Current.Queue.Current.MediaUri.ToString();
+
+            var currentTrack = PlaylistTracks.FirstOrDefault(t => t.Preview == currentMediaUri);
+            if (currentTrack == null)
+            {
+                _preStoredIndex = 0;
+                SelectedTrack = PlaylistTracks[0];
+                return;
+            }
+
+            var currentIndex = PlaylistTracks.IndexOf(currentTrack);
+            currentIndex++;
+            if (currentIndex >= PlaylistTracks.Count)
+            {
+                currentIndex = 0;
+            }
+            _preStoredIndex = currentIndex;
+            SelectedTrack = PlaylistTracks[currentIndex];
+        }
+
+        private void Reset()
+        {
+
         }
     }
 }

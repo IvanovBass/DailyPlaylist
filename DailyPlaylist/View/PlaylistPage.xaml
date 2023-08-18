@@ -24,9 +24,9 @@
                 </StackLayout>
 
                 <Label  Grid.Row="0" Grid.Column="1"  FontSize="32" Padding="0,25,0,0" MaxLines="1" LineBreakMode="TailTruncation"
-                    Text="{Binding SelectedTrackArtist}" HorizontalTextAlignment="Center" TextColor="{StaticResource Tertiary}" VerticalTextAlignment="End"/>
-                <Label  Grid.Row="1"  Grid.Column="1"  FontSize="28"  MaxLines="2"  Padding="10,0" VerticalTextAlignment="Start"
-                   Text="{Binding SelectedTrackTitle}"  HorizontalTextAlignment="Center" TextColor="{StaticResource Primary}"/>
+                    Text="{Binding SelectedTrackArtist}" HorizontalTextAlignment="Center" TextColor="{StaticResource Tertiary}" VerticalOptions="Start"/>
+                <Label  Grid.Row="1"  Grid.Column="1"  FontSize="22"  MaxLines="2"  Padding="10,0" VerticalOptions="Start" LineBreakMode="CharacterWrap"
+                   Text="{Binding SelectedTrackTitle}"  HorizontalTextAlignment="Center" TextColor="White"/>
             </Grid>
 
             <StackLayout
@@ -39,7 +39,7 @@
                                    x:Name="ForwardButton" Clicked="ImageButtonClicked"/>
             </StackLayout>
 
-            <Picker Title="Select a playlist" x:Name="PlaylistPicker" ItemsSource="{Binding UserPlaylists}" ItemDisplayBinding="{Binding Name}" TextColor="{StaticResource Tertiary}"
+            <Picker Title="Select a playlist" x:Name="PlaylistPicker" ItemsSource="{Binding UserPlaylists}" ItemDisplayBinding="{Binding Name}" TextColor="{StaticResource Primary}"
                     SelectedItem="{Binding SelectedPlaylist}" FontSize="Large" HorizontalOptions="Center"  MinimumWidthRequest="250" HorizontalTextAlignment="Center">
             <Picker.Items>
 

@@ -1,4 +1,5 @@
 ﻿using DailyPlaylist.Services;
+using MauiAppDI.Helpers;
 
 namespace DailyPlaylist.ViewModel
 {
@@ -86,6 +87,16 @@ namespace DailyPlaylist.ViewModel
 
         public SearchViewModel()  // will probably have to put the Active Playlist or the PlaylisVM in DI
         {
+            //var mediaPlayerService = ServiceHelper.GetService<MediaPlayerService>();
+
+            //if (mediaPlayerService != null) 
+            //{ 
+            //    _mediaPlayerService = mediaPlayerService;
+            //}
+            //else
+            //{
+            //    _mediaPlayerService = new MediaPlayerService(new List<Track>());
+            //}
 
             SearchCommand = new Command(PerformSearch);
             SearchResults = new ObservableCollection<Track>();
