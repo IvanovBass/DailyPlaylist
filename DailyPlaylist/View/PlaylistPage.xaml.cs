@@ -7,6 +7,7 @@ namespace DailyPlaylist.View;
 public partial class PlaylistPage : ContentPage
 {
 	private readonly AuthService _authService;
+    private PlaylistViewModel _playlistViewModel;
 	public PlaylistPage()
     {
         InitializeComponent();
@@ -15,7 +16,9 @@ public partial class PlaylistPage : ContentPage
 
         _authService = authService;
 
-        BindingContext = new PlaylistViewModel(_authService);
+        _playlistViewModel = new PlaylistViewModel(_authService);
+
+        BindingContext = _playlistViewModel;
 
     }
 
