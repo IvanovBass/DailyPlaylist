@@ -6,8 +6,8 @@ namespace DailyPlaylist.ViewModel
     public class SearchViewModel : BaseViewModel
     {
         private ObservableCollection<Track> _searchResults;
-        private int _preStoredIndex; 
-        private MediaPlayerService _mediaPlayerService;
+        public int preStoredIndex; 
+        public MediaPlayerService mediaPlayerService;
         private string _searchQuery;
         private Track _selectedTrack;
         private string _trackName = "Song";
@@ -60,7 +60,7 @@ namespace DailyPlaylist.ViewModel
                 if (value != null)
                 {
                     int selectedIndex = SearchResults.IndexOf(value);
-                    _preStoredIndex = selectedIndex;
+                    preStoredIndex = selectedIndex;
 
                     AlbumCover = value.Album?.CoverMedium;
                     TrackName = value.Title;
@@ -87,37 +87,26 @@ namespace DailyPlaylist.ViewModel
 
         public SearchViewModel()  // will probably have to put the Active Playlist or the PlaylisVM in DI
         {
-            //var mediaPlayerService = ServiceHelper.GetService<MediaPlayerService>();
-
-            //if (mediaPlayerService != null) 
-            //{ 
-            //    _mediaPlayerService = mediaPlayerService;
-            //}
-            //else
-            //{
-            //    _mediaPlayerService = new MediaPlayerService(new List<Track>());
-            //}
-
             SearchCommand = new Command(PerformSearch);
             SearchResults = new ObservableCollection<Track>();
 
             PlayPauseCommand = new Command(async track =>
             {
-                if (SearchResults == null || !SearchResults.Any() || _mediaPlayerService == null)
+                if (SearchResults == null || !SearchResults.Any() || mediaPlayerService == null)
                 {
                     await SnackBarVM.ShowSnackBarAsync("No track to play", "Dismiss", () => { });
                     return;
                 }
                 else
                 {
-                    await _mediaPlayerService.PlayPauseTaskAsync(_preStoredIndex);
+                    await mediaPlayerService.PlayPauseTaskAsync(preStoredIndex);
                 }
             });
 
             PlayFromCollectionViewCommand = new Command<Track>(async track =>
             {
                 SelectedTrack = track;
-                await _mediaPlayerService.PlayPauseTaskAsync(_preStoredIndex);
+                await mediaPlayerService.PlayPauseTaskAsync(preStoredIndex);
             });
 
             SetFavoriteCommand = new Command<Track>(track =>
@@ -150,27 +139,27 @@ namespace DailyPlaylist.ViewModel
 
             NextCommand = new Command<Track>(async track =>
             {
-                if (SearchResults == null || !SearchResults.Any() || _mediaPlayerService == null)
+                if (SearchResults == null || !SearchResults.Any() || mediaPlayerService == null)
                 {
                     await SnackBarVM.ShowSnackBarAsync("No tracklist to be forwarded", "Dismiss", () => { });
                     return;
                 }
                 else
                 {
-                    SelectedTrack = await _mediaPlayerService.PlayNextAsync();
+                    SelectedTrack = await mediaPlayerService.PlayNextAsync();
                 }
             });
 
             PreviousCommand = new Command<Track>(async track =>
             {
-                if (SearchResults == null || !SearchResults.Any() || _mediaPlayerService == null)
+                if (SearchResults == null || !SearchResults.Any() || mediaPlayerService == null)
                 {
                     await SnackBarVM.ShowSnackBarAsync("No tracklist to be backwarded", "Dismiss", () => { });
                     return;
                 } 
                 else
                 {
-                    SelectedTrack = await _mediaPlayerService.PlayPreviousAsync();
+                    SelectedTrack = await mediaPlayerService.PlayPreviousAsync();
                 }
             });
 
@@ -199,7 +188,7 @@ namespace DailyPlaylist.ViewModel
             var currentTrack = SearchResults.FirstOrDefault(t => t.Preview == currentMediaUri);
             if (currentTrack == null)
             {
-                _preStoredIndex = 0;
+                preStoredIndex = 0;
                 SelectedTrack = SearchResults[0];
                 return;
             }
@@ -210,7 +199,7 @@ namespace DailyPlaylist.ViewModel
             {
                 currentIndex = 0;
             }
-            _preStoredIndex = currentIndex;
+            preStoredIndex = currentIndex;
             SelectedTrack = SearchResults[currentIndex];
         }
 
@@ -231,7 +220,10 @@ namespace DailyPlaylist.ViewModel
 
                 if (SearchResults.Any())
                 {
-                    _mediaPlayerService = new MediaPlayerService(searchData.Data);
+                    CrossMediaManager.Current.Queue.Clear();
+                    CrossMediaManager.Current.Dispose();
+                    CrossMediaManager.Current.Init();
+                    mediaPlayerService = new MediaPlayerService(searchData.Data);
                     SelectedTrack = SearchResults[0];
                 }
                 else
@@ -262,8 +254,8 @@ namespace DailyPlaylist.ViewModel
         public void Reset()
         {
             SearchResults = new ObservableCollection<Track>();
-            _preStoredIndex = 0;
-            _mediaPlayerService = null;
+            preStoredIndex = 0;
+            mediaPlayerService = null;
             SearchQuery = string.Empty;
             SelectedTrack = null;
             TrackName = "Song";

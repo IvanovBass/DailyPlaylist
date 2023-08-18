@@ -49,5 +49,11 @@ namespace DailyPlaylist.View
             }
         }
 
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            NavigationState.LastVisitedPage = nameof(PlaylistConfigPage);
+        }
+
     }
 }

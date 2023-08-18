@@ -14,7 +14,7 @@ namespace DailyPlaylist.ViewModel
         private Playlist _selectedPlaylist;
         private ObservableCollection<Track> _playlistTracks;
         private Track _selectedTrack;
-        private int _preStoredIndex;
+        public int preStoredIndex;
         private string _selectedTrackTitle = "Title";
         private string _selectedTrackArtist = "Artist";
         private string _selectedTrackCover = "music_notes.png";
@@ -48,14 +48,16 @@ namespace DailyPlaylist.ViewModel
                 }
                 else
                 {
-                    await _mediaPlayerService.PlayPauseTaskAsync(_preStoredIndex);
+                    await _mediaPlayerService.PlayPauseTaskAsync(preStoredIndex);
                 }
             });
 
-            PlayFromCollectionViewCommand = new Command<Track>(async track =>
+            PlayFromPlaylistCollectionCommand = new Command<Track>(async track =>
             {
                 SelectedTrack = track;
-                await _mediaPlayerService.PlayPauseTaskAsync(_preStoredIndex);
+                var currentIndex = PlaylistTracks.IndexOf(track);
+                preStoredIndex = currentIndex;
+                await _mediaPlayerService.PlayPauseTaskAsync(preStoredIndex);
             });
 
             NextCommand = new Command<Track>(async track =>
@@ -144,7 +146,7 @@ namespace DailyPlaylist.ViewModel
                 if (value != null)
                 {
                     int selectedIndex = PlaylistTracks.IndexOf(value);
-                    _preStoredIndex = selectedIndex;
+                    preStoredIndex = selectedIndex;
 
                     SelectedTrackCover = value.Album?.CoverMedium;
                     SelectedTrackTitle = value.Title;
@@ -207,7 +209,7 @@ namespace DailyPlaylist.ViewModel
         // COMMANDS //
 
         public ICommand PlayPauseCommand { get; }
-        public ICommand PlayFromCollectionViewCommand { get; }
+        public ICommand PlayFromPlaylistCollectionCommand { get; }
         public ICommand DeleteFromCollectionViewCommand { get; }
         public ICommand NextCommand { get; }
         public ICommand PreviousCommand { get; }
@@ -259,13 +261,16 @@ namespace DailyPlaylist.ViewModel
             }
             PlaylistTracks = cachedPlaylist;
 
+            CrossMediaManager.Current.Queue.Clear();
+            CrossMediaManager.Current.Dispose();
+            CrossMediaManager.Current.Init();
             _mediaPlayerService = new MediaPlayerService(cachedPlaylist.ToList());
 
-            //if (PlaylistTracks.Any())
-            //{
-            //    SelectedTrack = PlaylistTracks[0];
-            //    _preStoredIndex = 0;
-            //}
+            if (PlaylistTracks.Any())
+            {
+                SelectedTrack = PlaylistTracks[0];
+                preStoredIndex = 0;
+            }
         }
 
         private async Task<Track> FetchTrackFromDeezer(long trackId)
@@ -340,7 +345,7 @@ namespace DailyPlaylist.ViewModel
             var currentTrack = PlaylistTracks.FirstOrDefault(t => t.Preview == currentMediaUri);
             if (currentTrack == null)
             {
-                _preStoredIndex = 0;
+                preStoredIndex = 0;
                 SelectedTrack = PlaylistTracks[0];
                 return;
             }
@@ -351,7 +356,7 @@ namespace DailyPlaylist.ViewModel
             {
                 currentIndex = 0;
             }
-            _preStoredIndex = currentIndex;
+            preStoredIndex = currentIndex;
             SelectedTrack = PlaylistTracks[currentIndex];
         }
 

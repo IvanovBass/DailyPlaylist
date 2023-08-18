@@ -68,5 +68,11 @@ namespace DailyPlaylist.View
                 await PlaylistGenBtn.ScaleTo(1, 600, Easing.SinOut);
             }
         }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            NavigationState.LastVisitedPage = nameof(HomePage);
+        }
     }
 }
