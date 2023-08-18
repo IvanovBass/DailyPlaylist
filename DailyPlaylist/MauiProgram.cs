@@ -43,8 +43,6 @@ public static class MauiProgram
 
         builder.Services.AddSingleton<AuthService>();
 
-        builder.Services.AddSingleton<MediaPlayerService>();
-
         builder.Services.AddSingleton<HttpClient>();
 
         return builder.Build();

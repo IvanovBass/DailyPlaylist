@@ -27,4 +27,27 @@ public partial class PlaylistPage : ContentPage
         var button = sender as ImageButton;
         await AnimationHelper.AnimatePressedImageButton(button);
     }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        NavigationState.LastVisitedPage = nameof(PlaylistPage);
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+        if (NavigationState.LastVisitedPage == nameof(SearchPage)
+            && _playlistViewModel.PlaylistTracks != null
+            && _playlistViewModel.PlaylistTracks is ObservableCollection<Track>)
+        {
+            CrossMediaManager.Current.Dispose();
+            CrossMediaManager.Current.Init();
+
+            var mediaPlayer = new MediaPlayerService(_playlistViewModel.PlaylistTracks.ToList());
+            mediaPlayer.storedIndex = _playlistViewModel.preStoredIndex;
+        }
+    }
+
 }

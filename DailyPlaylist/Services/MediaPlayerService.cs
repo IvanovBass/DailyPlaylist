@@ -6,9 +6,9 @@ namespace DailyPlaylist.Services
     {
         public List<Track> _tracks;
         public List<MediaItem> _mediaItems;
-        public int _currentIndex = 0;
+        public int storedIndex;
 
-        public MediaPlayerService(List<Track> tracks, int index = 0)
+        public MediaPlayerService(List<Track> tracks)
         {
             _tracks = tracks ?? throw new ArgumentNullException(nameof(tracks));
 
@@ -23,10 +23,13 @@ namespace DailyPlaylist.Services
                 //  If I was to create a dedicated Page "Player" displaying the Track playing only, and its details, these metadata could be useful
             }).ToList();
 
-            _currentIndex = index;
-            CrossMediaManager.Current.AutoPlay = false;
+            CrossMediaManager.Current.Queue.Clear();
             CrossMediaManager.Current.Play(_mediaItems);
-
+            if (storedIndex > 0 && storedIndex < CrossMediaManager.Current.Queue.Count) 
+            {
+                CrossMediaManager.Current.PlayQueueItem(storedIndex);
+            }
+            CrossMediaManager.Current.Stop();
             CrossMediaManager.Current.PositionChanged += async (sender, args) =>
             {
                 if (args.Position.TotalSeconds >= 28)
@@ -38,45 +41,45 @@ namespace DailyPlaylist.Services
 
         public async Task PlayPauseTaskAsync(int index)
         {
-            if (_currentIndex == index && CrossMediaManager.Current.IsPlaying())
+            if (CrossMediaManager.Current.Queue.CurrentIndex == index && CrossMediaManager.Current.IsPlaying())
             {
                 await CrossMediaManager.Current.Pause();
             }
-            else if (_currentIndex == index && !CrossMediaManager.Current.IsPlaying())
+            else if (CrossMediaManager.Current.Queue.CurrentIndex == index && !CrossMediaManager.Current.IsPlaying())
             {
                 await CrossMediaManager.Current.Play();
             }
             else
             {
-                _currentIndex = index;
+                storedIndex = index;
                 await CrossMediaManager.Current.PlayQueueItem(index);
             }
         }
 
         public async Task<Track> PlayNextAsync()
         {
-            _currentIndex++;
-            if (_currentIndex >= _mediaItems.Count)
+            storedIndex++;
+            if (storedIndex >= _mediaItems.Count)
             {
-                _currentIndex = 0;
+                storedIndex = 0;
             }
-            await CrossMediaManager.Current.PlayQueueItem(_currentIndex);
-            return _tracks[_currentIndex];
+            await CrossMediaManager.Current.PlayQueueItem(storedIndex);
+            return _tracks[storedIndex];
         }
 
         public async Task<Track> PlayPreviousAsync()
         {
             if (CrossMediaManager.Current.Position.TotalSeconds < 3)
             {
-                _currentIndex--;
-                if (_currentIndex < 0) _currentIndex = _mediaItems.Count - 1;
+                storedIndex--;
+                if (storedIndex < 0) storedIndex = _mediaItems.Count - 1;
             }
             else
             {
                 await CrossMediaManager.Current.SeekTo(TimeSpan.Zero);
             }
-            await CrossMediaManager.Current.PlayQueueItem(_currentIndex);
-            return _tracks[_currentIndex];
+            await CrossMediaManager.Current.PlayQueueItem(storedIndex);
+            return _tracks[storedIndex];
         }
     }
 }
