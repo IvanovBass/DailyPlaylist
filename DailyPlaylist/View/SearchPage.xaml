@@ -109,9 +109,13 @@
                                              Command="{Binding Path=BindingContext.PlayFromCollectionViewCommand, Source={x:Reference Name=TracksCollectionView}}"
                                              CommandParameter="{Binding}"  x:Name="CollectionPlayButton" Clicked="ImageButtonClicked"
                                              HeightRequest="25" WidthRequest="25"/>
-                                    <ImageButton Source="non_favorite.png"
-                                             Command="{Binding Path=BindingContext.SetFavoriteCommand, Source={x:Reference Name=TracksCollectionView}}"
-                                             CommandParameter="{Binding}"   Clicked="ImageButtonClicked"  HeightRequest="25" WidthRequest="25" />
+                                    <ImageButton 
+                                            Source="{Binding FavoriteImageSource}"
+                                            Command="{Binding Path=BindingContext.SetFavoriteCommand, Source={x:Reference Name=TracksCollectionView}}"
+                                            CommandParameter="{Binding}" 
+                                            Clicked="ImageButtonClicked"  
+                                            HeightRequest="25" 
+                                            WidthRequest="25" />
                                 </StackLayout>
                             </Grid>
                         </DataTemplate>
@@ -119,8 +123,8 @@
                 </CollectionView>
 
             </StackLayout>
-            
+
         </VerticalStackLayout>
     </ScrollView>
-    
+
 </ContentPage>

@@ -1,6 +1,7 @@
 ﻿using DailyPlaylist.Services;
 using DailyPlaylist.View;
 using MauiAppDI.Helpers;
+using System.Linq;
 
 namespace DailyPlaylist.ViewModel
 {
@@ -18,7 +19,7 @@ namespace DailyPlaylist.ViewModel
         private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
         private bool _isLoading;
 
-
+        // PROPERTIES //
         public ObservableCollection<Track> SearchResults
         {
             get => _searchResults;
@@ -77,6 +78,8 @@ namespace DailyPlaylist.ViewModel
             set => SetProperty(ref _isLoading, value);
         }
 
+        // COMMANDS //
+
         public ICommand PlayPauseCommand { get; }
         public ICommand PlayFromCollectionViewCommand { get; }
         public ICommand SetFavoriteCommand { get; }
@@ -86,6 +89,8 @@ namespace DailyPlaylist.ViewModel
 
         public ICommand SearchCommand { get; }
 
+
+        // CONSTRUCTOR //
 
         public SearchViewModel(PlaylistViewModel playlistViewModel)
         {
@@ -134,31 +139,25 @@ namespace DailyPlaylist.ViewModel
             });
 
             _playlistViewModel = playlistViewModel;
-            SetFavoriteCommand = new Command<Track>(track =>
+
+            _playlistViewModel.SelectedPlaylistChanged += LoadSelectedFavoriteTrackUris;
+
+            SetFavoriteCommand = new Command<Track>(async track =>
             {
-                //SelectedTrack = track;
+                track.Favorite = !track.Favorite;
 
-                //var activePlaylist = _playlistViewModel.ActivePlaylist;
+                NavigationState.LastVisitedPage = nameof(SearchPage);
 
-                //if (activePlaylist == null)
-                //{
-                //    activePlaylist = new Playlist
-                //    {
-                //        User = new User(),
-                //        Name = "Name",
-                //        Description = "Description",
-                //        Tracks = new List<Track>()
-                //    };
-
-                //    _playlistViewModel.ActivePlaylist = activePlaylist;
-                //}
-
-                //if (!activePlaylist.Tracks.Contains(track))
-                //{
-                //    activePlaylist.Tracks.Add(track);
-                //}
-                // we'll need the PLaylistVM as a singleton to call it ?
-
+                if (track.Favorite)
+                {
+                    _playlistViewModel.SelectedPlaylist.DeezerTrackIds.Add(track.Id);
+                    await ShowSnackBarShortAsync("Song succesfully added to playlist '" + _playlistViewModel.SelectedPlaylist.Name + "' !", "OK", () => { });
+                }
+                else
+                {
+                    _playlistViewModel.SelectedPlaylist.DeezerTrackIds.Remove(track.Id);
+                    await ShowSnackBarShortAsync("Song removed from playlist '" + _playlistViewModel.SelectedPlaylist.Name + "' !", "OK", () => { });
+                }
             });
 
 
@@ -171,19 +170,22 @@ namespace DailyPlaylist.ViewModel
                 }
                 else
                 {
+                    var currentIndex = SearchResults.IndexOf(SelectedTrack);
+                    preStoredIndex = currentIndex;
+                    preStoredIndex++;
+                    if (preStoredIndex >= SearchResults.Count)
+                    {
+                        preStoredIndex = 0;
+                    }
+                    SelectedTrack = SearchResults[preStoredIndex];
+
                     if (NavigationState.LastVisitedPage != nameof(SearchPage))
                     {
-                        // preStoredIndex = SearchResults.IndexOf(SelectedTrack);
-                        preStoredIndex++;
-                        if (preStoredIndex >= SearchResults.Count)
-                        {
-                            preStoredIndex = 0;
-                        }
-                        SelectedTrack = SearchResults[preStoredIndex];
+                        
                     }
                     else
                     {
-                        SelectedTrack = await mediaPlayerService.PlayNextAsync();
+                        await mediaPlayerService.PlayNextAsync();
                     }  
                 }
             });
@@ -208,7 +210,8 @@ namespace DailyPlaylist.ViewModel
                     }
                     else
                     {
-                        SelectedTrack = await mediaPlayerService.PlayPreviousAsync();
+                        preStoredIndex = await mediaPlayerService.PlayPreviousAsync();
+                        SelectedTrack = SearchResults[preStoredIndex];
                     }
                 }
             });
@@ -223,7 +226,10 @@ namespace DailyPlaylist.ViewModel
             {
                 if (args.Position.TotalSeconds >= 28)
                 {
-                    HandleTrackFinishedSVM();
+                    if (NavigationState.LastVisitedPage == nameof(SearchPage))
+                    {
+                        HandleTrackFinishedSVM();
+                    }  
                 }
             };
 
@@ -233,18 +239,14 @@ namespace DailyPlaylist.ViewModel
 
         public void HandleTrackFinishedSVM()
         {
-            var mediaPlayer = mediaPlayerService;
-            if (mediaPlayer != null)
+            var currentIndex = CrossMediaManager.Current.Queue.CurrentIndex;
+            currentIndex++;
+            if (currentIndex >= SearchResults.Count)
             {
-                var currentIndex = CrossMediaManager.Current.Queue.CurrentIndex;
-                currentIndex++;
-                if (currentIndex >= SearchResults.Count)
-                {
-                    currentIndex = 0;
-                }
-                preStoredIndex = currentIndex;
-                SelectedTrack = SearchResults[currentIndex];
+                currentIndex = 0;
             }
+            preStoredIndex = currentIndex;
+            SelectedTrack = SearchResults[currentIndex];
         }
 
         private async void PerformSearch()
@@ -268,6 +270,7 @@ namespace DailyPlaylist.ViewModel
                 if (SearchResults.Any())
                 {
                     SelectedTrack = SearchResults[0];
+                    LoadSelectedFavoriteTrackUris();
                 }
                 else
                 {
@@ -294,6 +297,23 @@ namespace DailyPlaylist.ViewModel
             //... other properties or objects to catch eventually
         }
 
+        private void LoadSelectedFavoriteTrackUris()
+        {
+            var favoriteTrackIds = _playlistViewModel.SelectedPlaylist.DeezerTrackIds;
+
+            foreach (var track in SearchResults)
+            {
+                if (favoriteTrackIds.Contains(track.Id))
+                {
+                    track.Favorite = true;
+                }
+                else
+                {
+                    track.Favorite = false;
+                }
+            }
+        }
+
         public void Reset()
         {
             SearchResults = new ObservableCollection<Track>();
@@ -305,6 +325,27 @@ namespace DailyPlaylist.ViewModel
             ArtistName = "Artist";
             AlbumCover = "music_notes2.png";
             IsLoading = false;
+        }
+
+        public async Task ShowSnackBarShortAsync(string message, string actionText, Action action, int durationInSeconds = 2)
+        {
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+            var snackbarOptions = new SnackbarOptions
+            {
+                BackgroundColor = Colors.DarkSlateBlue,
+                TextColor = Colors.White,
+                ActionButtonTextColor = Colors.Orange,
+                CornerRadius = new CornerRadius(10),
+
+                Font = Microsoft.Maui.Font.SystemFontOfSize(16),
+                ActionButtonFont = Microsoft.Maui.Font.SystemFontOfSize(16),
+                CharacterSpacing = 0.1
+            };
+
+            var snackbar = Snackbar.Make(message, action, actionText, TimeSpan.FromSeconds(durationInSeconds), snackbarOptions);
+
+            await snackbar.Show(cancellationTokenSource.Token);
         }
 
     }

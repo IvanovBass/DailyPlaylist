@@ -36,7 +36,7 @@ namespace DailyPlaylist.Services
             {
                 if (args.Position.TotalSeconds >= 28)
                 {
-                    var track = await PlayNextAsync();
+                    await PlayNextAsync();
                 }
             };
         }
@@ -59,7 +59,7 @@ namespace DailyPlaylist.Services
             }
         }
 
-        public async Task<Track> PlayNextAsync()
+        public async Task PlayNextAsync()
         {
             storedIndex++;
             if (storedIndex >= _mediaItems.Count)
@@ -67,10 +67,9 @@ namespace DailyPlaylist.Services
                 storedIndex = 0;
             }
             await CrossMediaManager.Current.PlayQueueItem(storedIndex);
-            return _tracks[storedIndex];
         }
 
-        public async Task<Track> PlayPreviousAsync()
+        public async Task<int> PlayPreviousAsync()
         {
             if (CrossMediaManager.Current.Position.TotalSeconds < 3)
             {
@@ -82,7 +81,7 @@ namespace DailyPlaylist.Services
                 await CrossMediaManager.Current.SeekTo(TimeSpan.Zero);
             }
             await CrossMediaManager.Current.PlayQueueItem(storedIndex);
-            return _tracks[storedIndex];
+            return storedIndex;
         }
     }
 }
