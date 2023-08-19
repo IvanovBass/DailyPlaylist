@@ -8,6 +8,6 @@ namespace DailyPlaylist.View
 {
     public static class NavigationState
     {
-        public static string LastVisitedPage { get; set; }
+        public static string LastVisitedPage { get; set; } = "";
     }
 }

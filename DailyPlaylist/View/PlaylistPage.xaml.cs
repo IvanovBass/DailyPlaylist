@@ -29,10 +29,4 @@ public partial class PlaylistPage : ContentPage
         var button = sender as ImageButton;
         await AnimationHelper.AnimatePressedImageButton(button);
     }
-
-    protected override void OnDisappearing()
-    {
-        base.OnDisappearing();
-        NavigationState.LastVisitedPage = nameof(PlaylistPage);
-    }
 }

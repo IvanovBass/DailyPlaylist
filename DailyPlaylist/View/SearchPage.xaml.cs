@@ -36,10 +36,4 @@ public partial class SearchPage : ContentPage
         var button = sender as ImageButton;
         await AnimationHelper.AnimatePressedImageButton(button);
     }
-
-    protected override void OnDisappearing()
-    {
-        base.OnDisappearing();
-        NavigationState.LastVisitedPage = nameof(SearchPage);
-    }
 }

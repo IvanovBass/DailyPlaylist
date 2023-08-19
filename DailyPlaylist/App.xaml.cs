@@ -1,8 +1,4 @@
-﻿using DailyPlaylist.Services;
-using DailyPlaylist.ViewModel;
-using MauiAppDI.Helpers;
-
-namespace DailyPlaylist;
+﻿namespace DailyPlaylist;
 
 public partial class App : Application
 {
@@ -12,6 +8,20 @@ public partial class App : Application
 
         MainPage = new AppShell();
 
+    }
+
+    protected override void OnStart()
+    {
+        CrossMediaManager.Current.Init();
+    }
+
+    protected override void OnSleep()
+    {
+        CrossMediaManager.Current.Dispose();
+    }
+
+    protected override void OnResume()
+    {
         CrossMediaManager.Current.Init();
     }
 }

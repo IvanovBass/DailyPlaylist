@@ -8,7 +8,7 @@ namespace DailyPlaylist.Services
         public List<MediaItem> _mediaItems;
         public int storedIndex = 0;
 
-        public MediaPlayerService(List<Track> tracks)
+        public MediaPlayerService(List<Track> tracks, bool autoPlay)
         {
             _tracks = tracks ?? throw new ArgumentNullException(nameof(tracks));
 
@@ -23,13 +23,15 @@ namespace DailyPlaylist.Services
                 //  If I was to create a dedicated Page "Player" displaying the Track playing only, and its details, these metadata could be useful
             }).ToList();
 
-            CrossMediaManager.Current.Queue.Clear();
             CrossMediaManager.Current.Play(_mediaItems);
-            CrossMediaManager.Current.Stop();
-            if (storedIndex > 0 && storedIndex < CrossMediaManager.Current.Queue.Count) 
+            if (!autoPlay)
             {
-                CrossMediaManager.Current.PlayQueueItem(storedIndex);
+                CrossMediaManager.Current.Pause();
             }
+            //if (storedIndex > 0 && storedIndex < CrossMediaManager.Current.Queue.Count) 
+            //{
+            //    CrossMediaManager.Current.PlayQueueItem(storedIndex);
+            //}
             CrossMediaManager.Current.PositionChanged += async (sender, args) =>
             {
                 if (args.Position.TotalSeconds >= 28)

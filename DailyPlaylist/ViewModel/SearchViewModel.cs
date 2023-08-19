@@ -94,44 +94,43 @@ namespace DailyPlaylist.ViewModel
 
             PlayPauseCommand = new Command(async track =>
             {
-                if (SearchResults == null || !SearchResults.Any() || mediaPlayerService == null)
+                if (SearchResults == null || !SearchResults.Any())
                 {
                     await SnackBarVM.ShowSnackBarAsync("No track to play", "Dismiss", () => { });
                     return;
                 }
                 else
                 {
-                    if (NavigationState.LastVisitedPage == nameof(PlaylistPage))
+                    if (NavigationState.LastVisitedPage != nameof(SearchPage))
                     {
-                        await CrossMediaManager.Current.Stop();
                         CrossMediaManager.Current.Queue.Clear();
-                        mediaPlayerService = new MediaPlayerService(SearchResults.ToList());
+                        mediaPlayerService = new MediaPlayerService(SearchResults.ToList(), true);
                         await mediaPlayerService.PlayPauseTaskAsync(SearchResults.IndexOf(SelectedTrack));
                         NavigationState.LastVisitedPage = nameof(SearchPage);
                     }
                     else
                     {
                         await mediaPlayerService.PlayPauseTaskAsync(SearchResults.IndexOf(SelectedTrack));
-                    }          
+                    }
                 }
             });
 
             PlayFromCollectionViewCommand = new Command<Track>(async track =>
             {
                 SelectedTrack = track;
+                preStoredIndex = SearchResults.IndexOf(SelectedTrack);
 
-                if (NavigationState.LastVisitedPage == nameof(PlaylistPage))
+                if (NavigationState.LastVisitedPage != nameof(SearchPage))
                 {
-                    await CrossMediaManager.Current.Stop();
                     CrossMediaManager.Current.Queue.Clear();
-                    mediaPlayerService = new MediaPlayerService(SearchResults.ToList());
-                    await mediaPlayerService.PlayPauseTaskAsync(SearchResults.IndexOf(SelectedTrack));
+                    mediaPlayerService = new MediaPlayerService(SearchResults.ToList(), true);
+                    await mediaPlayerService.PlayPauseTaskAsync(preStoredIndex);
                     NavigationState.LastVisitedPage = nameof(SearchPage);
                 }
                 else
                 {
-                    await mediaPlayerService.PlayPauseTaskAsync(SearchResults.IndexOf(SelectedTrack));
-                }  
+                    await mediaPlayerService.PlayPauseTaskAsync(preStoredIndex);
+                }
             });
 
             _playlistViewModel = playlistViewModel;
@@ -165,27 +164,52 @@ namespace DailyPlaylist.ViewModel
 
             NextCommand = new Command<Track>(async track =>
             {
-                if (SearchResults == null || !SearchResults.Any() || mediaPlayerService == null)
+                if (SearchResults == null || !SearchResults.Any())
                 {
                     await SnackBarVM.ShowSnackBarAsync("No tracklist to be forwarded", "Dismiss", () => { });
                     return;
                 }
                 else
                 {
-                    SelectedTrack = await mediaPlayerService.PlayNextAsync();
+                    if (NavigationState.LastVisitedPage != nameof(SearchPage))
+                    {
+                        // preStoredIndex = SearchResults.IndexOf(SelectedTrack);
+                        preStoredIndex++;
+                        if (preStoredIndex >= SearchResults.Count)
+                        {
+                            preStoredIndex = 0;
+                        }
+                        SelectedTrack = SearchResults[preStoredIndex];
+                    }
+                    else
+                    {
+                        SelectedTrack = await mediaPlayerService.PlayNextAsync();
+                    }  
                 }
             });
 
             PreviousCommand = new Command<Track>(async track =>
             {
-                if (SearchResults == null || !SearchResults.Any() || mediaPlayerService == null)
+                if (SearchResults == null || !SearchResults.Any())
                 {
                     await SnackBarVM.ShowSnackBarAsync("No tracklist to be backwarded", "Dismiss", () => { });
                     return;
                 } 
                 else
                 {
-                    SelectedTrack = await mediaPlayerService.PlayPreviousAsync();
+                    if (NavigationState.LastVisitedPage != nameof(SearchPage))
+                    {
+                        preStoredIndex--;
+                        if (preStoredIndex < 0)
+                        {
+                            preStoredIndex = SearchResults.Count - 1;
+                        }
+                        SelectedTrack = SearchResults[preStoredIndex];
+                    }
+                    else
+                    {
+                        SelectedTrack = await mediaPlayerService.PlayPreviousAsync();
+                    }
                 }
             });
 
@@ -237,12 +261,12 @@ namespace DailyPlaylist.ViewModel
                 var jsonResponse = await client.GetStringAsync($"https://api.deezer.com/search/track?q={SearchQuery}&limit=30");
                 var searchData = JsonConvert.DeserializeObject<SearchData>(jsonResponse);
                 SearchResults = new ObservableCollection<Track>(searchData.Data);
+                await CrossMediaManager.Current.Pause();
+                CrossMediaManager.Current.Queue.Clear();
+                mediaPlayerService = new MediaPlayerService(searchData.Data, false);
 
                 if (SearchResults.Any())
                 {
-                    await CrossMediaManager.Current.Stop();
-                    CrossMediaManager.Current.Queue.Clear();
-                    mediaPlayerService = new MediaPlayerService(searchData.Data);
                     SelectedTrack = SearchResults[0];
                 }
                 else
