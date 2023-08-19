@@ -1,10 +1,51 @@
-﻿using Newtonsoft.Json;
-
+﻿using System.ComponentModel;
 
 namespace DailyPlaylist.Model
 {
-    public class Track
+    public class Track : INotifyPropertyChanged
     {
+        private string _favoriteImageSource;
+        private bool _favorite;
+
+
+        public bool Favorite
+        {
+            get => _favorite;
+            set
+            {
+                if (_favorite != value)
+                {
+                    _favorite = value;
+                    OnPropertyChanged(nameof(Favorite));
+                    FavoriteImageSource = _favorite ? "heart.png" : "non_favorite.png";
+                }
+            }
+        }
+        public string FavoriteImageSource
+        {
+            get => _favoriteImageSource;
+            set
+            {
+                if (_favoriteImageSource != value)
+                {
+                    _favoriteImageSource = value;
+                    OnPropertyChanged(nameof(FavoriteImageSource));
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public Track()
+        {
+            FavoriteImageSource = "non_favorite.png";
+        }
+
         [JsonProperty("id")]
         public long Id { get; set; }
 
