@@ -1,7 +1,13 @@
-﻿namespace DailyPlaylist.Model
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
+namespace DailyPlaylist.Model
 {
     public class Playlist
     {
+        private string _name;
+        private string _description;
+
         [JsonProperty(PropertyName = "_id")]
         public string Id { get; private set; } = Guid.NewGuid().ToString();
 
@@ -9,10 +15,32 @@
         public string UserId { get; set; }
 
         [JsonProperty(PropertyName = "name")]
-        public string Name { get; set; } = "Name";
+        public string Name
+        {
+            get => string.IsNullOrEmpty(_name) ? "Name" : _name;
+            set
+            {
+                if (_name != value)
+                {
+                    _name = value;
+                    OnPropertyChanged(nameof(Name));
+                }
+            }
+        }
 
         [JsonProperty(PropertyName = "description")]
-        public string Description { get; set; } = "Describe what makes your playlist special ...";
+        public string Description
+        {
+            get => string.IsNullOrEmpty(_description) ? "Describe what makes your Playlist special..." : _description;
+            set
+            {
+                if (_description != value)
+                {
+                    _description = value;
+                    OnPropertyChanged(nameof(Description));
+                }
+            }
+        }
 
         [JsonProperty(PropertyName = "deezerTrackIds")]
         public List<long> DeezerTrackIds { get; set; }
@@ -26,6 +54,13 @@
         public Playlist()
         {
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
     }
 
 }
