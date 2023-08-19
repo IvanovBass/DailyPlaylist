@@ -1,19 +1,33 @@
 using DailyPlaylist.ViewModel;
 using DailyPlaylist.Services;
+using MauiAppDI.Helpers;
 
 namespace DailyPlaylist.View;
 
 public partial class SearchPage : ContentPage
 {
 
-    private SearchViewModel _viewModel;
+    private SearchViewModel _searchViewModel;
+    private PlaylistViewModel _playlistViewModel;
 	public SearchPage()
 	{
 		InitializeComponent();
 
-        var viewModel = new SearchViewModel();
-        _viewModel = viewModel;
-		BindingContext = _viewModel;
+        var playlistViewModel = ServiceHelper.GetService<PlaylistViewModel>();
+        if (playlistViewModel != null)
+        {
+            _playlistViewModel = playlistViewModel;
+            BindingContext = _playlistViewModel;
+        }
+        else
+        {
+            BindingContext = null;
+            Application.Current.MainPage.DisplayAlert("Error", "There was an error loading the Playlist context, you won't be able to add songs to your favorite playlists. Consider logging out and back in", "OK");
+        }
+
+        var viewModel = new SearchViewModel(_playlistViewModel);
+        _searchViewModel = viewModel;
+		BindingContext = _searchViewModel;
 
     }
 
@@ -28,22 +42,4 @@ public partial class SearchPage : ContentPage
         base.OnDisappearing();
         NavigationState.LastVisitedPage = nameof(SearchPage);
     }
-
-    protected override void OnAppearing()
-    {
-        base.OnAppearing();
-
-        if (NavigationState.LastVisitedPage == nameof(PlaylistPage)
-            && _viewModel.SearchResults != null
-            && _viewModel.SearchResults is ObservableCollection<Track>)
-        {
-            CrossMediaManager.Current.Dispose();
-            CrossMediaManager.Current.Init();
-
-            var mediaPlayer = new MediaPlayerService(_viewModel.SearchResults.ToList());
-            mediaPlayer.storedIndex = _viewModel.preStoredIndex;
-        }
-    }
-
-
 }

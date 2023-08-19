@@ -1,4 +1,5 @@
 ﻿using DailyPlaylist.Services;
+using DailyPlaylist.View;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using System.Text;
@@ -8,13 +9,13 @@ namespace DailyPlaylist.ViewModel
     public class PlaylistViewModel : BaseViewModel
     {
         private readonly AuthService _authService ;
-        private MediaPlayerService _mediaPlayerService;
+        public MediaPlayerService mediaPlayerService;
         private User _activeUser;
         private ObservableCollection<Playlist> _userPlaylists;
         private Playlist _selectedPlaylist;
         private ObservableCollection<Track> _playlistTracks;
         private Track _selectedTrack;
-        public int preStoredIndex;
+        public int preStoredIndex = 0;
         private string _selectedTrackTitle = "Title";
         private string _selectedTrackArtist = "Artist";
         private string _selectedTrackCover = "music_notes.png";
@@ -41,14 +42,25 @@ namespace DailyPlaylist.ViewModel
 
             PlayPauseCommand = new Command(async track =>
             {
-                if (PlaylistTracks == null || !PlaylistTracks.Any() || _mediaPlayerService == null)
+                if (PlaylistTracks == null || !PlaylistTracks.Any() || mediaPlayerService == null)
                 {
                     await SnackBarVM.ShowSnackBarAsync("No track to play", "Dismiss", () => { });
                     return;
                 }
                 else
                 {
-                    await _mediaPlayerService.PlayPauseTaskAsync(preStoredIndex);
+                    if (NavigationState.LastVisitedPage == nameof(SearchPage))
+                    {
+                        await CrossMediaManager.Current.Stop();
+                        CrossMediaManager.Current.Queue.Clear();
+                        mediaPlayerService = new MediaPlayerService(PlaylistTracks.ToList());
+                        await mediaPlayerService.PlayPauseTaskAsync(PlaylistTracks.IndexOf(SelectedTrack));
+                        NavigationState.LastVisitedPage = nameof(PlaylistPage);
+                    } 
+                    else
+                    {
+                        await mediaPlayerService.PlayPauseTaskAsync(PlaylistTracks.IndexOf(SelectedTrack));
+                    } 
                 }
             });
 
@@ -57,32 +69,43 @@ namespace DailyPlaylist.ViewModel
                 SelectedTrack = track;
                 var currentIndex = PlaylistTracks.IndexOf(track);
                 preStoredIndex = currentIndex;
-                await _mediaPlayerService.PlayPauseTaskAsync(preStoredIndex);
+                if (NavigationState.LastVisitedPage == nameof(SearchPage))
+                {
+                    await CrossMediaManager.Current.Stop();
+                    CrossMediaManager.Current.Queue.Clear();
+                    mediaPlayerService = new MediaPlayerService(PlaylistTracks.ToList());
+                    await mediaPlayerService.PlayPauseTaskAsync(currentIndex);
+                    NavigationState.LastVisitedPage = nameof(PlaylistPage);
+                }
+                else
+                {
+                    await mediaPlayerService.PlayPauseTaskAsync(currentIndex);
+                }   
             });
 
             NextCommand = new Command<Track>(async track =>
             {
-                if (PlaylistTracks == null || !PlaylistTracks.Any() || _mediaPlayerService == null)
+                if (PlaylistTracks == null || !PlaylistTracks.Any() || mediaPlayerService == null)
                 {
                     await SnackBarVM.ShowSnackBarAsync("No tracklist to be forwarded", "Dismiss", () => { });
                     return;
                 }
                 else
                 {
-                    SelectedTrack = await _mediaPlayerService.PlayNextAsync();
+                    SelectedTrack = await mediaPlayerService.PlayNextAsync();
                 }
             });
 
             PreviousCommand = new Command<Track>(async track =>
             {
-                if (PlaylistTracks == null || !PlaylistTracks.Any() || _mediaPlayerService == null)
+                if (PlaylistTracks == null || !PlaylistTracks.Any() || mediaPlayerService == null)
                 {
                     await SnackBarVM.ShowSnackBarAsync("No tracklist to be backwarded", "Dismiss", () => { });
                     return;
                 }
                 else
                 {
-                    SelectedTrack = await _mediaPlayerService.PlayPreviousAsync();
+                    SelectedTrack = await mediaPlayerService.PlayPreviousAsync();
                 }
             });
 
@@ -90,7 +113,7 @@ namespace DailyPlaylist.ViewModel
             {
                 if (args.Position.TotalSeconds >= 28)
                 {
-                    HandleTrackFinished();
+                    HandleTrackFinishedPVM();
                 }
             };
 
@@ -261,10 +284,9 @@ namespace DailyPlaylist.ViewModel
             }
             PlaylistTracks = cachedPlaylist;
 
+            await CrossMediaManager.Current.Stop();
             CrossMediaManager.Current.Queue.Clear();
-            CrossMediaManager.Current.Dispose();
-            CrossMediaManager.Current.Init();
-            _mediaPlayerService = new MediaPlayerService(cachedPlaylist.ToList());
+            mediaPlayerService = new MediaPlayerService(cachedPlaylist.ToList());
 
             if (PlaylistTracks.Any())
             {
@@ -338,26 +360,20 @@ namespace DailyPlaylist.ViewModel
             return null;
         }
 
-        public void HandleTrackFinished()
+        public void HandleTrackFinishedPVM()
         {
-            var currentMediaUri = CrossMediaManager.Current.Queue.Current.MediaUri.ToString();
-
-            var currentTrack = PlaylistTracks.FirstOrDefault(t => t.Preview == currentMediaUri);
-            if (currentTrack == null)
+            var mediaPlayer = mediaPlayerService;
+            if (mediaPlayer != null)
             {
-                preStoredIndex = 0;
-                SelectedTrack = PlaylistTracks[0];
-                return;
+                var currentIndex = CrossMediaManager.Current.Queue.CurrentIndex;
+                currentIndex++;
+                if (currentIndex >= PlaylistTracks.Count)
+                {
+                    currentIndex = 0;
+                }
+                preStoredIndex = currentIndex;
+                SelectedTrack = PlaylistTracks[currentIndex];
             }
-
-            var currentIndex = PlaylistTracks.IndexOf(currentTrack);
-            currentIndex++;
-            if (currentIndex >= PlaylistTracks.Count)
-            {
-                currentIndex = 0;
-            }
-            preStoredIndex = currentIndex;
-            SelectedTrack = PlaylistTracks[currentIndex];
         }
 
         private void Reset()

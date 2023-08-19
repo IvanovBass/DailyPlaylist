@@ -39,9 +39,9 @@ public static class MauiProgram
 
         builder.Services.AddTransient<PlaylistPage>();
 
-        builder.Services.AddTransient<PlaylistViewModel>();
-
         builder.Services.AddSingleton<AuthService>();
+
+        builder.Services.AddSingleton<PlaylistViewModel>();
 
         builder.Services.AddSingleton<HttpClient>();
 

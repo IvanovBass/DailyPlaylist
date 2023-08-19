@@ -1,4 +1,5 @@
 using DailyPlaylist.Services;
+using DailyPlaylist.ViewModel;
 using MauiAppDI.Helpers;
 
 
@@ -6,12 +7,16 @@ namespace DailyPlaylist.View
 {
     public partial class HomePage : ContentPage
     {
+        private AuthService _authService;
+        private PlaylistViewModel _playlistViewModel;
         public HomePage()
         {
             InitializeComponent();
             StartAnimations();
 
             _ = InitializeAsync();
+
+            _playlistViewModel = new PlaylistViewModel(_authService);
         }
 
         private async Task InitializeAsync()
@@ -21,12 +26,13 @@ namespace DailyPlaylist.View
                 var authService = ServiceHelper.GetService<AuthService>();
                 if (authService != null)
                 {
-                    string emailUser = authService.WhoIsAuthenticatedAsync();
+                    _authService = authService;
+                    string emailUser = _authService.WhoIsAuthenticatedAsync();
                     User authUser = await authService.RetrieveUserAsync(emailUser);
 
                     if (authUser != null && authUser is User)
                     {
-                        authService.ActiveUser = authUser;
+                        _authService.ActiveUser = authUser;
                     }
                 }
             }
@@ -67,12 +73,6 @@ namespace DailyPlaylist.View
                 await PlaylistGenBtn.ScaleTo(1.15, 700, Easing.SinIn);
                 await PlaylistGenBtn.ScaleTo(1, 600, Easing.SinOut);
             }
-        }
-
-        protected override void OnDisappearing()
-        {
-            base.OnDisappearing();
-            NavigationState.LastVisitedPage = nameof(HomePage);
         }
     }
 }

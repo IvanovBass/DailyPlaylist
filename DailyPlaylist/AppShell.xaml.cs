@@ -19,6 +19,5 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(PlaylistConfigPage), typeof(PlaylistConfigPage));
 
         BindingContext = new LogoutViewModel();
-
     }
 }
