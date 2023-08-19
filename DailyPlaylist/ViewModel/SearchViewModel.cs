@@ -1,12 +1,14 @@
 ﻿using DailyPlaylist.Services;
+using DailyPlaylist.View;
 using MauiAppDI.Helpers;
 
 namespace DailyPlaylist.ViewModel
 {
     public class SearchViewModel : BaseViewModel
     {
+        private PlaylistViewModel _playlistViewModel;
         private ObservableCollection<Track> _searchResults;
-        public int preStoredIndex; 
+        public int preStoredIndex = 0; 
         public MediaPlayerService mediaPlayerService;
         private string _searchQuery;
         private Track _selectedTrack;
@@ -85,7 +87,7 @@ namespace DailyPlaylist.ViewModel
         public ICommand SearchCommand { get; }
 
 
-        public SearchViewModel()  // will probably have to put the Active Playlist or the PlaylisVM in DI
+        public SearchViewModel(PlaylistViewModel playlistViewModel)
         {
             SearchCommand = new Command(PerformSearch);
             SearchResults = new ObservableCollection<Track>();
@@ -99,16 +101,40 @@ namespace DailyPlaylist.ViewModel
                 }
                 else
                 {
-                    await mediaPlayerService.PlayPauseTaskAsync(preStoredIndex);
+                    if (NavigationState.LastVisitedPage == nameof(PlaylistPage))
+                    {
+                        await CrossMediaManager.Current.Stop();
+                        CrossMediaManager.Current.Queue.Clear();
+                        mediaPlayerService = new MediaPlayerService(SearchResults.ToList());
+                        await mediaPlayerService.PlayPauseTaskAsync(SearchResults.IndexOf(SelectedTrack));
+                        NavigationState.LastVisitedPage = nameof(SearchPage);
+                    }
+                    else
+                    {
+                        await mediaPlayerService.PlayPauseTaskAsync(SearchResults.IndexOf(SelectedTrack));
+                    }          
                 }
             });
 
             PlayFromCollectionViewCommand = new Command<Track>(async track =>
             {
                 SelectedTrack = track;
-                await mediaPlayerService.PlayPauseTaskAsync(preStoredIndex);
+
+                if (NavigationState.LastVisitedPage == nameof(PlaylistPage))
+                {
+                    await CrossMediaManager.Current.Stop();
+                    CrossMediaManager.Current.Queue.Clear();
+                    mediaPlayerService = new MediaPlayerService(SearchResults.ToList());
+                    await mediaPlayerService.PlayPauseTaskAsync(SearchResults.IndexOf(SelectedTrack));
+                    NavigationState.LastVisitedPage = nameof(SearchPage);
+                }
+                else
+                {
+                    await mediaPlayerService.PlayPauseTaskAsync(SearchResults.IndexOf(SelectedTrack));
+                }  
             });
 
+            _playlistViewModel = playlistViewModel;
             SetFavoriteCommand = new Command<Track>(track =>
             {
                 //SelectedTrack = track;
@@ -173,7 +199,7 @@ namespace DailyPlaylist.ViewModel
             {
                 if (args.Position.TotalSeconds >= 28)
                 {
-                    HandleTrackFinished();
+                    HandleTrackFinishedSVM();
                 }
             };
 
@@ -181,26 +207,20 @@ namespace DailyPlaylist.ViewModel
 
         }
 
-        public void HandleTrackFinished()
+        public void HandleTrackFinishedSVM()
         {
-            var currentMediaUri = CrossMediaManager.Current.Queue.Current.MediaUri.ToString();
-
-            var currentTrack = SearchResults.FirstOrDefault(t => t.Preview == currentMediaUri);
-            if (currentTrack == null)
+            var mediaPlayer = mediaPlayerService;
+            if (mediaPlayer != null)
             {
-                preStoredIndex = 0;
-                SelectedTrack = SearchResults[0];
-                return;
+                var currentIndex = CrossMediaManager.Current.Queue.CurrentIndex;
+                currentIndex++;
+                if (currentIndex >= SearchResults.Count)
+                {
+                    currentIndex = 0;
+                }
+                preStoredIndex = currentIndex;
+                SelectedTrack = SearchResults[currentIndex];
             }
-
-            var currentIndex = SearchResults.IndexOf(currentTrack);
-            currentIndex++;
-            if (currentIndex >= SearchResults.Count)
-            {
-                currentIndex = 0;
-            }
-            preStoredIndex = currentIndex;
-            SelectedTrack = SearchResults[currentIndex];
         }
 
         private async void PerformSearch()
@@ -220,9 +240,8 @@ namespace DailyPlaylist.ViewModel
 
                 if (SearchResults.Any())
                 {
+                    await CrossMediaManager.Current.Stop();
                     CrossMediaManager.Current.Queue.Clear();
-                    CrossMediaManager.Current.Dispose();
-                    CrossMediaManager.Current.Init();
                     mediaPlayerService = new MediaPlayerService(searchData.Data);
                     SelectedTrack = SearchResults[0];
                 }

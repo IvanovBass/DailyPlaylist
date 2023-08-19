@@ -6,7 +6,7 @@ namespace DailyPlaylist.Services
     {
         public List<Track> _tracks;
         public List<MediaItem> _mediaItems;
-        public int storedIndex;
+        public int storedIndex = 0;
 
         public MediaPlayerService(List<Track> tracks)
         {
@@ -25,22 +25,24 @@ namespace DailyPlaylist.Services
 
             CrossMediaManager.Current.Queue.Clear();
             CrossMediaManager.Current.Play(_mediaItems);
+            CrossMediaManager.Current.Stop();
             if (storedIndex > 0 && storedIndex < CrossMediaManager.Current.Queue.Count) 
             {
                 CrossMediaManager.Current.PlayQueueItem(storedIndex);
             }
-            CrossMediaManager.Current.Stop();
             CrossMediaManager.Current.PositionChanged += async (sender, args) =>
             {
                 if (args.Position.TotalSeconds >= 28)
                 {
-                    await PlayNextAsync();
+                    var track = await PlayNextAsync();
                 }
             };
         }
 
         public async Task PlayPauseTaskAsync(int index)
         {
+  
+            storedIndex = index;
             if (CrossMediaManager.Current.Queue.CurrentIndex == index && CrossMediaManager.Current.IsPlaying())
             {
                 await CrossMediaManager.Current.Pause();
@@ -51,7 +53,6 @@ namespace DailyPlaylist.Services
             }
             else
             {
-                storedIndex = index;
                 await CrossMediaManager.Current.PlayQueueItem(index);
             }
         }
