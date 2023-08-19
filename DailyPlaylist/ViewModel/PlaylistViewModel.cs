@@ -36,6 +36,8 @@ namespace DailyPlaylist.ViewModel
 
             _activeUser = _authService.ActiveUser;
 
+            UserPlaylists = new ObservableCollection<Playlist>();
+
             _ = InitializationAsync();
 
             SelectedPlaylistChanged?.Invoke(); 
@@ -154,6 +156,36 @@ namespace DailyPlaylist.ViewModel
                 PromptCreateEvent?.Invoke();
             });
 
+            DeleteFromPlaylistCollectionCommand = new Command<Track>(async track =>
+            {
+                int index = PlaylistTracks.IndexOf(track);
+
+                if (index >= 0)
+                {
+
+                    SelectedPlaylist.DeezerTrackIds.Remove(track.Id);
+                    PlaylistTracks.RemoveAt(index);
+                    if (index < CrossMediaManager.Current.Queue.Count())
+                    {
+                        CrossMediaManager.Current.Queue.RemoveAt(index);
+                    }
+                    await SnackBarVM.ShowSnackBarShortAsync($"Song '{track.Title}' removed from playlist '{SelectedPlaylist.Name}'!", "OK", () => { });
+                }
+                else
+                {
+                    await SnackBarVM.ShowSnackBarShortAsync($"Song '{track.Title}' not found in playlist '{SelectedPlaylist.Name}'", "OK", () => { });
+                }
+            });
+
+            DeleteCommand = new Command(async () =>
+            {
+
+                bool confirmDelete = await Application.Current.MainPage.DisplayAlert("Delete Playlist", "Are you sure you want to delete the current playlist?", "Yes", "No");
+                if (!confirmDelete) return;
+                UserPlaylists.Remove(SelectedPlaylist);
+                SelectedPlaylist = UserPlaylists.OrderByDescending(p => p.DateUpdated).FirstOrDefault();
+                await DeletePlaylistInBackend(SelectedPlaylist.Id);
+            });
 
             CrossMediaManager.Current.PositionChanged += (sender, args) =>
             {
@@ -186,8 +218,11 @@ namespace DailyPlaylist.ViewModel
             get => _userPlaylists;
             set
             {
-                _userPlaylists = value;
-                OnPropertyChanged(nameof(UserPlaylists));
+                if (value != null && value != _userPlaylists)
+                {
+                    _userPlaylists = value;
+                    OnPropertyChanged(nameof(UserPlaylists));
+                }
             }
         }
 
@@ -299,12 +334,14 @@ namespace DailyPlaylist.ViewModel
 
         public ICommand PlayPauseCommand { get; }
         public ICommand PlayFromPlaylistCollectionCommand { get; }
-        public ICommand DeleteFromCollectionViewCommand { get; }
+        public ICommand DeleteFromPlaylistCollectionCommand { get; }
         public ICommand NextCommand { get; }
         public ICommand PreviousCommand { get; }
         public ICommand ItemSelectedCommand { get; }
         public ICommand EditCommand { get; }
         public ICommand CreateCommand { get; }
+        public ICommand DeleteCommand { get; }
+        public ICommand SaveCommand { get; }
 
 
 
@@ -314,14 +351,12 @@ namespace DailyPlaylist.ViewModel
         {
             await LoadUserPlaylists();
 
-            OrderPlaylistByDate(UserPlaylists);
-
-            if (_userPlaylists != null && _userPlaylists.Any())
+            if (UserPlaylists != null && UserPlaylists.Any())
             {
-                SelectedPlaylist = _selectedPlaylist = _userPlaylists.First();
+                OrderPlaylistByDate(UserPlaylists); // Order the Playlists by DateUpdated
+                _selectedPlaylist = _userPlaylists.First();
+                LoadTracksForPlaylist(_selectedPlaylist);
             }
-
-            LoadTracksForPlaylist(_selectedPlaylist);
         }
 
         private async Task LoadUserPlaylists()
@@ -381,7 +416,6 @@ namespace DailyPlaylist.ViewModel
             }
         }
 
-
         public async Task<List<Playlist>> RetrievePlaylistsAsync(string playlistUserId)
         {
             var requestUri = "https://eu-central-1.aws.data.mongodb-api.com/app/data-httpe/endpoint/data/v1/action/find";
@@ -433,13 +467,26 @@ namespace DailyPlaylist.ViewModel
                         return playlists;
                     }
                 }
+                else
+                {
+                    if (!string.IsNullOrEmpty(NavigationState.LastVisitedPage))
+                    {
+                        await SnackBarVM.ShowSnackBarAsync("You have not yet created any playlist, consider creating some ;)", "Dismiss", () => { });
+                    }
+                }
             }
-
             return null;
+        }
+
+        private async Task DeletePlaylistInBackend(string playlistId)
+        {
+            // TODO: Implement API call to delete the playlist with the given ID from MongoDB
         }
 
         public void HandleTrackFinishedPVM()
         {
+            if (PlaylistTracks == null) return;
+
             var currentIndex = CrossMediaManager.Current.Queue.CurrentIndex;
             currentIndex++;
             if (currentIndex >= PlaylistTracks.Count())
@@ -447,7 +494,10 @@ namespace DailyPlaylist.ViewModel
                 currentIndex = 0;
             }
             preStoredIndexPVM = currentIndex;
-            SelectedTrackPVM = PlaylistTracks[currentIndex];
+            if (preStoredIndexPVM >= 0 && preStoredIndexPVM < PlaylistTracks.Count())
+            {
+                SelectedTrackPVM = PlaylistTracks[preStoredIndexPVM];
+            }  
         }
 
         private void Reset()

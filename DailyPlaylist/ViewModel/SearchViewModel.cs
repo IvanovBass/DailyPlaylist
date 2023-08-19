@@ -239,14 +239,19 @@ namespace DailyPlaylist.ViewModel
 
         public void HandleTrackFinishedSVM()
         {
+            if (SearchResults == null) return;
+
             var currentIndex = CrossMediaManager.Current.Queue.CurrentIndex;
             currentIndex++;
-            if (currentIndex >= SearchResults.Count)
+            if (currentIndex >= SearchResults.Count())
             {
                 currentIndex = 0;
             }
             preStoredIndex = currentIndex;
-            SelectedTrack = SearchResults[currentIndex];
+            if (preStoredIndex >= 0 && preStoredIndex < SearchResults.Count())
+            {
+                SelectedTrack = SearchResults[preStoredIndex];
+            }
         }
 
         private async void PerformSearch()
@@ -297,8 +302,10 @@ namespace DailyPlaylist.ViewModel
             //... other properties or objects to catch eventually
         }
 
-        private void LoadSelectedFavoriteTrackUris()
+        public void LoadSelectedFavoriteTrackUris()
         {
+            if (_playlistViewModel.SelectedPlaylist == null) { return; }
+
             var favoriteTrackIds = _playlistViewModel.SelectedPlaylist.DeezerTrackIds;
 
             foreach (var track in SearchResults)

@@ -31,6 +31,14 @@ public partial class SearchPage : ContentPage
 
     }
 
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        if (NavigationState.LastVisitedPage == nameof(PlaylistPage))
+        {
+            _searchViewModel.LoadSelectedFavoriteTrackUris();
+        }
+    }
     private async void ImageButtonClicked(object sender, EventArgs e)
     {
         var button = sender as ImageButton;
