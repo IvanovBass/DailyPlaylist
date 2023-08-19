@@ -151,12 +151,12 @@ namespace DailyPlaylist.ViewModel
                 if (track.Favorite)
                 {
                     _playlistViewModel.SelectedPlaylist.DeezerTrackIds.Add(track.Id);
-                    await ShowSnackBarShortAsync("Song succesfully added to playlist '" + _playlistViewModel.SelectedPlaylist.Name + "' !", "OK", () => { });
+                    await SnackBarVM.ShowSnackBarShortAsync("Song succesfully added to playlist '" + _playlistViewModel.SelectedPlaylist.Name + "' !", "OK", () => { });
                 }
                 else
                 {
                     _playlistViewModel.SelectedPlaylist.DeezerTrackIds.Remove(track.Id);
-                    await ShowSnackBarShortAsync("Song removed from playlist '" + _playlistViewModel.SelectedPlaylist.Name + "' !", "OK", () => { });
+                    await SnackBarVM.ShowSnackBarShortAsync("Song removed from playlist '" + _playlistViewModel.SelectedPlaylist.Name + "' !", "OK", () => { });
                 }
             });
 
@@ -326,28 +326,6 @@ namespace DailyPlaylist.ViewModel
             AlbumCover = "music_notes2.png";
             IsLoading = false;
         }
-
-        public async Task ShowSnackBarShortAsync(string message, string actionText, Action action, int durationInSeconds = 2)
-        {
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-
-            var snackbarOptions = new SnackbarOptions
-            {
-                BackgroundColor = Colors.DarkSlateBlue,
-                TextColor = Colors.White,
-                ActionButtonTextColor = Colors.Orange,
-                CornerRadius = new CornerRadius(10),
-
-                Font = Microsoft.Maui.Font.SystemFontOfSize(16),
-                ActionButtonFont = Microsoft.Maui.Font.SystemFontOfSize(16),
-                CharacterSpacing = 0.1
-            };
-
-            var snackbar = Snackbar.Make(message, action, actionText, TimeSpan.FromSeconds(durationInSeconds), snackbarOptions);
-
-            await snackbar.Show(cancellationTokenSource.Token);
-        }
-
     }
 }
 

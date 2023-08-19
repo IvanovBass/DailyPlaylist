@@ -25,6 +25,7 @@ namespace DailyPlaylist.ViewModel
         private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
         public event Action SelectedPlaylistChanged;
         public event Action PromptEditEvent;
+        public event Action PromptCreateEvent;
 
 
         // CONSTRUCTOR //
@@ -148,6 +149,11 @@ namespace DailyPlaylist.ViewModel
                 PromptEditEvent?.Invoke();
             });
 
+            CreateCommand = new Command(void () =>
+            {
+                PromptCreateEvent?.Invoke();
+            });
+
 
             CrossMediaManager.Current.PositionChanged += (sender, args) =>
             {
@@ -165,6 +171,15 @@ namespace DailyPlaylist.ViewModel
         }
 
         // PROPERTIES //
+
+        public User ActiveUser
+        {
+            get => _activeUser;
+            set
+            {
+                _activeUser = value;
+            }
+        }
 
         public ObservableCollection<Playlist> UserPlaylists
         {
@@ -289,6 +304,8 @@ namespace DailyPlaylist.ViewModel
         public ICommand PreviousCommand { get; }
         public ICommand ItemSelectedCommand { get; }
         public ICommand EditCommand { get; }
+        public ICommand CreateCommand { get; }
+
 
 
         // METHODS //
@@ -317,7 +334,8 @@ namespace DailyPlaylist.ViewModel
             if (playlistsToOrder != null)
             {
                 playlistsToOrder = new ObservableCollection<Playlist>(
-                playlistsToOrder.OrderByDescending(p => p.DateUpdated));  // because DateUpdated is initialized with the CreateDate = DateTimeNow and will evovle at each change
+                playlistsToOrder.OrderByDescending(p => p.DateUpdated));  
+                // because DateUpdated is initialized with the CreateDate = DateTimeNow and will evovle at each change
             }
         }
 
@@ -424,7 +442,7 @@ namespace DailyPlaylist.ViewModel
         {
             var currentIndex = CrossMediaManager.Current.Queue.CurrentIndex;
             currentIndex++;
-            if (currentIndex >= PlaylistTracks.Count)
+            if (currentIndex >= PlaylistTracks.Count())
             {
                 currentIndex = 0;
             }

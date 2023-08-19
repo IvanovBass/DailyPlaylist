@@ -17,6 +17,8 @@ public partial class PlaylistPage : ContentPage
             _playlistViewModel = playlistViewModel;
             BindingContext = _playlistViewModel;
             _playlistViewModel.PromptEditEvent += PromptMessageEditAsync;
+            _playlistViewModel.PromptCreateEvent += PromptCreateAsync;
+
         }
         else 
         { 
@@ -52,9 +54,33 @@ public partial class PlaylistPage : ContentPage
                 var tempList = new ObservableCollection<Playlist>(_playlistViewModel.UserPlaylists);
                 _playlistViewModel.SelectedPlaylist.Name = newName;
                 _playlistViewModel.SelectedPlaylist.Description = newDescription;
+                // _playlistViewModel.SelectedPlaylist.DateUpdated = DateTime.Now;  for the Save process
                 _playlistViewModel.UserPlaylists = tempList;
             }
         }
     }
 
+    public async void PromptCreateAsync()
+    {
+        var newName = await DisplayPromptAsync("Create Playlist", "Enter playlist name:", "OK", "Cancel");
+        if (!string.IsNullOrEmpty(newName))
+        {
+            var newDescription = await DisplayPromptAsync("Create Playlist", "Enter playlist description:", "OK", "Cancel");
+            if (!string.IsNullOrEmpty(newDescription))
+            {
+                var newPlaylist = new Playlist
+                {
+                    UserId = _playlistViewModel.ActiveUser.Id,
+                    Name = newName,
+                    Description = newDescription,
+                    DeezerTrackIds = new List<long>()
+                };
+
+                _playlistViewModel.UserPlaylists.Add(newPlaylist);
+                _playlistViewModel.SelectedPlaylist = newPlaylist;
+
+                await SnackBarVM.ShowSnackBarShortAsync("Playlist '" + newName + "' succesfully created !", "OK", () => { });
+            }
+        }
+    }
 }
