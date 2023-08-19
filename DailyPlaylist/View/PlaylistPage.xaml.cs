@@ -16,6 +16,7 @@ public partial class PlaylistPage : ContentPage
         {
             _playlistViewModel = playlistViewModel;
             BindingContext = _playlistViewModel;
+            _playlistViewModel.PromptEditEvent += PromptMessageEditAsync;
         }
         else 
         { 
@@ -38,6 +39,22 @@ public partial class PlaylistPage : ContentPage
             _playlistViewModel.LoadTracksForPlaylist(_playlistViewModel.SelectedPlaylist);
         }
         
+    }
+    public async void PromptMessageEditAsync()
+    {
+        var newName = await DisplayPromptAsync("Edit Playlist", "Enter new name:", "OK", "Cancel", _playlistViewModel.SelectedPlaylist.Name);
+        if (!string.IsNullOrEmpty(newName))
+        {
+
+            var newDescription = await DisplayPromptAsync("Edit Playlist", "Enter new description:", "OK", "Cancel", _playlistViewModel.SelectedPlaylist.Description);
+            if (!string.IsNullOrEmpty(newDescription))
+            {
+                var tempList = new ObservableCollection<Playlist>(_playlistViewModel.UserPlaylists);
+                _playlistViewModel.SelectedPlaylist.Name = newName;
+                _playlistViewModel.SelectedPlaylist.Description = newDescription;
+                _playlistViewModel.UserPlaylists = tempList;
+            }
+        }
     }
 
 }

@@ -39,12 +39,23 @@
                                    x:Name="ForwardButton" Clicked="ImageButtonClicked"/>
             </StackLayout>
 
-            <Picker Title="Select a playlist" x:Name="PlaylistPicker" ItemsSource="{Binding UserPlaylists}" ItemDisplayBinding="{Binding Name}" TextColor="{StaticResource Primary}"
-                    SelectedItem="{Binding SelectedPlaylist}" FontSize="Large" HorizontalOptions="Center"  MinimumWidthRequest="250" HorizontalTextAlignment="Center">
-            <Picker.Items>
-
-                </Picker.Items>
-            </Picker>
+            <StackLayout   Orientation="Horizontal" Spacing="10"  Margin="0,0,0,8">
+                <Picker Title="Select a playlist" x:Name="PlaylistPicker" ItemsSource="{Binding UserPlaylists}" ItemDisplayBinding="{Binding Name}" TextColor="{StaticResource Primary}"
+                    SelectedItem="{Binding SelectedPlaylist}" FontSize="Large" HorizontalOptions="StartAndExpand"  MinimumWidthRequest="180" HorizontalTextAlignment="Start">
+                    <Picker.Items>
+                    </Picker.Items>
+                </Picker>
+                <StackLayout Orientation="Horizontal" Spacing="11">
+                    <ImageButton   HeightRequest="33" WidthRequest="33"  Source="save.png" Command="{Binding SaveCommand}" 
+                                   x:Name="SaveButton" Clicked="ImageButtonClicked"/>
+                    <ImageButton   HeightRequest="33" WidthRequest="33"  Source="create.png" Command="{Binding CreateCommand}" 
+                                   x:Name="CreateButton" Clicked="ImageButtonClicked"/>
+                    <ImageButton   HeightRequest="33" WidthRequest="33"  Source="edit.png" Command="{Binding EditCommand}" 
+                                   x:Name="EditButton" Clicked="ImageButtonClicked"/>
+                    <ImageButton   HeightRequest="33" WidthRequest="33"  Source="delete.png" Command="{Binding DeleteCommand}" 
+                                   x:Name="DeleteButton" Clicked="ImageButtonClicked"/>
+                </StackLayout>
+            </StackLayout>
 
             <StackLayout  Padding="10,10">
 

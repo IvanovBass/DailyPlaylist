@@ -24,6 +24,7 @@ namespace DailyPlaylist.ViewModel
         private readonly string _apiKey = "BhSU3Kx9cS7norilVbrWO6JicjdihtQUnYZOhrU7Js8GYSYIqQOka0uh1znKlf7H";
         private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
         public event Action SelectedPlaylistChanged;
+        public event Action PromptEditEvent;
 
 
         // CONSTRUCTOR //
@@ -142,6 +143,12 @@ namespace DailyPlaylist.ViewModel
                 }
             });
 
+            EditCommand = new Command( void () =>
+            {
+                PromptEditEvent?.Invoke();
+            });
+
+
             CrossMediaManager.Current.PositionChanged += (sender, args) =>
             {
                 if (args.Position.TotalSeconds >= 28)
@@ -247,21 +254,28 @@ namespace DailyPlaylist.ViewModel
 
         public string Description
         {
-            get => _description;
+            get => _selectedPlaylist?.Description;
             set
             {
-                _description = value;
-                OnPropertyChanged(nameof(Description));
+                if (_selectedPlaylist.Description != value)
+                {
+                    _selectedPlaylist.Description = value;
+                    OnPropertyChanged(nameof(Description));
+
+                }
             }
         }
 
         public string Name
         {
-            get => _name;
+            get => _selectedPlaylist?.Name;
             set
             {
-                _name = value;
-                OnPropertyChanged(nameof(Name));
+                if (_selectedPlaylist.Name != value)
+                {
+                    _selectedPlaylist.Name = value;
+                    OnPropertyChanged(nameof(Name));
+                }
             }
         }
 
@@ -274,6 +288,8 @@ namespace DailyPlaylist.ViewModel
         public ICommand NextCommand { get; }
         public ICommand PreviousCommand { get; }
         public ICommand ItemSelectedCommand { get; }
+        public ICommand EditCommand { get; }
+
 
         // METHODS //
 
