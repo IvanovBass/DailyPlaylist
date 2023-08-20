@@ -34,6 +34,10 @@ namespace DailyPlaylist.View
                     {
                         _authService.ActiveUser = authUser;
                     }
+                    else 
+                    {
+                        await SnackBarVM.ShowSnackBarAsync("Problem to retrieve your playlists and details from server, please try gain to log in", "Dismiss", () => { });
+                    }
                 }
             }
             catch (Exception ex)
@@ -41,7 +45,9 @@ namespace DailyPlaylist.View
                 Debug.WriteLine(ex.Message);
             }
         }
-
+        /// <summary>
+        ///  je sais pas ce qui merde ici ça saoule ... User est bien retrieved, mais la Plylist Viewmode commence à se construire sans le User, c'est un nouveau User
+        /// </summary>
 
         private async void StartAnimations()
         {
@@ -75,4 +81,5 @@ namespace DailyPlaylist.View
             }
         }
     }
+
 }

@@ -8,7 +8,7 @@ namespace DailyPlaylist.ViewModel
 {
     public class PlaylistViewModel : BaseViewModel
     {
-        private readonly AuthService _authService ;
+        private readonly AuthService _authService;
         public MediaPlayerService mediaPlayerService;
         private User _activeUser;
         private ObservableCollection<Playlist> _userPlaylists;
@@ -21,7 +21,7 @@ namespace DailyPlaylist.ViewModel
         private string _selectedTrackCover = "music_notes.png";
         private string _description = "Describe what makes this playlist special ...";
         private string _name = "Name ...";
-        private readonly string _apiKey = "BhSU3Kx9cS7norilVbrWO6JicjdihtQUnYZOhrU7Js8GYSYIqQOka0uh1znKlf7H";
+        private readonly string _apiKey = "19ORABeXOuwTOxF2KEW1tzNcqUpjbbiTee3TuNEgkNtesrk9wIPW7wvUqhda8inT";
         private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
         public event Action SelectedPlaylistChanged;
         public event Action PromptEditEvent;
@@ -40,7 +40,7 @@ namespace DailyPlaylist.ViewModel
 
             _ = InitializationAsync();
 
-            SelectedPlaylistChanged?.Invoke(); 
+            SelectedPlaylistChanged?.Invoke();
 
             ItemSelectedCommand = new Command<Track>(track =>
             {
@@ -68,7 +68,7 @@ namespace DailyPlaylist.ViewModel
                     else
                     {
                         await mediaPlayerService.PlayPauseTaskAsync(PlaylistTracks.IndexOf(SelectedTrackPVM));
-                    } 
+                    }
                 }
             });
 
@@ -83,7 +83,7 @@ namespace DailyPlaylist.ViewModel
                     CrossMediaManager.Current.Queue.Clear();
                     mediaPlayerService = new MediaPlayerService(PlaylistTracks.ToList(), true);
                     NavigationState.LastVisitedPage = nameof(PlaylistPage);
-                    await mediaPlayerService.PlayPauseTaskAsync(preStoredIndexPVM);           
+                    await mediaPlayerService.PlayPauseTaskAsync(preStoredIndexPVM);
                 }
                 else
                 {
@@ -110,13 +110,13 @@ namespace DailyPlaylist.ViewModel
                     SelectedTrackPVM = PlaylistTracks[preStoredIndexPVM];
 
                     if (NavigationState.LastVisitedPage != nameof(PlaylistPage))
-                    {             
-                        
+                    {
+
                     }
                     else
                     {
                         await mediaPlayerService.PlayNextAsync();
-                    }                   
+                    }
                 }
             });
 
@@ -142,11 +142,11 @@ namespace DailyPlaylist.ViewModel
                     {
                         preStoredIndexPVM = await mediaPlayerService.PlayPreviousAsync();
                         SelectedTrackPVM = PlaylistTracks[preStoredIndexPVM];
-                    }  
+                    }
                 }
             });
 
-            EditCommand = new Command( void () =>
+            EditCommand = new Command(void () =>
             {
                 PromptEditEvent?.Invoke();
             });
@@ -179,19 +179,42 @@ namespace DailyPlaylist.ViewModel
 
             DeleteCommand = new Command(async () =>
             {
-
                 bool confirmDelete = await Application.Current.MainPage.DisplayAlert("Delete Playlist", "Are you sure you want to delete the current playlist?", "Yes", "No");
                 if (!confirmDelete) return;
-                UserPlaylists.Remove(SelectedPlaylist);
-                SelectedPlaylist = UserPlaylists.OrderByDescending(p => p.DateUpdated).FirstOrDefault();
-                await DeletePlaylistInBackend(SelectedPlaylist.Id);
+
+                bool deletionSuccess = await DeletePlaylistAsync(SelectedPlaylist.Id);
+                if (deletionSuccess)
+                {
+                    UserPlaylists.Remove(SelectedPlaylist);
+                    SelectedPlaylist = UserPlaylists.OrderByDescending(p => p.DateUpdated).FirstOrDefault();
+                }
+                else
+                {
+                    await SnackBarVM.ShowSnackBarAsync($"Error while deleting the Playlist at server side, please retry", "OK", () => { });
+                }
             });
+
+            SaveCommand = new Command(async () =>
+            {
+                bool isUpdateSuccessful = await UpdatePlaylistAsync(SelectedPlaylist);
+
+                if (isUpdateSuccessful)
+                {
+                    await SnackBarVM.ShowSnackBarAsync($"Playlist '{SelectedPlaylist.Name}' successfully saved! Good job!", "OK", () => { });
+                }
+                else
+                {
+                    await SnackBarVM.ShowSnackBarAsync("Failed to save the playlist. Please try again.", "Dismiss", () => { });
+                }
+
+            });
+
 
             CrossMediaManager.Current.PositionChanged += (sender, args) =>
             {
                 if (args.Position.TotalSeconds >= 28)
                 {
-                    if(NavigationState.LastVisitedPage == nameof(PlaylistPage))
+                    if (NavigationState.LastVisitedPage == nameof(PlaylistPage))
                     {
                         HandleTrackFinishedPVM();
                     }
@@ -369,7 +392,7 @@ namespace DailyPlaylist.ViewModel
             if (playlistsToOrder != null)
             {
                 playlistsToOrder = new ObservableCollection<Playlist>(
-                playlistsToOrder.OrderByDescending(p => p.DateUpdated));  
+                playlistsToOrder.OrderByDescending(p => p.DateUpdated));
                 // because DateUpdated is initialized with the CreateDate = DateTimeNow and will evovle at each change
             }
         }
@@ -418,11 +441,11 @@ namespace DailyPlaylist.ViewModel
 
         public async Task<List<Playlist>> RetrievePlaylistsAsync(string playlistUserId)
         {
-            var requestUri = "https://eu-central-1.aws.data.mongodb-api.com/app/data-httpe/endpoint/data/v1/action/find";
+            var requestUri = "https://westeurope.azure.data.mongodb-api.com/app/data-bqkhe/endpoint/data/v1/action/find";
             var payload = new
             {
                 collection = "Playlist",
-                database = "DailyPlaylistDB",
+                database = "DailyPlaylist",
                 dataSource = "DailyPlaylistMongoDB",
                 filter = new { userId = playlistUserId }
             };
@@ -478,10 +501,139 @@ namespace DailyPlaylist.ViewModel
             return null;
         }
 
-        private async Task DeletePlaylistInBackend(string playlistId)
+        public async Task<bool> DeletePlaylistAsync(string playlistId)
         {
-            // TODO: Implement API call to delete the playlist with the given ID from MongoDB
+            var requestUri = "https://westeurope.azure.data.mongodb-api.com/app/data-bqkhe/endpoint/data/v1/action/deleteOne";
+
+            var payload = new
+            {
+                dataSource = "DailyPlaylistMongoDB",
+                database = "DailyPlaylist",
+                collection = "Playlist",
+                filter = new
+                {
+                    _id = playlistId
+                }
+            };
+
+            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json"); // Note the content type is `application/ejson`
+
+            var client = _httpClient.Value;
+
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            client.DefaultRequestHeaders.Add("Access-Control-Request-Headers", "*");
+            client.DefaultRequestHeaders.Add("api-key", _apiKey);
+
+            var response = await client.PostAsync(requestUri, content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            else
+            {
+                var errorResponse = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"Error deleting playlist: {errorResponse}");
+                await SnackBarVM.ShowSnackBarAsync("Error while deleting your Playlist in the server, please retry;)", "Dismiss", () => { });
+                return false;
+            }
         }
+
+        public async Task<Playlist> InsertNewPlaylistAsync(Playlist newPlaylist)
+        {
+            if (newPlaylist == null) return null;
+
+            var requestUri = "https://westeurope.azure.data.mongodb-api.com/app/data-bqkhe/endpoint/data/v1/action/insertOne";
+            var payload = new
+            {
+                collection = "Playlist",
+                database = "DailyPlaylist",
+                dataSource = "DailyPlaylistMongoDB",
+                document = new
+                {
+                    _id = newPlaylist.Id,
+                    userId = newPlaylist.UserId,
+                    name = newPlaylist.Name,
+                    description = newPlaylist.Description,
+                    deezerTrackIds = newPlaylist.DeezerTrackIds,
+                    dateCreation = newPlaylist.DateCreation.ToString(),
+                    dateUpdated = newPlaylist.DateUpdated.ToString(),
+                }
+            };
+
+            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
+
+            var client = _httpClient.Value;
+            client.DefaultRequestHeaders.Clear();
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            client.DefaultRequestHeaders.Add("Access-Control-Request-Headers", "*");
+            client.DefaultRequestHeaders.Add("api-key", _apiKey);
+
+            var response = await client.PostAsync(requestUri, content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return newPlaylist;
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"Error while inserting new playlist: {error}");
+                return null;
+            }
+        }
+
+        public async Task<bool> UpdatePlaylistAsync(Playlist updatedPlaylist)
+        {
+            if (updatedPlaylist == null) return false;
+
+            var requestUri = "https://westeurope.azure.data.mongodb-api.com/app/data-bqkhe/endpoint/data/v1/action/updateOne";
+            var stringDeezerIds = updatedPlaylist.DeezerTrackIds.Select(id => id.ToString()).ToList();
+            var payload = new
+            {
+                collection = "Playlist",
+                database = "DailyPlaylist",
+                dataSource = "DailyPlaylistMongoDB",
+                filter = new
+                {
+                    _id = updatedPlaylist.Id
+                },
+                update = new
+                {
+                    userId = updatedPlaylist.UserId,
+                    name = updatedPlaylist.Name,
+                    description = updatedPlaylist.Description,
+                    deezerTrackIds = stringDeezerIds,
+                    dateCreation = updatedPlaylist.DateCreation,
+                    dateUpdated = updatedPlaylist.DateUpdated.ToString()
+                }
+            };
+
+            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
+
+            var client = _httpClient.Value;
+            client.DefaultRequestHeaders.Clear();
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            client.DefaultRequestHeaders.Add("Access-Control-Request-Headers", "*");
+            client.DefaultRequestHeaders.Add("api-key", _apiKey);
+
+            var response = await client.PostAsync(requestUri, content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"Error while updating playlist: {error}");
+                await SnackBarVM.ShowSnackBarAsync("Error while reaching the server to save your playlist, please retry;)", "Dismiss", () => { });
+                return false; 
+            }
+        }
+
+
+
 
         public void HandleTrackFinishedPVM()
         {
@@ -497,7 +649,7 @@ namespace DailyPlaylist.ViewModel
             if (preStoredIndexPVM >= 0 && preStoredIndexPVM < PlaylistTracks.Count())
             {
                 SelectedTrackPVM = PlaylistTracks[preStoredIndexPVM];
-            }  
+            }
         }
 
         private void Reset()

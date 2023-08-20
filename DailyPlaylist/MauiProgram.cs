@@ -35,6 +35,8 @@ public static class MauiProgram
 
         builder.Services.AddTransient<LoadingPage>();
 
+        builder.Services.AddTransient<HomePage>();
+
         builder.Services.AddTransient<LoginPage>();
 
         builder.Services.AddTransient<PlaylistPage>();

@@ -13,13 +13,14 @@ namespace DailyPlaylist.Services
         private const string AuthUserKey = "AuthUser";
         private User _activeUser;
         private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
-        private readonly string _apiKey = "BhSU3Kx9cS7norilVbrWO6JicjdihtQUnYZOhrU7Js8GYSYIqQOka0uh1znKlf7H";
+        private readonly string _apiKey = "19ORABeXOuwTOxF2KEW1tzNcqUpjbbiTee3TuNEgkNtesrk9wIPW7wvUqhda8inT";
 
         public User ActiveUser
         {
             get => _activeUser;
             set
             {
+
                 SetProperty(ref _activeUser, value);
             }
         }
@@ -80,11 +81,11 @@ namespace DailyPlaylist.Services
             userPassword = HashPassword(userPassword);
             User createdUser = new User() { Email = email };
 
-            var requestUri = "https://eu-central-1.aws.data.mongodb-api.com/app/data-httpe/endpoint/data/v1/action/insertOne";
+            var requestUri = "https://westeurope.azure.data.mongodb-api.com/app/data-bqkhe/endpoint/data/v1/action/insertOne";
             var payload = new
             {
                 collection = "User",
-                database = "DailyPlaylistDB",
+                database = "DailyPlaylist",
                 dataSource = "DailyPlaylistMongoDB",
                 document = new
                 {
@@ -140,11 +141,11 @@ namespace DailyPlaylist.Services
         {
             if (string.IsNullOrEmpty(userEmail)) { return null; }
 
-            var requestUri = "https://eu-central-1.aws.data.mongodb-api.com/app/data-httpe/endpoint/data/v1/action/findOne";
+            var requestUri = "https://westeurope.azure.data.mongodb-api.com/app/data-bqkhe/endpoint/data/v1/action/findOne";
             var payload = new
             {
                 collection = "User",
-                database = "DailyPlaylistDB",
+                database = "DailyPlaylist",
                 dataSource = "DailyPlaylistMongoDB",
                 filter = new { email = userEmail }
             };
@@ -177,6 +178,12 @@ namespace DailyPlaylist.Services
                         return retrievedUser;
                     }
                 }
+            } 
+            else
+            {
+                await SnackBarVM.ShowSnackBarAsync("There's a problem reaching the server for the moment, please retry", "Dismiss", () => { });
+                var error = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"Error: {error}");
             }
        
             return null;
