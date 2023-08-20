@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace DailyPlaylist.Model
 {
-    public class Playlist
+    public class Tracklist
     {
         private string _name;
         private string _description;
@@ -51,7 +51,7 @@ namespace DailyPlaylist.Model
         [JsonProperty(PropertyName = "dateUpdated")]
         public DateTime DateUpdated { get; set; } = DateTime.Now;
 
-        public Playlist()
+        public Tracklist()
         {
         }
 

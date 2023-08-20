@@ -1,5 +1,6 @@
 ﻿using DailyPlaylist.Services;
 using DailyPlaylist.View;
+using MediaManager.Library;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using System.Text;
@@ -11,8 +12,8 @@ namespace DailyPlaylist.ViewModel
         private readonly AuthService _authService;
         public MediaPlayerService mediaPlayerService;
         private User _activeUser;
-        private ObservableCollection<Playlist> _userPlaylists;
-        private Playlist _selectedPlaylist;
+        private ObservableCollection<Tracklist> _userPlaylists;
+        private Tracklist _selectedPlaylist;
         private ObservableCollection<Track> _playlistTracks;
         private Track _selectedTrackPVM;
         public int preStoredIndexPVM = 0;
@@ -36,7 +37,7 @@ namespace DailyPlaylist.ViewModel
 
             _activeUser = _authService.ActiveUser;
 
-            UserPlaylists = new ObservableCollection<Playlist>();
+            UserPlaylists = new ObservableCollection<Tracklist>();
 
             _ = InitializationAsync();
 
@@ -100,23 +101,19 @@ namespace DailyPlaylist.ViewModel
                 }
                 else
                 {
-                    var currentIndex = PlaylistTracks.IndexOf(SelectedTrackPVM);
-                    preStoredIndexPVM = currentIndex;
-                    preStoredIndexPVM++;
-                    if (preStoredIndexPVM >= PlaylistTracks.Count)
-                    {
-                        preStoredIndexPVM = 0;
-                    }
-                    SelectedTrackPVM = PlaylistTracks[preStoredIndexPVM];
-
-                    if (NavigationState.LastVisitedPage != nameof(PlaylistPage))
-                    {
-
-                    }
-                    else
-                    {
-                        await mediaPlayerService.PlayNextAsync();
-                    }
+                    //var currentIndex = PlaylistTracks.IndexOf(SelectedTrackPVM);
+                    //preStoredIndexPVM = currentIndex;
+                    //preStoredIndexPVM++;
+                    //if (preStoredIndexPVM >= CrossMediaManager.Current.Queue.Count)
+                    //{
+                    //    preStoredIndexPVM = 0;
+                    //}
+                    //SelectedTrackPVM = PlaylistTracks[preStoredIndexPVM];
+                    ////if (NavigationState.LastVisitedPage != nameof(PlaylistPage))
+                    await mediaPlayerService.PlayNextAsync();
+                    var index = CrossMediaManager.Current.Queue.CurrentIndex;
+                    preStoredIndexPVM = index;
+                    SelectedTrackPVM = PlaylistTracks[index];
                 }
             });
 
@@ -132,9 +129,9 @@ namespace DailyPlaylist.ViewModel
                     if (NavigationState.LastVisitedPage != nameof(PlaylistPage))
                     {
                         preStoredIndexPVM--;
-                        if (preStoredIndexPVM < 0)
+                        if (preStoredIndexPVM < 0 || preStoredIndexPVM >= CrossMediaManager.Current.Queue.Count)
                         {
-                            preStoredIndexPVM = PlaylistTracks.Count - 1;
+                            preStoredIndexPVM = CrossMediaManager.Current.Queue.Count - 1;
                         }
                         SelectedTrackPVM = PlaylistTracks[preStoredIndexPVM];
                     }
@@ -236,7 +233,7 @@ namespace DailyPlaylist.ViewModel
             }
         }
 
-        public ObservableCollection<Playlist> UserPlaylists
+        public ObservableCollection<Tracklist> UserPlaylists
         {
             get => _userPlaylists;
             set
@@ -249,7 +246,7 @@ namespace DailyPlaylist.ViewModel
             }
         }
 
-        public Playlist SelectedPlaylist
+        public Tracklist SelectedPlaylist
         {
             get => _selectedPlaylist;
             set
@@ -377,27 +374,27 @@ namespace DailyPlaylist.ViewModel
             if (UserPlaylists != null && UserPlaylists.Any())
             {
                 OrderPlaylistByDate(UserPlaylists); // Order the Playlists by DateUpdated
-                _selectedPlaylist = _userPlaylists.First();
+                SelectedPlaylist = _selectedPlaylist = UserPlaylists.First();
                 LoadTracksForPlaylist(_selectedPlaylist);
             }
         }
 
         private async Task LoadUserPlaylists()
         {
-            UserPlaylists = new ObservableCollection<Playlist>(await RetrievePlaylistsAsync(_activeUser.Id));
+            UserPlaylists = new ObservableCollection<Tracklist>(await RetrievePlaylistsAsync(_activeUser.Id));
         }
 
-        private void OrderPlaylistByDate(ObservableCollection<Playlist> playlistsToOrder)
+        private void OrderPlaylistByDate(ObservableCollection<Tracklist> playlistsToOrder)
         {
             if (playlistsToOrder != null)
             {
-                playlistsToOrder = new ObservableCollection<Playlist>(
+                playlistsToOrder = new ObservableCollection<Tracklist>(
                 playlistsToOrder.OrderByDescending(p => p.DateUpdated));
                 // because DateUpdated is initialized with the CreateDate = DateTimeNow and will evovle at each change
             }
         }
 
-        public async void LoadTracksForPlaylist(Playlist playlist)
+        public async void LoadTracksForPlaylist(Tracklist playlist)
         {
             if (playlist == null) { return; }
 
@@ -439,7 +436,7 @@ namespace DailyPlaylist.ViewModel
             }
         }
 
-        public async Task<List<Playlist>> RetrievePlaylistsAsync(string playlistUserId)
+        public async Task<List<Tracklist>> RetrievePlaylistsAsync(string playlistUserId)
         {
             var requestUri = "https://westeurope.azure.data.mongodb-api.com/app/data-bqkhe/endpoint/data/v1/action/find";
             var payload = new
@@ -471,7 +468,7 @@ namespace DailyPlaylist.ViewModel
                 return null;
             }
 
-            var playlists = new List<Playlist>();
+            var playlists = new List<Tracklist>();
 
 
             if (response.IsSuccessStatusCode)
@@ -483,7 +480,7 @@ namespace DailyPlaylist.ViewModel
 
                 if (playlistsJson.Contains(playlistUserId))
                 {
-                    playlists = JsonConvert.DeserializeObject<List<Playlist>>(playlistsJson);
+                    playlists = JsonConvert.DeserializeObject<List<Tracklist>>(playlistsJson);
 
                     if (playlists != null && playlists.Any())
                     {
@@ -539,7 +536,7 @@ namespace DailyPlaylist.ViewModel
             }
         }
 
-        public async Task<Playlist> InsertNewPlaylistAsync(Playlist newPlaylist)
+        public async Task<Tracklist> InsertNewPlaylistAsync(Tracklist newPlaylist)
         {
             if (newPlaylist == null) return null;
 
@@ -583,7 +580,7 @@ namespace DailyPlaylist.ViewModel
             }
         }
 
-        public async Task<bool> UpdatePlaylistAsync(Playlist updatedPlaylist)
+        public async Task<bool> UpdatePlaylistAsync(Tracklist updatedPlaylist)
         {
             if (updatedPlaylist == null) return false;
 
