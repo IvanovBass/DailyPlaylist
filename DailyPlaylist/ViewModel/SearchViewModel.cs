@@ -274,16 +274,18 @@ namespace DailyPlaylist.ViewModel
             {
                 var jsonResponse = await client.GetStringAsync($"https://api.deezer.com/search/track?q={SearchQuery}&limit=30");
                 var searchData = JsonConvert.DeserializeObject<SearchData>(jsonResponse);
-                SearchResults = new ObservableCollection<Track>(searchData.Data);
-                await CrossMediaManager.Current.Pause();
-                CrossMediaManager.Current.Queue.Clear();
-                mediaPlayerService = new MediaPlayerService(searchData.Data, false);
-
-                if (SearchResults.Any())
+                if (searchData.Data is List<Track> tracks && tracks.Any())
                 {
-                    SelectedTrack = SearchResults[0];
-                    LoadSelectedFavoriteTrackUris();
-                }
+                    SearchResults = new ObservableCollection<Track>(searchData.Data);
+                    CrossMediaManager.Current.Queue.Clear();
+                    mediaPlayerService = new MediaPlayerService(searchData.Data, false);
+
+                    if (SearchResults.Any())
+                    {
+                        SelectedTrack = SearchResults[0];
+                        LoadSelectedFavoriteTrackUris();
+                    }
+                }              
                 else
                 {
                     await SnackBarVM.ShowSnackBarAsync("No tracks found for your search query", "Dismiss", () => { });
