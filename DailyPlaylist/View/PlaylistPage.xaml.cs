@@ -76,11 +76,21 @@ public partial class PlaylistPage : ContentPage
                     DeezerTrackIds = new List<long>()
                 };
 
-                _playlistViewModel.UserPlaylists.Add(newPlaylist);
-                _playlistViewModel.SelectedPlaylist = newPlaylist;
+                var insertedPlaylist = await _playlistViewModel.InsertNewPlaylistAsync(newPlaylist);
 
-                await SnackBarVM.ShowSnackBarShortAsync("Playlist '" + newName + "' succesfully created !", "OK", () => { });
+                if (insertedPlaylist != null)
+                {
+                    _playlistViewModel.UserPlaylists.Add(newPlaylist);
+                    _playlistViewModel.SelectedPlaylist = newPlaylist;
+
+                    await SnackBarVM.ShowSnackBarAsync("Playlist '" + newName + "' successfully created!", "OK", () => { });
+                }
+                else
+                {
+                    await SnackBarVM.ShowSnackBarAsync("Failed to create the playlist. Please try again.", "Dismiss", () => { });
+                }
             }
         }
     }
+
 }
