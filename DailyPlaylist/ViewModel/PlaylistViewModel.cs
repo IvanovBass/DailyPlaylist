@@ -373,7 +373,7 @@ namespace DailyPlaylist.ViewModel
 
             if (UserPlaylists != null && UserPlaylists.Any())
             {
-                OrderPlaylistByDate(UserPlaylists); // Order the Playlists by DateUpdated
+                UserPlaylists = OrderPlaylistByDate(UserPlaylists); // Order the Playlists by DateUpdated
                 SelectedPlaylist = _selectedPlaylist = UserPlaylists.First();
                 LoadTracksForPlaylist(_selectedPlaylist);
             }
@@ -384,7 +384,7 @@ namespace DailyPlaylist.ViewModel
             UserPlaylists = new ObservableCollection<Tracklist>(await RetrievePlaylistsAsync(_activeUser.Id));
         }
 
-        private void OrderPlaylistByDate(ObservableCollection<Tracklist> playlistsToOrder)
+        private ObservableCollection<Tracklist> OrderPlaylistByDate(ObservableCollection<Tracklist> playlistsToOrder)
         {
             if (playlistsToOrder != null)
             {
@@ -392,6 +392,8 @@ namespace DailyPlaylist.ViewModel
                 playlistsToOrder.OrderByDescending(p => p.DateUpdated));
                 // because DateUpdated is initialized with the CreateDate = DateTimeNow and will evovle at each change
             }
+            return playlistsToOrder; 
+
         }
 
         public async void LoadTracksForPlaylist(Tracklist playlist)
@@ -553,8 +555,8 @@ namespace DailyPlaylist.ViewModel
                     name = newPlaylist.Name,
                     description = newPlaylist.Description,
                     deezerTrackIds = newPlaylist.DeezerTrackIds,
-                    dateCreation = newPlaylist.DateCreation.ToString(),
-                    dateUpdated = newPlaylist.DateUpdated.ToString(),
+                    dateCreation = newPlaylist.DateCreation.ToString("s")+"Z",
+                    dateUpdated = newPlaylist.DateUpdated.ToString("s")+"Z",
                 }
             };
 
@@ -601,8 +603,8 @@ namespace DailyPlaylist.ViewModel
                     name = updatedPlaylist.Name,
                     description = updatedPlaylist.Description,
                     deezerTrackIds = stringDeezerIds,
-                    dateCreation = updatedPlaylist.DateCreation,
-                    dateUpdated = updatedPlaylist.DateUpdated.ToString()
+                    dateCreation = updatedPlaylist.DateCreation.ToString("s") + "Z",
+                    dateUpdated = DateTime.Now.ToString("s") + "Z",
                 }
             };
 
