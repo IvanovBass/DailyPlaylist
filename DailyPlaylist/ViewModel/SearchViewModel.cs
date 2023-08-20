@@ -144,6 +144,12 @@ namespace DailyPlaylist.ViewModel
 
             SetFavoriteCommand = new Command<Track>(async track =>
             {
+                if (_playlistViewModel.SelectedPlaylist == null)
+                {
+                    await SnackBarVM.ShowSnackBarShortAsync("No playlist selected. Please select a playlist first.", "OK", () => { });
+                    return;
+                }
+
                 track.Favorite = !track.Favorite;
 
                 NavigationState.LastVisitedPage = nameof(SearchPage);
@@ -159,6 +165,7 @@ namespace DailyPlaylist.ViewModel
                     await SnackBarVM.ShowSnackBarShortAsync("Song removed from playlist '" + _playlistViewModel.SelectedPlaylist.Name + "' !", "OK", () => { });
                 }
             });
+
 
 
             NextCommand = new Command<Track>(async track =>

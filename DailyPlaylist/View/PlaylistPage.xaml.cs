@@ -51,7 +51,7 @@ public partial class PlaylistPage : ContentPage
             var newDescription = await DisplayPromptAsync("Edit Playlist", "Enter new description:", "OK", "Cancel", _playlistViewModel.SelectedPlaylist.Description);
             if (!string.IsNullOrEmpty(newDescription))
             {
-                var tempList = new ObservableCollection<Playlist>(_playlistViewModel.UserPlaylists);
+                var tempList = new ObservableCollection<Tracklist>(_playlistViewModel.UserPlaylists);
                 _playlistViewModel.SelectedPlaylist.Name = newName;
                 _playlistViewModel.SelectedPlaylist.Description = newDescription;
                 // _playlistViewModel.SelectedPlaylist.DateUpdated = DateTime.Now;  for the Save process
@@ -68,7 +68,7 @@ public partial class PlaylistPage : ContentPage
             var newDescription = await DisplayPromptAsync("Create Playlist", "Enter playlist description:", "OK", "Cancel");
             if (!string.IsNullOrEmpty(newDescription))
             {
-                var newPlaylist = new Playlist
+                var newPlaylist = new Tracklist
                 {
                     UserId = _playlistViewModel.ActiveUser.Id,
                     Name = newName,
