@@ -93,7 +93,7 @@ namespace DailyPlaylist.ViewModel
 
         // CONSTRUCTOR //
 
-        public SearchViewModel(PlaylistViewModel playlistViewModel)
+        public SearchViewModel(PlaylistViewModel playlistviewmodel)
         {
 
             SearchResults = new ObservableCollection<Track>();
@@ -105,7 +105,8 @@ namespace DailyPlaylist.ViewModel
             NextCommand = new Command<Track>(async (track) => await HandleNext());
             PreviousCommand = new Command<Track>(async (track) => await HandlePrevious());
 
-            _playlistViewModel = playlistViewModel;
+
+            _playlistViewModel = playlistviewmodel;
             _playlistViewModel.SelectedPlaylistChanged += LoadSelectedFavoriteTrackUris;
 
 
@@ -300,6 +301,7 @@ namespace DailyPlaylist.ViewModel
             preStoredIndex = 0;
             SearchQuery = string.Empty;
             SelectedTrack = null;
+            _playlistViewModel = null;
             TrackName = "Song";
             ArtistName = "Artist";
             AlbumCover = "music_notes2.png";

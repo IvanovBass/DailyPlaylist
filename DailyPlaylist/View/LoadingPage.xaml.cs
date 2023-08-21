@@ -20,6 +20,7 @@ public partial class LoadingPage : ContentPage
 
 		if (_authService.IsAuthenticatedAsync())
 		{
+            NavigationState.LastVisitedPage = nameof(LoadingPage);
             await Shell.Current.GoToAsync($"//{nameof(HomePage)}");
         }
 		else
@@ -28,6 +29,7 @@ public partial class LoadingPage : ContentPage
 			await Task.Delay(3500);
             if(_authService.IsAuthenticatedAsync())
 			{
+				NavigationState.LastVisitedPage = nameof(LoadingPage);
                 await Shell.Current.GoToAsync($"//{nameof(HomePage)}");
             }
         }

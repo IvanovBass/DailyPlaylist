@@ -10,8 +10,8 @@ namespace DailyPlaylist.ViewModel
 {
     public class PlaylistViewModel : BaseViewModel
     {
-        private AuthService _authService;
         private User _activeUser;
+        private AuthService _authService;
         private ObservableCollection<Tracklist> _userPlaylists;
         private Tracklist _selectedPlaylist;
         private ObservableCollection<Track> _playlistTracks;
@@ -25,6 +25,7 @@ namespace DailyPlaylist.ViewModel
         private readonly string _apiKey = "19ORABeXOuwTOxF2KEW1tzNcqUpjbbiTee3TuNEgkNtesrk9wIPW7wvUqhda8inT";
         private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
         public event Action SelectedPlaylistChanged;
+        public event Func<Task> OnUserChanged;
         public event Action PromptEditEvent;
         public event Action PromptCreateEvent;
         public static int attemtps = 0;
@@ -35,13 +36,10 @@ namespace DailyPlaylist.ViewModel
 
         public PlaylistViewModel(AuthService authservice)
         {
+            
+            OnUserChanged += InitializationPlaylistsAsync;
+
             _authService = authservice;
-
-            _activeUser = _authService.ActiveUser;
-
-            UserPlaylists = new ObservableCollection<Tracklist>();
-
-            _ = InitializationAsync();
 
             SelectedPlaylistChanged?.Invoke();
 
@@ -72,6 +70,8 @@ namespace DailyPlaylist.ViewModel
 
             LogoutViewModel.OnLogout += Reset;
 
+            OnUserChanged += InitializationPlaylistsAsync;
+
         }
 
         // PROPERTIES //
@@ -82,6 +82,20 @@ namespace DailyPlaylist.ViewModel
             set
             {
                 _activeUser = value;
+            }
+        }
+
+        public AuthService AuthService
+        {
+            get => _authService;
+            set
+            {
+                _authService = value;
+                if (value != null)
+                {
+                    ActiveUser = value.ActiveUser;
+                    OnUserChanged?.Invoke();
+                }
             }
         }
 
@@ -220,7 +234,7 @@ namespace DailyPlaylist.ViewModel
 
         // METHODS //
 
-        private async Task InitializationAsync()
+        private async Task InitializationPlaylistsAsync()
         {
             await LoadUserPlaylists();
 
@@ -229,6 +243,10 @@ namespace DailyPlaylist.ViewModel
                 UserPlaylists = OrderPlaylistByDate(UserPlaylists); // Order the Playlists by DateUpdated
                 SelectedPlaylist = _selectedPlaylist = UserPlaylists.First();
                 LoadTracksForPlaylist(_selectedPlaylist);
+            }
+            else
+            {
+                UserPlaylists = new ObservableCollection<Tracklist>();
             }
         }
 
@@ -603,11 +621,10 @@ namespace DailyPlaylist.ViewModel
         {
             PlaylistTracks = new ObservableCollection<Track>();
             preStoredIndexPVM = 0;
-            _authService = null;
-            _userPlaylists = null;
-            _selectedPlaylist = null;
-            _playlistTracks = null;
-            _activeUser = null; 
+            UserPlaylists = new ObservableCollection<Tracklist>();
+            SelectedPlaylist = null;
+            _activeUser = null;
+            AuthService = null;
             SelectedTrackPVM = null;
             SelectedTrackTitle = "Song";
             SelectedTrackArtist = "Artist";

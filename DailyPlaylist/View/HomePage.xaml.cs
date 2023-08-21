@@ -1,6 +1,7 @@
 using DailyPlaylist.Services;
 using DailyPlaylist.ViewModel;
 using MauiAppDI.Helpers;
+using System.ComponentModel;
 
 
 namespace DailyPlaylist.View
@@ -9,20 +10,20 @@ namespace DailyPlaylist.View
     {
         private AuthService _authService;
         private PlaylistViewModel _playlistViewModel;
+        private SearchViewModel _searchViewModel;
         public HomePage()
         {
             InitializeComponent();
+
             StartAnimations();
-
-            _ = InitializeAsync();
-
-            _playlistViewModel = new PlaylistViewModel(_authService);
         }
-
+        
         private async Task InitializeAsync()
         {
+
             try
             {
+                
                 var authService = ServiceHelper.GetService<AuthService>();
                 if (authService != null)
                 {
@@ -36,8 +37,12 @@ namespace DailyPlaylist.View
                     }
                     else 
                     {
-                        await SnackBarVM.ShowSnackBarAsync("Problem to retrieve your playlists and details from server, please try gain to log in", "Dismiss", () => { });
+                        await SnackBarVM.ShowSnackBarAsync("Problem to retrieve your playlists and details from server, please re-log in and try again", "Dismiss", () => { });
                     }
+                    //var playVM = ServiceHelper.GetService<PlaylistViewModel>();
+                    //var searchVM = ServiceHelper.GetService<SearchViewModel>();
+                    //_searchViewModel = searchVM;
+
                 }
             }
             catch (Exception ex)
@@ -45,9 +50,17 @@ namespace DailyPlaylist.View
                 Debug.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        ///  je sais pas ce qui merde ici ça saoule ... User est bien retrieved, mais la Plylist Viewmode commence à se construire sans le User, c'est un nouveau User
-        /// </summary>
+
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+
+            if (NavigationState.LastVisitedPage == nameof(LoadingPage))
+            {
+                NavigationState.LastVisitedPage = "";
+                await InitializeAsync();
+            }
+        }
 
         private async void StartAnimations()
         {

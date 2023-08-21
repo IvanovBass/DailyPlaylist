@@ -1,0 +1,48 @@
+‘DAILY PLAYLISTS’ TERMS OF USE 
+
+
+1. Acceptance of Terms 
+
+By accessing and using DailyPlaylists, you accept and agree to be bound by these Terms of Use ("Terms"). If you do not agree to these Terms, you should not use this application. 
+
+2. Purpose of the App 
+
+DailyPlaylists is developed solely for educational and school-related purposes. It is not intended for commercial distribution or profit. The application allows users to experience previews of musical content, each limited to a maximum duration of 30 seconds. 
+
+3. Intellectual Property and Content Ownership 
+
+All rights in the musical content, including tracks, artist names, album details, and associated copyrights, trademarks, or other intellectual properties, are owned by the respective artists, record labels, and licensors. DailyPlaylists respects these rights and only provides access to this content via the Deezer API in accordance with their terms and guidelines. 
+
+4. Limited License 
+
+Users are granted a limited license to use DailyPlaylists strictly for personal and educational purposes. Unauthorized copying, distribution, modification, or any other misuse of the content is strictly prohibited. 
+
+5. Restrictions 
+
+Users shall not: 
+
+Reproduce, duplicate, copy, sell, or re-sell any part of DailyPlaylists or its content. 
+
+Use the application for any public performances or any other non-personal or non-educational purposes. 
+
+Attempt to circumvent the 30-second limit on music previews. 
+
+6. No Warranty 
+
+DailyPlaylists is provided "as is", without any warranties of any kind, either expressed or implied. The developers make no guarantees regarding the accuracy, completeness, or usefulness of the content. 
+
+7. Limitation of Liability 
+
+In no event will the developers, maintainers, or any other affiliated parties of DailyPlaylists be liable for any damages, including without limitation direct or indirect, special, incidental, or consequential damages, losses, or expenses arising in connection with this application or use thereof. 
+
+8. Changes to Terms 
+
+We reserve the right to change, modify, or update these Terms at any time without notice. Users are responsible for periodically reviewing these Terms for updates. 
+
+9. Governing Law 
+
+These Terms shall be governed by and construed in accordance with the laws in appliance in Belgium. Disputes arising in connection with these Terms shall be subject to the exclusive jurisdiction of the courts of business in Belgium. 
+
+10. Contact 
+
+For questions or concerns about these Terms, please contact us at ivan.chorine@ifosup.wavre.be
