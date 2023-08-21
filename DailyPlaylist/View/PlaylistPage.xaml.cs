@@ -36,11 +36,20 @@ public partial class PlaylistPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        if (NavigationState.LastVisitedPage == nameof(SearchPage))
+        if (NavigationState.refreshFavoritesNeeded)
         {
+            NavigationState.refreshFavoritesNeeded = false;
             _playlistViewModel.LoadTracksForPlaylist(_playlistViewModel.SelectedPlaylist);
         }
-        
+        if (NavigationState.IsPlaylistToCreate)
+        {
+            NavigationState.IsPlaylistToCreate = false;
+            Task.Run(async () =>
+            {
+                await SnackBarVM.ShowSnackBarAsync("You have not yet created any playlist, consider creating some ;)", "OK", () => { });
+                
+            });
+        }    
     }
     public async void PromptMessageEditAsync()
     {
@@ -54,7 +63,6 @@ public partial class PlaylistPage : ContentPage
                 var tempList = new ObservableCollection<Tracklist>(_playlistViewModel.UserPlaylists);
                 _playlistViewModel.SelectedPlaylist.Name = newName;
                 _playlistViewModel.SelectedPlaylist.Description = newDescription;
-                // _playlistViewModel.SelectedPlaylist.DateUpdated = DateTime.Now;  for the Save process
                 _playlistViewModel.UserPlaylists = tempList;
             }
         }
@@ -84,6 +92,7 @@ public partial class PlaylistPage : ContentPage
                     _playlistViewModel.SelectedPlaylist = newPlaylist;
 
                     await SnackBarVM.ShowSnackBarAsync("Playlist '" + newName + "' successfully created!", "OK", () => { });
+                    NavigationState.refreshFavoritesNeeded = true;
                 }
                 else
                 {

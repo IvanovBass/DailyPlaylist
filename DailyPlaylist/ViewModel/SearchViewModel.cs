@@ -94,146 +94,30 @@ namespace DailyPlaylist.ViewModel
 
         public SearchViewModel(PlaylistViewModel playlistViewModel)
         {
-            SearchCommand = new Command(PerformSearch);
+
             SearchResults = new ObservableCollection<Track>();
 
-            PlayPauseCommand = new Command(async track =>
-            {
-                if (SearchResults == null || !SearchResults.Any())
-                {
-                    await SnackBarVM.ShowSnackBarAsync("No track to play", "Dismiss", () => { });
-                    return;
-                }
-                else
-                {
-                    if (NavigationState.LastVisitedPage != nameof(SearchPage))
-                    {
-                        CrossMediaManager.Current.Queue.Clear();
-                        mediaPlayerService = new MediaPlayerService(SearchResults.ToList(), true);
-                        await mediaPlayerService.PlayPauseTaskAsync(SearchResults.IndexOf(SelectedTrack));
-                        NavigationState.LastVisitedPage = nameof(SearchPage);
-                    }
-                    else
-                    {
-                        await mediaPlayerService.PlayPauseTaskAsync(SearchResults.IndexOf(SelectedTrack));
-                    }
-                }
-            });
-
-            PlayFromCollectionViewCommand = new Command<Track>(async track =>
-            {
-                SelectedTrack = track;
-                preStoredIndex = SearchResults.IndexOf(SelectedTrack);
-
-                if (NavigationState.LastVisitedPage != nameof(SearchPage))
-                {
-                    CrossMediaManager.Current.Queue.Clear();
-                    mediaPlayerService = new MediaPlayerService(SearchResults.ToList(), true);
-                    await mediaPlayerService.PlayPauseTaskAsync(preStoredIndex);
-                    NavigationState.LastVisitedPage = nameof(SearchPage);
-                }
-                else
-                {
-                    await mediaPlayerService.PlayPauseTaskAsync(preStoredIndex);
-                }
-            });
+            SearchCommand = new Command(PerformSearch);
+            PlayPauseCommand = new Command(async (track) => await HandlePlayPause());
+            PlayFromCollectionViewCommand = new Command<Track>(async (track) => await HandlePlayFromCollectionView(track));
+            SetFavoriteCommand = new Command<Track>(async (track) => await HandleSetFavorite(track));
+            NextCommand = new Command<Track>(async (track) => await HandleNext());
+            PreviousCommand = new Command<Track>(async (track) => await HandlePrevious(track));
 
             _playlistViewModel = playlistViewModel;
-
             _playlistViewModel.SelectedPlaylistChanged += LoadSelectedFavoriteTrackUris;
 
-            SetFavoriteCommand = new Command<Track>(async track =>
-            {
-                if (_playlistViewModel.SelectedPlaylist == null)
-                {
-                    await SnackBarVM.ShowSnackBarShortAsync("No playlist selected. Please select a playlist first.", "OK", () => { });
-                    return;
-                }
-
-                track.Favorite = !track.Favorite;
-
-                NavigationState.LastVisitedPage = nameof(SearchPage);
-
-                if (track.Favorite)
-                {
-                    _playlistViewModel.SelectedPlaylist.DeezerTrackIds.Add(track.Id);
-                    await SnackBarVM.ShowSnackBarShortAsync("Song succesfully added to playlist '" + _playlistViewModel.SelectedPlaylist.Name + "' !", "OK", () => { });
-                }
-                else
-                {
-                    _playlistViewModel.SelectedPlaylist.DeezerTrackIds.Remove(track.Id);
-                    await SnackBarVM.ShowSnackBarShortAsync("Song removed from playlist '" + _playlistViewModel.SelectedPlaylist.Name + "' !", "OK", () => { });
-                }
-            });
-
-
-
-            NextCommand = new Command<Track>(async track =>
-            {
-                if (SearchResults == null || !SearchResults.Any())
-                {
-                    await SnackBarVM.ShowSnackBarAsync("No tracklist to be forwarded", "Dismiss", () => { });
-                    return;
-                }
-                else
-                {
-                    var currentIndex = SearchResults.IndexOf(SelectedTrack);
-                    preStoredIndex = currentIndex;
-                    preStoredIndex++;
-                    if (preStoredIndex >= SearchResults.Count)
-                    {
-                        preStoredIndex = 0;
-                    }
-                    SelectedTrack = SearchResults[preStoredIndex];
-
-                    if (NavigationState.LastVisitedPage != nameof(SearchPage))
-                    {
-                        
-                    }
-                    else
-                    {
-                        await mediaPlayerService.PlayNextAsync();
-                    }  
-                }
-            });
-
-            PreviousCommand = new Command<Track>(async track =>
-            {
-                if (SearchResults == null || !SearchResults.Any())
-                {
-                    await SnackBarVM.ShowSnackBarAsync("No tracklist to be backwarded", "Dismiss", () => { });
-                    return;
-                } 
-                else
-                {
-                    if (NavigationState.LastVisitedPage != nameof(SearchPage))
-                    {
-                        preStoredIndex--;
-                        if (preStoredIndex < 0)
-                        {
-                            preStoredIndex = SearchResults.Count - 1;
-                        }
-                        SelectedTrack = SearchResults[preStoredIndex];
-                    }
-                    else
-                    {
-                        preStoredIndex = await mediaPlayerService.PlayPreviousAsync();
-                        SelectedTrack = SearchResults[preStoredIndex];
-                    }
-                }
-            });
 
             ItemSelectedCommand = new Command<Track>(track =>
             {
                 SelectedTrack = track;
             });
 
-
             CrossMediaManager.Current.PositionChanged += (sender, args) =>
             {
                 if (args.Position.TotalSeconds >= 28)
                 {
-                    if (NavigationState.LastVisitedPage == nameof(SearchPage))
+                    if (NavigationState.LastPlayerUsed == "SVM")
                     {
                         HandleTrackFinishedSVM();
                     }  
@@ -244,22 +128,7 @@ namespace DailyPlaylist.ViewModel
 
         }
 
-        public void HandleTrackFinishedSVM()
-        {
-            if (SearchResults == null) return;
-
-            var currentIndex = CrossMediaManager.Current.Queue.CurrentIndex;
-            currentIndex++;
-            if (currentIndex >= SearchResults.Count())
-            {
-                currentIndex = 0;
-            }
-            preStoredIndex = currentIndex;
-            if (preStoredIndex >= 0 && preStoredIndex < SearchResults.Count())
-            {
-                SelectedTrack = SearchResults[preStoredIndex];
-            }
-        }
+        // COMMANDS METHODS //
 
         private async void PerformSearch()
         {
@@ -285,7 +154,7 @@ namespace DailyPlaylist.ViewModel
                         SelectedTrack = SearchResults[0];
                         LoadSelectedFavoriteTrackUris();
                     }
-                }              
+                }
                 else
                 {
                     await SnackBarVM.ShowSnackBarAsync("No tracks found for your search query", "Dismiss", () => { });
@@ -304,6 +173,122 @@ namespace DailyPlaylist.ViewModel
                 IsLoading = false;
             }
         }
+
+        private async Task HandlePlayPause()
+        {
+            if (SearchResults == null || !SearchResults.Any())
+            {
+                await SnackBarVM.ShowSnackBarAsync("No track to play", "Dismiss", () => { });
+                return;
+            }
+            else
+            {
+                if (NavigationState.LastPlayerUsed != "SVM")
+                {
+                    CrossMediaManager.Current.Queue.Clear();
+                    mediaPlayerService = new MediaPlayerService(SearchResults.ToList(), false);
+                }
+                await mediaPlayerService.PlayPauseTaskAsync(SearchResults.IndexOf(SelectedTrack));
+                NavigationState.LastPlayerUsed = "SVM";
+            }
+        }
+
+        private async Task HandlePlayFromCollectionView(Track track)
+        {
+            SelectedTrack = track;
+
+            if (NavigationState.LastPlayerUsed != "SVM")
+            {
+                CrossMediaManager.Current.Queue.Clear();
+                mediaPlayerService = new MediaPlayerService(SearchResults.ToList(), false);
+            }
+            await mediaPlayerService.PlayPauseTaskAsync(preStoredIndex);
+            NavigationState.LastPlayerUsed = "SVM";
+        }
+
+        private async Task HandleSetFavorite(Track track)
+        {
+            if (_playlistViewModel.SelectedPlaylist == null)
+            {
+                await SnackBarVM.ShowSnackBarShortAsync("No playlist selected. Please select a playlist first.", "OK", () => { });
+                return;
+            }
+
+            track.Favorite = !track.Favorite;
+
+            NavigationState.refreshFavoritesNeeded = true;
+
+            if (track.Favorite)
+            {
+                _playlistViewModel.SelectedPlaylist.DeezerTrackIds.Add(track.Id);
+                await SnackBarVM.ShowSnackBarShortAsync("'" + track.Title + "' succesfully added to playlist '" + _playlistViewModel.SelectedPlaylist.Name + "' !", "OK", () => { });
+            }
+            else
+            {
+                _playlistViewModel.SelectedPlaylist.DeezerTrackIds.Remove(track.Id);
+                await SnackBarVM.ShowSnackBarShortAsync("'" + track.Title + "' removed from playlist '" + _playlistViewModel.SelectedPlaylist.Name + "' !", "OK", () => { });
+            }
+        }
+
+        private async Task HandleNext()
+        {
+            if (SearchResults == null || !SearchResults.Any())
+            {
+                await SnackBarVM.ShowSnackBarAsync("No tracklist to be forwarded", "Dismiss", () => { });
+                return;
+            }
+            if (NavigationState.LastPlayerUsed != "SVM")
+            {
+                CrossMediaManager.Current.Queue.Clear();
+                mediaPlayerService = new MediaPlayerService(SearchResults.ToList(), false);
+            }
+            int nextMediaIndex = await mediaPlayerService.PlayNextAsync();
+            try
+            {
+                SelectedTrack = SearchResults[nextMediaIndex];
+            }
+            catch
+            {
+                SelectedTrack = SearchResults.FirstOrDefault();
+            }
+            NavigationState.LastPlayerUsed = "SVM";
+        }
+
+        private async Task HandlePrevious(Track track)
+        {
+            if (SearchResults == null || !SearchResults.Any())
+            {
+                await SnackBarVM.ShowSnackBarAsync("No tracklist to be backwarded", "Dismiss", () => { });
+                return;
+            }
+            else
+            {
+                if (NavigationState.LastPlayerUsed != "SVM")
+                {
+                    CrossMediaManager.Current.Queue.Clear();
+                    mediaPlayerService = new MediaPlayerService(SearchResults.ToList(), true);
+                }
+                preStoredIndex = await mediaPlayerService.PlayPreviousAsync();
+                SelectedTrack = SearchResults[preStoredIndex];
+            }
+            NavigationState.LastPlayerUsed = "SVM";
+        }
+
+
+        public void HandleTrackFinishedSVM()
+        {
+            if (SearchResults == null) return;
+
+            var currentIndex = CrossMediaManager.Current.Queue.CurrentIndex;
+            currentIndex++;
+            if (currentIndex >= SearchResults.Count)
+            {
+                currentIndex = 0;
+            }
+            SelectedTrack = SearchResults[currentIndex];
+        }
+
+        // BACK-END METHODS  //
 
         public class SearchData
         {
