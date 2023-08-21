@@ -41,15 +41,6 @@ public partial class PlaylistPage : ContentPage
             NavigationState.refreshFavoritesNeeded = false;
             _playlistViewModel.LoadTracksForPlaylist(_playlistViewModel.SelectedPlaylist);
         }
-        if (NavigationState.IsPlaylistToCreate)
-        {
-            NavigationState.IsPlaylistToCreate = false;
-            Task.Run(async () =>
-            {
-                await SnackBarVM.ShowSnackBarAsync("You have not yet created any playlist, consider creating some ;)", "OK", () => { });
-                
-            });
-        }    
     }
     public async void PromptMessageEditAsync()
     {
@@ -63,7 +54,9 @@ public partial class PlaylistPage : ContentPage
                 var tempList = new ObservableCollection<Tracklist>(_playlistViewModel.UserPlaylists);
                 _playlistViewModel.SelectedPlaylist.Name = newName;
                 _playlistViewModel.SelectedPlaylist.Description = newDescription;
+                var tempSelectedPlaylist = _playlistViewModel.SelectedPlaylist;
                 _playlistViewModel.UserPlaylists = tempList;
+                _playlistViewModel.SelectedPlaylist = tempSelectedPlaylist;
             }
         }
     }

@@ -3,9 +3,7 @@ using DailyPlaylist.View;
 using MediaManager.Library;
 using MediaManager.Media;
 using Newtonsoft.Json.Linq;
-using System;
 using System.Net.Http.Headers;
-using System.Reflection;
 using System.Text;
 
 namespace DailyPlaylist.ViewModel
@@ -13,7 +11,6 @@ namespace DailyPlaylist.ViewModel
     public class PlaylistViewModel : BaseViewModel
     {
         private AuthService _authService;
-        public MediaPlayerService mediaPlayerService;
         private User _activeUser;
         private ObservableCollection<Tracklist> _userPlaylists;
         private Tracklist _selectedPlaylist;
@@ -30,6 +27,8 @@ namespace DailyPlaylist.ViewModel
         public event Action SelectedPlaylistChanged;
         public event Action PromptEditEvent;
         public event Action PromptCreateEvent;
+        public static int attemtps = 0;
+        
 
 
         // CONSTRUCTOR //
@@ -69,18 +68,9 @@ namespace DailyPlaylist.ViewModel
                 PromptCreateEvent?.Invoke();
             });
 
-            CrossMediaManager.Current.PositionChanged += (sender, args) =>
-            {
-                if (args.Position.TotalSeconds >= 28)
-                {
-                    if (NavigationState.LastPlayerUsed == "PVM")
-                    {
-                        HandleTrackFinishedPVM();
-                    }
-                }
-            };
+            MediaPlayerService.OnItemChanged += SynchronizedSelectedItemPVM;
 
-            // LogoutViewModel.OnLogout += Reset;
+            LogoutViewModel.OnLogout += Reset;
 
         }
 
@@ -120,9 +110,8 @@ namespace DailyPlaylist.ViewModel
                     _selectedPlaylist = value;
                     OnPropertyChanged(nameof(SelectedPlaylist));
                     LoadTracksForPlaylist(value);
-                    SelectedPlaylistChanged?.Invoke();
-                    CrossMediaManager.Current.Queue.Clear();
-                    mediaPlayerService = new MediaPlayerService(PlaylistTracks.ToList(), false);
+                    NavigationState.playlistChanged = true;
+      
                 }
             }
         }
@@ -281,9 +270,12 @@ namespace DailyPlaylist.ViewModel
                 SelectedTrackPVM = PlaylistTracks[0];
                 preStoredIndexPVM = 0;
             }
-            //CrossMediaManager.Current.Queue.Clear();
-            //mediaPlayerService = new MediaPlayerService(cachedPlaylist.ToList(), false);
+            CrossMediaManager.Current.Queue.Clear();
+            MediaPlayerService.Initialize(PlaylistTracks.ToList(), false);
+            SelectedPlaylistChanged?.Invoke();
+            
         }
+
 
         private async Task<Track> FetchTrackFromDeezer(long trackId)
         {
@@ -297,7 +289,6 @@ namespace DailyPlaylist.ViewModel
             catch (HttpRequestException ex)
             {
                 Debug.WriteLine($"Error fetching track from Deezer: {ex.Message}");
-                await SnackBarVM.ShowSnackBarAsync("Error fetching tracks. Please reselect a playlist or try again later.", "Dismiss", () => { });
                 return null;
             }
         }
@@ -329,8 +320,7 @@ namespace DailyPlaylist.ViewModel
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Error while fetching the Playlists on the MongoDB server : " + ex.Message);
-                await SnackBarVM.ShowSnackBarAsync("Problem while fetching the playlists", "Dismiss", () => { });
+                Debug.WriteLine("Error while fetching the Playlists from the server : " + ex.Message);
                 return null;
             }
 
@@ -352,10 +342,6 @@ namespace DailyPlaylist.ViewModel
                     {
                         return playlists;
                     }
-                }
-                else
-                {
-                    NavigationState.IsPlaylistToCreate = true;
                 }
             }
             return null;
@@ -496,42 +482,29 @@ namespace DailyPlaylist.ViewModel
 
         private async Task PlayPauseAsync()
         {
-            if (PlaylistTracks == null || !PlaylistTracks.Any())
+            if (!CrossMediaManager.Current.Queue.HasCurrent)
             {
+                if (PlaylistTracks.Any())
+                {
+                    await MediaPlayerService.PlayPauseTaskAsync(0, false);
+                }
                 await SnackBarVM.ShowSnackBarAsync("No track to play", "Dismiss", () => { });
                 return;
             }
-            if (SelectedTrackPVM != null)
-            {
-                string mediaUri = SelectedTrackPVM.Preview;
-                IMediaItem media = mediaPlayerService._mediaItems.FindAll(m => m.MediaUri == mediaUri).FirstOrDefault();
-
-                if (NavigationState.LastPlayerUsed != "PVM")
-                {
-                    CrossMediaManager.Current.Queue.Clear();
-                    mediaPlayerService = new MediaPlayerService(PlaylistTracks.ToList(), false);
-                }
-                if (media != null)
-                {
-                    var index = CrossMediaManager.Current.Queue.IndexOf(media);
-                    await mediaPlayerService.PlayPauseTaskAsync(index);
-               
-                }
-                else
-                {
-                    await mediaPlayerService.PlayPauseTaskAsync(0);
-                }
-                NavigationState.LastPlayerUsed = "PVM";
-            }
             else
             {
-                if (NavigationState.LastPlayerUsed != "PVM")
+                if (SelectedTrackPVM != null)
                 {
-                    CrossMediaManager.Current.Queue.Clear();
-                    mediaPlayerService = new MediaPlayerService(PlaylistTracks.ToList(), false);
+                    if (NavigationState.LastPlayerUsed != "PVM")
+                    {
+                        CrossMediaManager.Current.Queue.Clear();
+                        MediaPlayerService.Initialize(PlaylistTracks.ToList(), false);
+                    }
+                    await MediaPlayerService.PlayPauseTaskAsync(PlaylistTracks.IndexOf(SelectedTrackPVM), true);
+                    NavigationState.LastPlayerUsed = "PVM";
                 }
-                await mediaPlayerService.PlayPauseTaskAsync(0);
-                NavigationState.LastPlayerUsed = "PVM";
+                await MediaPlayerService.PlayPauseTaskAsync(0, false);
+
             }
         }
 
@@ -543,54 +516,20 @@ namespace DailyPlaylist.ViewModel
             if (NavigationState.LastPlayerUsed != "PVM")
             {
                 CrossMediaManager.Current.Queue.Clear();
-                mediaPlayerService = new MediaPlayerService(PlaylistTracks.ToList(), true);
+                MediaPlayerService.Initialize(PlaylistTracks.ToList(), false);
             }
-            await mediaPlayerService.PlayPauseTaskAsync(preStoredIndexPVM);
+            await MediaPlayerService.PlayPauseTaskAsync(preStoredIndexPVM, true);
             NavigationState.LastPlayerUsed = "PVM";
         }
 
         private async Task PlayNextAsync()
         {
-            if (PlaylistTracks == null || !PlaylistTracks.Any())
-            {
-                await SnackBarVM.ShowSnackBarAsync("No tracklist to be forwarded", "Dismiss", () => { });
-                return;
-            }
-            if (NavigationState.LastPlayerUsed != "PVM")
-            {
-                CrossMediaManager.Current.Queue.Clear();
-                mediaPlayerService = new MediaPlayerService(PlaylistTracks.ToList(), true);
-            }
-            int nextMediaIndex = await mediaPlayerService.PlayNextAsync();
-            try
-            {
-                SelectedTrackPVM = PlaylistTracks[nextMediaIndex];
-            }
-            catch
-            {
-                SelectedTrackPVM = PlaylistTracks.FirstOrDefault();
-            }
-            NavigationState.LastPlayerUsed = "PVM";
+            await MediaPlayerService.PlayNextAsync();
         }
 
         private async Task PlayPreviousAsync()
         {
-            if (PlaylistTracks == null || !PlaylistTracks.Any())
-            {
-                await SnackBarVM.ShowSnackBarAsync("No tracklist to be backwarded", "Dismiss", () => { });
-                return;
-            }
-            else
-            {
-                if (NavigationState.LastPlayerUsed != "PVM")
-                {
-                    CrossMediaManager.Current.Queue.Clear();
-                    mediaPlayerService = new MediaPlayerService(PlaylistTracks.ToList(), true);
-                }
-                preStoredIndexPVM = await mediaPlayerService.PlayPreviousAsync();
-                SelectedTrackPVM = PlaylistTracks[preStoredIndexPVM];
-            }
-            NavigationState.LastPlayerUsed = "PVM";
+            await MediaPlayerService.PlayPreviousAsync();
         }
 
         private async Task DeleteFromPlaylistCollectionAsync(Track track)
@@ -605,9 +544,9 @@ namespace DailyPlaylist.ViewModel
                 if (index < CrossMediaManager.Current.Queue.Count)
                 {
                     CrossMediaManager.Current.Queue.RemoveAt(index);
-                    await CrossMediaManager.Current.Queue.UpdateMediaItems();
-                    mediaPlayerService._mediaItems.RemoveAt(index);
+                    MediaPlayerService._mediaItems.RemoveAt(index);
                 }
+                await CrossMediaManager.Current.Queue.UpdateMediaItems();
                 await SnackBarVM.ShowSnackBarShortAsync($"Song '{track.Title}' removed from playlist '{SelectedPlaylist.Name}'!", "OK", () => { });
             }
             else
@@ -650,26 +589,20 @@ namespace DailyPlaylist.ViewModel
             }
         }
 
-
-
-        public void HandleTrackFinishedPVM()
+        public void SynchronizedSelectedItemPVM ()
         {
-            if (PlaylistTracks == null) return;
-
-            var currentIndex = CrossMediaManager.Current.Queue.CurrentIndex;
-            currentIndex++;
-            if (currentIndex >= PlaylistTracks.Count)
-            {
-                currentIndex = 0;
-            }
-            SelectedTrackPVM = PlaylistTracks[currentIndex];
+            IMediaItem media = CrossMediaManager.Current.Queue.Current;
+            if (media == null) return;
+            _selectedTrackPVM = null;
+            SelectedTrackTitle = media.Title; 
+            SelectedTrackArtist = media.Artist;
+            SelectedTrackCover = media.AlbumImageUri;
         }
 
         public void Reset()
         {
             PlaylistTracks = new ObservableCollection<Track>();
             preStoredIndexPVM = 0;
-            mediaPlayerService = null;
             _authService = null;
             _userPlaylists = null;
             _selectedPlaylist = null;
@@ -680,35 +613,6 @@ namespace DailyPlaylist.ViewModel
             SelectedTrackArtist = "Artist";
             SelectedTrackCover = "music_notes.png";
 
-            // est-ce que le PlaylistVM en singleton c'est une bonne idée n'y a-t-il pas d'autres alternatives, faut pouvoir réinitialiser le process
-            // si nouveau User sans avoir quitté l'appli ...  Puis faut s'assurer que tout est bien loadé , sur à 100%, quand le User est authentifié
-
-            // et check l'histoire des indexs , suivant, précédents etctera... dans le Search en allant chercher le current index du media manager c'est pas bon
-
-            // enfin, poste ton appli sur Google via tuto Jonathan
-
-            // 
-
-
-
-            //    private readonly AuthService _authService;
-            //public MediaPlayerService mediaPlayerService;
-            //private User _activeUser;
-            //private ObservableCollection<Tracklist> _userPlaylists;
-            //private Tracklist _selectedPlaylist;
-            //private ObservableCollection<Track> _playlistTracks;
-            //private Track _selectedTrackPVM;
-            //public int preStoredIndexPVM = 0;
-            //private string _selectedTrackTitle = "Title";
-            //private string _selectedTrackArtist = "Artist";
-            //private string _selectedTrackCover = "music_notes.png";
-            //private string _description = "Describe what makes this playlist special ...";
-            //private string _name = "Name ...";
-            //private readonly string _apiKey = "19ORABeXOuwTOxF2KEW1tzNcqUpjbbiTee3TuNEgkNtesrk9wIPW7wvUqhda8inT";
-            //private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
-            //public event Action SelectedPlaylistChanged;
-            //public event Action PromptEditEvent;
-            //public event Action PromptCreateEvent;
         }
     }
 }
