@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using DailyPlaylist.ViewModel;
+using System;
 
 namespace DailyPlaylist.Services
 {
@@ -20,7 +21,6 @@ namespace DailyPlaylist.Services
             get => _activeUser;
             set
             {
-
                 SetProperty(ref _activeUser, value);
             }
         }
@@ -56,16 +56,14 @@ namespace DailyPlaylist.Services
 
             Preferences.Default.Set<bool>(AuthStateKey, true);
             Preferences.Default.Set<string>(AuthUserKey, user.Email);
-            var authService = ServiceHelper.GetService<AuthService>();
-            authService._activeUser = user;
+            _activeUser = user;
 
         }
         public void Logout()
         {
             Preferences.Default.Remove(AuthStateKey);
             Preferences.Default.Remove(AuthUserKey);
-            var authService = ServiceHelper.GetService<AuthService>();
-            authService._activeUser = null;
+            _activeUser = null;
         }
 
         public async Task<User> CreateAccountAsync(string email, string userPassword)

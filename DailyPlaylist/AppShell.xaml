@@ -47,6 +47,12 @@
             ContentTemplate="{DataTemplate view:PlaylistPage}"     
             Route="PlaylistPage" />
 
+        <ShellContent
+            Title="Legal"
+            Icon="legal.png"
+            ContentTemplate="{DataTemplate view:LegalPage}"     
+            Route="LegalPage" />
+
     </TabBar>
 
 </Shell>

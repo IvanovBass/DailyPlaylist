@@ -7,15 +7,20 @@ namespace DailyPlaylist.View;
 public partial class PlaylistPage : ContentPage
 {
     private PlaylistViewModel _playlistViewModel;
+    private AuthService _authService;
 	public PlaylistPage()
     {
         InitializeComponent();
 
-        var playlistViewModel = ServiceHelper.GetService<PlaylistViewModel>();
+        var authservice = ServiceHelper.GetService<AuthService>();
+        _authService = authservice;
+
+        var playlistViewModel = new PlaylistViewModel(authservice);
+
         if (playlistViewModel != null )
         {
             _playlistViewModel = playlistViewModel;
-            BindingContext = _playlistViewModel;
+            BindingContext = playlistViewModel;
             _playlistViewModel.PromptEditEvent += PromptMessageEditAsync;
             _playlistViewModel.PromptCreateEvent += PromptCreateAsync;
 
@@ -40,6 +45,11 @@ public partial class PlaylistPage : ContentPage
         {
             NavigationState.refreshFavoritesNeeded = false;
             _playlistViewModel.LoadTracksForPlaylist(_playlistViewModel.SelectedPlaylist);
+        }
+        if (NavigationState.IsRelogged) 
+        {
+            _playlistViewModel.AuthService = _authService;
+            NavigationState.IsRelogged = false;
         }
     }
     public async void PromptMessageEditAsync()

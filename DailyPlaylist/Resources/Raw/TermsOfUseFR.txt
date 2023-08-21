@@ -1,0 +1,48 @@
+Conditions d'Utilisation de Daily Playlists 
+
+
+1. Acceptation des Conditions 
+
+En accédant et en utilisant DailyPlaylists, vous acceptez d'être lié par ces Conditions d'Utilisation ("Conditions"). Si vous n'acceptez pas ces Conditions, vous ne devriez pas utiliser cette application. 
+
+2. Objectif de l'App 
+
+DailyPlaylists est développée uniquement à des fins éducatives et scolaires. Elle n'est pas destinée à la distribution commerciale ou à la réalisation de profits. L'application permet aux utilisateurs d'écouter des extraits de contenus musicaux, chacun étant limité à une durée maximale de 30 secondes. 
+
+3. Propriété Intellectuelle et Contenu 
+
+Tous les droits sur le contenu musical, y compris les titres, les noms d'artistes, les détails des albums, et les droits d'auteur, marques commerciales ou autres propriétés intellectuelles associés, appartiennent aux artistes respectifs, aux labels discographiques et aux concédants. DailyPlaylists respecte ces droits et ne fournit l'accès à ce contenu que via l'API Deezer, conformément à leurs termes et directives. 
+
+4. Licence Limitée 
+
+Les utilisateurs bénéficient d'une licence limitée pour utiliser DailyPlaylists strictement à des fins personnelles et éducatives. La copie, la distribution, la modification ou toute autre utilisation abusive du contenu est strictement interdite. 
+
+5. Restrictions 
+
+Les utilisateurs ne doivent pas : 
+
+Reproduire, dupliquer, copier, vendre ou revendre une partie de DailyPlaylists ou de son contenu. 
+
+Utiliser l'application pour des performances publiques ou toute autre utilisation non personnelle ou non éducative. 
+
+Tenter de contourner la limite de 30 secondes pour les extraits musicaux. 
+
+6. Aucune Garantie 
+
+DailyPlaylists est fournie "tel quel", sans aucune garantie d'aucune sorte, expresse ou implicite. Les développeurs ne donnent aucune garantie quant à l'exactitude, l'exhaustivité ou l'utilité du contenu. 
+
+7. Limitation de Responsabilité 
+
+En aucun cas, les développeurs, les responsables de la maintenance, ou toute autre partie affiliée à DailyPlaylists] ne seront responsables des dommages, y compris sans limitation les dommages directs ou indirects, spéciaux, accessoires ou consécutifs, pertes ou dépenses découlant de l'utilisation de cette application. 
+
+8. Modification des Conditions 
+
+Nous nous réservons le droit de modifier, de changer ou de mettre à jour ces Conditions à tout moment et sans préavis. Les utilisateurs sont responsables de la vérification périodique de ces Conditions pour les mises à jour. 
+
+9. Loi Applicable 
+
+Ces Conditions sont régies par et interprétées conformément aux lois en vigueur en Belgique. Les litiges découlant de ces Conditions sont soumis à la juridiction exclusive des tribunaux de Belgique. 
+
+10. Contact 
+
+Pour toute question ou préoccupation concernant ces Conditions, veuillez nous contacter à ivan.chorine@ifosup.Wavre.be 

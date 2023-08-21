@@ -30,7 +30,7 @@ namespace DailyPlaylist.ViewModel
 
                     OnLogout?.Invoke();
                     MediaPlayerService.ResetProperties();
-
+                    NavigationState.IsRelogged = true;
                     await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
                 }
             });
