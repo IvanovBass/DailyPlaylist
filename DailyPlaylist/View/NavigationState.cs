@@ -15,6 +15,7 @@ namespace DailyPlaylist.View
 
         public static bool refreshFavoritesNeeded { get; set; } = false;
 
-        public static bool IsPlaylistToCreate { get; set; } = false;
+        public static bool playlistChanged { get; set; } = false;
+
     }
 }

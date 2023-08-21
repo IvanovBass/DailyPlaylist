@@ -29,6 +29,7 @@ namespace DailyPlaylist.ViewModel
                     //CrossMediaManager.Current.Dispose();
 
                     OnLogout?.Invoke();
+                    MediaPlayerService.ResetProperties();
 
                     await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
                 }

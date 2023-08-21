@@ -1,6 +1,8 @@
 ﻿using DailyPlaylist.Services;
 using DailyPlaylist.View;
 using MauiAppDI.Helpers;
+using MediaManager.Library;
+using MediaManager.Media;
 using System.Linq;
 
 namespace DailyPlaylist.ViewModel
@@ -10,7 +12,6 @@ namespace DailyPlaylist.ViewModel
         private PlaylistViewModel _playlistViewModel;
         private ObservableCollection<Track> _searchResults;
         public int preStoredIndex = 0; 
-        public MediaPlayerService mediaPlayerService;
         private string _searchQuery;
         private Track _selectedTrack;
         private string _trackName = "Song";
@@ -102,7 +103,7 @@ namespace DailyPlaylist.ViewModel
             PlayFromCollectionViewCommand = new Command<Track>(async (track) => await HandlePlayFromCollectionView(track));
             SetFavoriteCommand = new Command<Track>(async (track) => await HandleSetFavorite(track));
             NextCommand = new Command<Track>(async (track) => await HandleNext());
-            PreviousCommand = new Command<Track>(async (track) => await HandlePrevious(track));
+            PreviousCommand = new Command<Track>(async (track) => await HandlePrevious());
 
             _playlistViewModel = playlistViewModel;
             _playlistViewModel.SelectedPlaylistChanged += LoadSelectedFavoriteTrackUris;
@@ -113,16 +114,7 @@ namespace DailyPlaylist.ViewModel
                 SelectedTrack = track;
             });
 
-            CrossMediaManager.Current.PositionChanged += (sender, args) =>
-            {
-                if (args.Position.TotalSeconds >= 28)
-                {
-                    if (NavigationState.LastPlayerUsed == "SVM")
-                    {
-                        HandleTrackFinishedSVM();
-                    }  
-                }
-            };
+            MediaPlayerService.OnItemChanged += SynchronizedSelectedItemSVM;
 
             LogoutViewModel.OnLogout += Reset;
 
@@ -146,14 +138,12 @@ namespace DailyPlaylist.ViewModel
                 if (searchData.Data is List<Track> tracks && tracks.Any())
                 {
                     SearchResults = new ObservableCollection<Track>(searchData.Data);
-                    CrossMediaManager.Current.Queue.Clear();
-                    mediaPlayerService = new MediaPlayerService(searchData.Data, false);
-
                     if (SearchResults.Any())
                     {
                         SelectedTrack = SearchResults[0];
                         LoadSelectedFavoriteTrackUris();
                     }
+                    NavigationState.LastPlayerUsed = "SVMprevious";
                 }
                 else
                 {
@@ -176,21 +166,42 @@ namespace DailyPlaylist.ViewModel
 
         private async Task HandlePlayPause()
         {
-            if (SearchResults == null || !SearchResults.Any())
+            if (!CrossMediaManager.Current.Queue.HasCurrent)
             {
+                if (SearchResults.Any())
+                {
+                    CrossMediaManager.Current.Queue.Clear();
+                    MediaPlayerService.Initialize(SearchResults.ToList(), false);
+                    await MediaPlayerService.PlayPauseTaskAsync(0, false);
+                }
                 await SnackBarVM.ShowSnackBarAsync("No track to play", "Dismiss", () => { });
                 return;
             }
-            else
+            if (NavigationState.LastPlayerUsed != "SVM")
             {
-                if (NavigationState.LastPlayerUsed != "SVM")
+                if (SelectedTrack != null)
                 {
                     CrossMediaManager.Current.Queue.Clear();
-                    mediaPlayerService = new MediaPlayerService(SearchResults.ToList(), false);
+                    MediaPlayerService.Initialize(SearchResults.ToList(), false);
+                    NavigationState.LastPlayerUsed = "SVM";
+                    await MediaPlayerService.PlayPauseTaskAsync(SearchResults.IndexOf(SelectedTrack), true);
+                } else
+                {
+                    await MediaPlayerService.PlayPauseTaskAsync(0, false);
                 }
-                await mediaPlayerService.PlayPauseTaskAsync(SearchResults.IndexOf(SelectedTrack));
-                NavigationState.LastPlayerUsed = "SVM";
             }
+            else
+            {
+                if (SelectedTrack != null)
+                {
+                    await MediaPlayerService.PlayPauseTaskAsync(SearchResults.IndexOf(SelectedTrack), true);
+                    NavigationState.LastPlayerUsed = "SVM";
+                } else
+                {
+                    await MediaPlayerService.PlayPauseTaskAsync(0, false);
+                }
+            }
+            
         }
 
         private async Task HandlePlayFromCollectionView(Track track)
@@ -200,9 +211,9 @@ namespace DailyPlaylist.ViewModel
             if (NavigationState.LastPlayerUsed != "SVM")
             {
                 CrossMediaManager.Current.Queue.Clear();
-                mediaPlayerService = new MediaPlayerService(SearchResults.ToList(), false);
+                MediaPlayerService.Initialize(SearchResults.ToList(), false);
             }
-            await mediaPlayerService.PlayPauseTaskAsync(preStoredIndex);
+            await MediaPlayerService.PlayPauseTaskAsync(preStoredIndex, true);
             NavigationState.LastPlayerUsed = "SVM";
         }
 
@@ -228,64 +239,21 @@ namespace DailyPlaylist.ViewModel
                 _playlistViewModel.SelectedPlaylist.DeezerTrackIds.Remove(track.Id);
                 await SnackBarVM.ShowSnackBarShortAsync("'" + track.Title + "' removed from playlist '" + _playlistViewModel.SelectedPlaylist.Name + "' !", "OK", () => { });
             }
+
+            if (NavigationState.LastPlayerUsed == "PVM")
+            {
+                await CrossMediaManager.Current.Queue.UpdateMediaItems();
+            }
         }
 
         private async Task HandleNext()
         {
-            if (SearchResults == null || !SearchResults.Any())
-            {
-                await SnackBarVM.ShowSnackBarAsync("No tracklist to be forwarded", "Dismiss", () => { });
-                return;
-            }
-            if (NavigationState.LastPlayerUsed != "SVM")
-            {
-                CrossMediaManager.Current.Queue.Clear();
-                mediaPlayerService = new MediaPlayerService(SearchResults.ToList(), false);
-            }
-            int nextMediaIndex = await mediaPlayerService.PlayNextAsync();
-            try
-            {
-                SelectedTrack = SearchResults[nextMediaIndex];
-            }
-            catch
-            {
-                SelectedTrack = SearchResults.FirstOrDefault();
-            }
-            NavigationState.LastPlayerUsed = "SVM";
+            await MediaPlayerService.PlayNextAsync();
         }
 
-        private async Task HandlePrevious(Track track)
+        private async Task HandlePrevious( )
         {
-            if (SearchResults == null || !SearchResults.Any())
-            {
-                await SnackBarVM.ShowSnackBarAsync("No tracklist to be backwarded", "Dismiss", () => { });
-                return;
-            }
-            else
-            {
-                if (NavigationState.LastPlayerUsed != "SVM")
-                {
-                    CrossMediaManager.Current.Queue.Clear();
-                    mediaPlayerService = new MediaPlayerService(SearchResults.ToList(), true);
-                }
-                preStoredIndex = await mediaPlayerService.PlayPreviousAsync();
-                SelectedTrack = SearchResults[preStoredIndex];
-            }
-            NavigationState.LastPlayerUsed = "SVM";
-        }
-
-
-        public void HandleTrackFinishedSVM()
-        {
-            if (SearchResults == null) return;
-
-            var currentIndex = CrossMediaManager.Current.Queue.CurrentIndex;
-            currentIndex++;
-            if (currentIndex >= SearchResults.Count)
-            {
-                currentIndex = 0;
-            }
-            SelectedTrack = SearchResults[currentIndex];
+            await MediaPlayerService.PlayPreviousAsync();
         }
 
         // BACK-END METHODS  //
@@ -315,11 +283,21 @@ namespace DailyPlaylist.ViewModel
             }
         }
 
+        public void SynchronizedSelectedItemSVM()
+        {
+            IMediaItem media = CrossMediaManager.Current.Queue.Current;
+            if (media == null) return;
+            _selectedTrack = null;
+            TrackName = media.Title;
+            ArtistName = media.Artist;
+            AlbumCover = media.AlbumImageUri;
+            
+        }
+
         public void Reset()
         {
             SearchResults = new ObservableCollection<Track>();
             preStoredIndex = 0;
-            mediaPlayerService = null;
             SearchQuery = string.Empty;
             SelectedTrack = null;
             TrackName = "Song";
