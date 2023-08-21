@@ -34,15 +34,10 @@ public partial class SearchPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        if (NavigationState.LastVisitedPage == nameof(PlaylistPage))
+        if (NavigationState.refreshFavoritesNeeded)
         {
+            NavigationState.refreshFavoritesNeeded = false;
             _searchViewModel.LoadSelectedFavoriteTrackUris();
-            if (_searchViewModel.SearchResults.Count > 0)
-            {
-                CrossMediaManager.Current.Queue.Clear();
-                _searchViewModel.mediaPlayerService = new MediaPlayerService(_searchViewModel.SearchResults.ToList(), true);
-                CrossMediaManager.Current.PlayQueueItem(_searchViewModel.SearchResults.IndexOf(_searchViewModel.SelectedTrack));
-            }
         }
     }
     private async void ImageButtonClicked(object sender, EventArgs e)

@@ -9,8 +9,10 @@ namespace DailyPlaylist.ViewModel
     {
 
         private ObservableCollection<Genre> _genres;
-
         Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
+
+        // PROPERTIES //
+
         public ObservableCollection<Genre> Genres
         {
             get => _genres;
@@ -20,7 +22,8 @@ namespace DailyPlaylist.ViewModel
                 OnPropertyChanged();
             }
         }
-        public ICommand LoadGenresCommand { get; }
+       
+        // CONSTRUCTOR //
 
         public PlaylistConfigViewModel()
         {
@@ -28,6 +31,12 @@ namespace DailyPlaylist.ViewModel
             LoadGenresCommand = new Command(async () => await LoadGenres());
         }
 
+        // COMMANDS //
+
+        public ICommand LoadGenresCommand { get; }
+
+
+        // METHODS //
 
         private async Task LoadGenres()
         {
@@ -118,6 +127,7 @@ namespace DailyPlaylist.ViewModel
             return await ExtractTracksFromAlbumsAsync(filteredAlbums);
         }
 
+        // RESPONSE CLASSES
 
         public class GenreData
         {

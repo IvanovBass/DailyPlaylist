@@ -1,4 +1,5 @@
 ﻿using MediaManager.Library;
+using MediaManager.Media;
 
 namespace DailyPlaylist.Services
 {
@@ -59,14 +60,16 @@ namespace DailyPlaylist.Services
             }
         }
 
-        public async Task PlayNextAsync()
+        public async Task<int> PlayNextAsync()
         {
-            storedIndex++;
-            if (storedIndex >= _mediaItems.Count)
+            int index = CrossMediaManager.Current.Queue.CurrentIndex;
+            index++;
+            if (index >= CrossMediaManager.Current.Queue.Count)
             {
-                storedIndex = 0;
+                index = 0;
             }
-            await CrossMediaManager.Current.PlayQueueItem(storedIndex);
+            await CrossMediaManager.Current.PlayQueueItem(index);
+            return index;
         }
 
         public async Task<int> PlayPreviousAsync()

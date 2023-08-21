@@ -39,13 +39,15 @@ namespace DailyPlaylist.View
 
        
                 List<Track> MyAlgorithmedPlaylist = new();
-                // I don't know how I'm gonna deal with that since Deezer's GET API is less smart than I though , I won't be able to parameter a search query
-        
-                await Navigation.PushAsync(new PlaylistPage()); 
+                // I don't know how I'm gonna deal with that since Deezer's GET API is less smart than I though ,
+                // I won't be able to parameter a search query
+
+                await Shell.Current.GoToAsync($"//{nameof(PlaylistPage)}");
+                await DisplayAlert("We're working on it!", "You're going to enjoy your smart playlists very soon. Meanwhile, have fun creating your own playlists by searching for tracks or artists and adding them in your created playlists. Enjoy!", "Got it");
             }
             else
             {
-                await DisplayAlert("Selection Missing", "Please select both a genre and a decade.", "OK");
+                await DisplayAlert("We're missing some info...", "Please select both a genre and a decade.", "OK");
             }
         }
 
