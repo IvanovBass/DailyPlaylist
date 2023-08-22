@@ -49,11 +49,23 @@
 
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+		
+		<!-- Embedded Resources-->
+		<EmbeddedResource Include="Resources\Raw\TermsOfUseEN.txt">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Resources\Raw\TermsOfUseFR.txt">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</EmbeddedResource>
+
+
+
 	</ItemGroup>
 
 	<ItemGroup>
 	  <None Remove="FodyWeavers.xml" />
 	  <None Remove="Resources\Images\icon.png" />
+	  <None Remove="Resources\Raw\TermsOfUseFR.txt" />
 	</ItemGroup>
 
 	<ItemGroup>

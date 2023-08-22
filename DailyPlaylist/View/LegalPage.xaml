@@ -2,23 +2,31 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="DailyPlaylist.View.LegalPage"
-             Title="LegalPage">
-    <VerticalStackLayout Padding="0,15,0,0">
+             Title="Terms Of Use">
 
-        <Picker x:Name="LanguagePicker" SelectedIndexChanged="OnLanguageChanged" HorizontalOptions="Center" HorizontalTextAlignment="Center"
-                FontSize="Large">
-            <Picker.ItemsSource>
-                <x:Array Type="{x:Type x:String}">
-                    <x:String>Français</x:String>
-                    <x:String>English</x:String>
-                </x:Array>
-            </Picker.ItemsSource>
-        </Picker>
+    <VerticalStackLayout Padding="0,15,0,0"  Spacing="15" >
 
-        <ScrollView>
-            <Label  x:Name="TermsOfUseLabel" Padding="15" HorizontalOptions="Center" HorizontalTextAlignment="Center">
+        <StackLayout Orientation="Horizontal" Padding="20,5,20,0" Spacing="10">
+            <Label   Text="Choose your language : "  HeightRequest="40" VerticalTextAlignment="Center" FontSize="Medium" />
+            <Picker x:Name="LanguagePicker" SelectedIndexChanged="OnLanguageChanged" HorizontalOptions="FillAndExpand" HorizontalTextAlignment="Center"
+                FontSize="Medium" >
+                <Picker.ItemsSource>
+                    <x:Array Type="{x:Type x:String}">
+                        <x:String>Français</x:String>
+                        <x:String>English</x:String>
+                    </x:Array>
+                </Picker.ItemsSource>
+            </Picker>
+        </StackLayout>
 
-            </Label>
+        <ScrollView VerticalOptions="FillAndExpand" HorizontalOptions="Center"  VerticalScrollBarVisibility="Always">
+            <StackLayout>
+                <Label x:Name="TermsOfUseLabel" 
+                VerticalOptions="StartAndExpand" 
+                HorizontalTextAlignment="Center"
+                Padding="15"/>
+            </StackLayout>
         </ScrollView>
     </VerticalStackLayout>
+
 </ContentPage>

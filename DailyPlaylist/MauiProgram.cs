@@ -39,9 +39,13 @@ public static class MauiProgram
 
         builder.Services.AddTransient<LoginPage>();
 
+        builder.Services.AddTransient<SearchPage>();
+
         builder.Services.AddTransient<PlaylistPage>();
 
-        // builder.Services.AddTransient<PlaylistViewModel>();
+        builder.Services.AddTransient<SearchViewModel>();
+
+        builder.Services.AddTransient<PlaylistViewModel>();
 
         builder.Services.AddSingleton<AuthService>();
 

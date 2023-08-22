@@ -7,20 +7,18 @@ namespace DailyPlaylist.View;
 public partial class PlaylistPage : ContentPage
 {
     private PlaylistViewModel _playlistViewModel;
-    private AuthService _authService;
+
+    // CONSTRUCTOR //
 	public PlaylistPage()
     {
         InitializeComponent();
 
-        var authservice = ServiceHelper.GetService<AuthService>();
-        _authService = authservice;
+        var playVM = ServiceHelper.GetService<PlaylistViewModel>();
 
-        var playlistViewModel = new PlaylistViewModel(authservice);
-
-        if (playlistViewModel != null )
+        if (playVM != null )
         {
-            _playlistViewModel = playlistViewModel;
-            BindingContext = playlistViewModel;
+            PlaylistViewModel = _playlistViewModel = playVM;
+            BindingContext = PlaylistViewModel;
             _playlistViewModel.PromptEditEvent += PromptMessageEditAsync;
             _playlistViewModel.PromptCreateEvent += PromptCreateAsync;
 
@@ -32,6 +30,20 @@ public partial class PlaylistPage : ContentPage
         }
     }
 
+    // PROPERTIES //
+
+    public PlaylistViewModel PlaylistViewModel
+    {
+        get { return _playlistViewModel; }
+        set
+        {
+            _playlistViewModel = value;
+            BindingContext = _playlistViewModel;
+        }
+    }
+
+    // METHODS //
+
     private async void ImageButtonClicked(object sender, EventArgs e)
     {
         var button = sender as ImageButton;
@@ -41,15 +53,11 @@ public partial class PlaylistPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
+
         if (NavigationState.refreshFavoritesNeeded)
         {
             NavigationState.refreshFavoritesNeeded = false;
             _playlistViewModel.LoadTracksForPlaylist(_playlistViewModel.SelectedPlaylist);
-        }
-        if (NavigationState.IsRelogged) 
-        {
-            _playlistViewModel.AuthService = _authService;
-            NavigationState.IsRelogged = false;
         }
     }
     public async void PromptMessageEditAsync()

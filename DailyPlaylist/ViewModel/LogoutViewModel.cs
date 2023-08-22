@@ -1,6 +1,6 @@
 ﻿using DailyPlaylist.Services;
 using DailyPlaylist.View;
-
+using MauiAppDI.Helpers;
 
 namespace DailyPlaylist.ViewModel
 {
@@ -29,8 +29,11 @@ namespace DailyPlaylist.ViewModel
                     //CrossMediaManager.Current.Dispose();
 
                     OnLogout?.Invoke();
+
                     MediaPlayerService.ResetProperties();
-                    NavigationState.IsRelogged = true;
+
+                    // NavigationState.IsRelogged = true;   // on va mettre la lgoqieu sur le disappearing
+
                     await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
                 }
             });
