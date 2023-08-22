@@ -9,38 +9,16 @@ public partial class PlaylistPage : ContentPage
     private PlaylistViewModel _playlistViewModel;
 
     // CONSTRUCTOR //
-	public PlaylistPage()
+	public PlaylistPage(PlaylistViewModel playlistViewModel)
     {
         InitializeComponent();
 
-        var playVM = ServiceHelper.GetService<PlaylistViewModel>();
+        _playlistViewModel = playlistViewModel;
 
-        if (playVM != null )
-        {
-            PlaylistViewModel = _playlistViewModel = playVM;
-            BindingContext = PlaylistViewModel;
-            _playlistViewModel.PromptEditEvent += PromptMessageEditAsync;
-            _playlistViewModel.PromptCreateEvent += PromptCreateAsync;
+        BindingContext = _playlistViewModel;
 
-        }
-        else 
-        { 
-            BindingContext = null;
-            Application.Current.MainPage.DisplayAlert("Error", "There was an error loading the Playlists, consider logging out and back in", "OK");
-        }
     }
 
-    // PROPERTIES //
-
-    public PlaylistViewModel PlaylistViewModel
-    {
-        get { return _playlistViewModel; }
-        set
-        {
-            _playlistViewModel = value;
-            BindingContext = _playlistViewModel;
-        }
-    }
 
     // METHODS //
 

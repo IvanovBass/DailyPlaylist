@@ -1,74 +1,34 @@
 using DailyPlaylist.Services;
-using DailyPlaylist.ViewModel;
-using MauiAppDI.Helpers;
-using System.ComponentModel;
-
 
 namespace DailyPlaylist.View
 {
     public partial class HomePage : ContentPage
     {
-        private AuthService _authService;
-        private PlaylistViewModel _playlistViewModel;
-        private SearchViewModel _searchViewModel;
-        // private SearchViewModel _searchViewModel;
-        public HomePage()
+        private readonly AppSessionManager _appSessionManager;
+        private readonly AuthService _authService;
+
+
+        public HomePage(AuthService authService)
         {
             InitializeComponent();
 
             StartAnimations();
+            
+            _authService = authService;
 
         }
-        
-        private async Task InitializeAsync()
-        {
 
-            try
-            {
-                
-                var authService = ServiceHelper.GetService<AuthService>();
-                if (authService != null)
-                {
-                    _authService = authService;
-                    string emailUser = _authService.WhoIsAuthenticatedAsync();
-                    User authUser = await authService.RetrieveUserAsync(emailUser);
-
-                    if (authUser != null && authUser is User)
-                    {
-                        _authService.ActiveUser = authUser;
-                    }
-                    else 
-                    {
-                        await SnackBarVM.ShowSnackBarAsync("Problem to retrieve your playlists and details from server, please re-log in and try again", "Dismiss", () => { });
-                    }
-                    var playVM = new PlaylistViewModel(_authService);
-                    _playlistViewModel = playVM;
-                    await Task.Delay(1500);
-                    var playlistPage = ServiceHelper.GetService<PlaylistPage>();
-                    playlistPage.PlaylistViewModel = playVM;
-
-                    var searchVM = new SearchViewModel(playVM);
-                    _searchViewModel = searchVM;
-                    await Task.Delay(1000);
-                    new SearchPage();
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
-        }
-
-        protected override async void OnAppearing()
+        protected override void OnAppearing()
         {
             base.OnAppearing();
 
             if (NavigationState.LastVisitedPage == nameof(LoadingPage))
             {
                 NavigationState.LastVisitedPage = "";
-                await InitializeAsync();
+                _appSessionManager = new AppSessionManager(IServiceScopeFactory, _authService);
             }
         }
+
 
         private async void StartAnimations()
         {

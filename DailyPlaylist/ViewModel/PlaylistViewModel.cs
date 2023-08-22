@@ -8,10 +8,9 @@ using System.Text;
 
 namespace DailyPlaylist.ViewModel
 {
-    public class PlaylistViewModel : BaseViewModel
+    public class PlaylistViewModel : BaseViewModel, IPlaylistViewModel
     {
         private User _activeUser;
-        private AuthService _authService;
         private ObservableCollection<Tracklist> _userPlaylists;
         private Tracklist _selectedPlaylist;
         private ObservableCollection<Track> _playlistTracks;
@@ -34,15 +33,8 @@ namespace DailyPlaylist.ViewModel
 
         // CONSTRUCTOR //
 
-        public PlaylistViewModel(AuthService authservice)
+        public PlaylistViewModel()
         {
-            _authService = authservice;
-            ActiveUser = authservice.ActiveUser;
-
-            // OnUserChanged += InitializationPlaylistsAsync;
-
-            _ = InitializationPlaylistsAsync();
-
             SelectedPlaylistChanged?.Invoke();
 
             PlayPauseCommand = new Command(async track => await PlayPauseAsync());
@@ -70,11 +62,18 @@ namespace DailyPlaylist.ViewModel
 
             MediaPlayerService.OnItemChanged += SynchronizedSelectedItemPVM;
 
-            LogoutViewModel.OnLogout += Reset;  
-
-            // We now have to make sure that new transient models will be constructed each time when relogging
-
         }
+
+        public void Initialize(User activeUser)
+        {
+            ActiveUser = activeUser;
+
+            // OnUserChanged += InitializationPlaylistsAsync;
+
+            _ = InitializationPlaylistsAsync();
+
+            
+        } 
 
         // PROPERTIES //
 
@@ -84,20 +83,7 @@ namespace DailyPlaylist.ViewModel
             set
             {
                 _activeUser = value;
-            }
-        }
-
-        public AuthService AuthService
-        {
-            get => _authService;
-            set
-            {
-                _authService = value;
-                if (value != null)
-                {
-                    ActiveUser = value.ActiveUser;
-                    // OnUserChanged?.Invoke();
-                }
+                // OnUserChanged?.Invoke();
             }
         }
 
@@ -618,20 +604,5 @@ namespace DailyPlaylist.ViewModel
             SelectedTrackArtist = media.Artist;
             SelectedTrackCover = media.AlbumImageUri;
         }
-
-        //public void Reset()
-        //{
-        //    PlaylistTracks = new ObservableCollection<Track>();
-        //    preStoredIndexPVM = 0;
-        //    UserPlaylists = new ObservableCollection<Tracklist>();
-        //    SelectedPlaylist = null;
-        //    _activeUser = null;
-        //    AuthService = null;
-        //    SelectedTrackPVM = null;
-        //    SelectedTrackTitle = "Song";
-        //    SelectedTrackArtist = "Artist";
-        //    SelectedTrackCover = "music_notes.png";
-
-        //}
     }
 }
