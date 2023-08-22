@@ -1,14 +1,15 @@
-using DailyPlaylist.Services;
+using System.IO;
 using System.Reflection;
 
 namespace DailyPlaylist.View;
 
 public partial class LegalPage : ContentPage
 {
-	public LegalPage()
-	{
-		InitializeComponent();
-	}
+    public LegalPage()
+    {
+        InitializeComponent();
+        LanguagePicker.SelectedIndex = 0;
+    }
 
     private async void OnLanguageChanged(object sender, EventArgs e)
     {
@@ -20,7 +21,7 @@ public partial class LegalPage : ContentPage
     {
         string fileName = language == "English" ? "TermsOfUseEN.txt" : "TermsOfUseFR.txt";
         var assembly = Assembly.GetExecutingAssembly();
-        var stream = assembly.GetManifestResourceStream($"{fileName}");
+        var stream = assembly.GetManifestResourceStream($"DailyPlaylist.Resources.Raw.{fileName}");
         using (var reader = new StreamReader(stream))
         {
             return await reader.ReadToEndAsync();
@@ -30,9 +31,7 @@ public partial class LegalPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        TermsOfUseLabel.Text = await ReadTextFilesAsync("English");
+        TermsOfUseLabel.Text = await ReadTextFilesAsync("Français");
     }
-
-
 
 }

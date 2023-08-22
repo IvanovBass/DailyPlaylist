@@ -11,11 +11,13 @@ namespace DailyPlaylist.View
         private AuthService _authService;
         private PlaylistViewModel _playlistViewModel;
         private SearchViewModel _searchViewModel;
+        // private SearchViewModel _searchViewModel;
         public HomePage()
         {
             InitializeComponent();
 
             StartAnimations();
+
         }
         
         private async Task InitializeAsync()
@@ -39,10 +41,16 @@ namespace DailyPlaylist.View
                     {
                         await SnackBarVM.ShowSnackBarAsync("Problem to retrieve your playlists and details from server, please re-log in and try again", "Dismiss", () => { });
                     }
-                    //var playVM = ServiceHelper.GetService<PlaylistViewModel>();
-                    //var searchVM = ServiceHelper.GetService<SearchViewModel>();
-                    //_searchViewModel = searchVM;
+                    var playVM = new PlaylistViewModel(_authService);
+                    _playlistViewModel = playVM;
+                    await Task.Delay(1500);
+                    var playlistPage = ServiceHelper.GetService<PlaylistPage>();
+                    playlistPage.PlaylistViewModel = playVM;
 
+                    var searchVM = new SearchViewModel(playVM);
+                    _searchViewModel = searchVM;
+                    await Task.Delay(1000);
+                    new SearchPage();
                 }
             }
             catch (Exception ex)

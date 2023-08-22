@@ -25,7 +25,7 @@ namespace DailyPlaylist.ViewModel
         private readonly string _apiKey = "19ORABeXOuwTOxF2KEW1tzNcqUpjbbiTee3TuNEgkNtesrk9wIPW7wvUqhda8inT";
         private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
         public event Action SelectedPlaylistChanged;
-        public event Func<Task> OnUserChanged;
+        // public event Func<Task> OnUserChanged;
         public event Action PromptEditEvent;
         public event Action PromptCreateEvent;
         public static int attemtps = 0;
@@ -36,10 +36,12 @@ namespace DailyPlaylist.ViewModel
 
         public PlaylistViewModel(AuthService authservice)
         {
-            
-            OnUserChanged += InitializationPlaylistsAsync;
-
             _authService = authservice;
+            ActiveUser = authservice.ActiveUser;
+
+            // OnUserChanged += InitializationPlaylistsAsync;
+
+            _ = InitializationPlaylistsAsync();
 
             SelectedPlaylistChanged?.Invoke();
 
@@ -68,9 +70,9 @@ namespace DailyPlaylist.ViewModel
 
             MediaPlayerService.OnItemChanged += SynchronizedSelectedItemPVM;
 
-            LogoutViewModel.OnLogout += Reset;
+            LogoutViewModel.OnLogout += Reset;  
 
-            OnUserChanged += InitializationPlaylistsAsync;
+            // We now have to make sure that new transient models will be constructed each time when relogging
 
         }
 
@@ -94,7 +96,7 @@ namespace DailyPlaylist.ViewModel
                 if (value != null)
                 {
                     ActiveUser = value.ActiveUser;
-                    OnUserChanged?.Invoke();
+                    // OnUserChanged?.Invoke();
                 }
             }
         }
@@ -617,19 +619,19 @@ namespace DailyPlaylist.ViewModel
             SelectedTrackCover = media.AlbumImageUri;
         }
 
-        public void Reset()
-        {
-            PlaylistTracks = new ObservableCollection<Track>();
-            preStoredIndexPVM = 0;
-            UserPlaylists = new ObservableCollection<Tracklist>();
-            SelectedPlaylist = null;
-            _activeUser = null;
-            AuthService = null;
-            SelectedTrackPVM = null;
-            SelectedTrackTitle = "Song";
-            SelectedTrackArtist = "Artist";
-            SelectedTrackCover = "music_notes.png";
+        //public void Reset()
+        //{
+        //    PlaylistTracks = new ObservableCollection<Track>();
+        //    preStoredIndexPVM = 0;
+        //    UserPlaylists = new ObservableCollection<Tracklist>();
+        //    SelectedPlaylist = null;
+        //    _activeUser = null;
+        //    AuthService = null;
+        //    SelectedTrackPVM = null;
+        //    SelectedTrackTitle = "Song";
+        //    SelectedTrackArtist = "Artist";
+        //    SelectedTrackCover = "music_notes.png";
 
-        }
+        //}
     }
 }
