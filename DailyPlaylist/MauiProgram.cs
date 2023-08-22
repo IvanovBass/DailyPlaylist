@@ -3,6 +3,7 @@ using DailyPlaylist.ViewModel;
 using DailyPlaylist.View;
 using Microsoft.Extensions.Logging;
 using CommunityToolkit.Maui;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DailyPlaylist;
 
@@ -30,8 +31,14 @@ public static class MauiProgram
             });
 
 #if DEBUG
-		builder.Logging.AddDebug();
+        builder.Logging.AddDebug();
 #endif
+
+        builder.Services.AddSingleton<HttpClient>();
+
+        builder.Services.AddSingleton<AuthService>();
+
+        builder.Services.AddSingleton<AppSessionManager>();
 
         builder.Services.AddTransient<LoadingPage>();
 
@@ -39,17 +46,15 @@ public static class MauiProgram
 
         builder.Services.AddTransient<LoginPage>();
 
+        builder.Services.AddTransient<ISearchViewModel, SearchViewModel>();
+
+        builder.Services.AddTransient<IPlaylistViewModel, PlaylistViewModel>();
+
         builder.Services.AddTransient<SearchPage>();
 
         builder.Services.AddTransient<PlaylistPage>();
 
-        builder.Services.AddTransient<SearchViewModel>();
-
-        builder.Services.AddTransient<PlaylistViewModel>();
-
-        builder.Services.AddSingleton<AuthService>();
-
-        builder.Services.AddSingleton<HttpClient>();
+        builder.Services.AddTransient<LogoutViewModel>();
 
         return builder.Build();
 	}

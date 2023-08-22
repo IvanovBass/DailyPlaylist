@@ -1,6 +1,7 @@
 ﻿using DailyPlaylist.Services;
 using DailyPlaylist.View;
 using DailyPlaylist.ViewModel;
+using MauiAppDI.Helpers;
 
 namespace DailyPlaylist;
 
@@ -19,6 +20,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(PlayerPage), typeof(PlayerPage));
         Routing.RegisterRoute(nameof(PlaylistConfigPage), typeof(PlaylistConfigPage));
 
-        BindingContext = new LogoutViewModel();
+        var appSessionManager = ServiceHelper.GetService<IAppSessionManager>();
+        BindingContext = new LogoutViewModel(appSessionManager);
     }
 }

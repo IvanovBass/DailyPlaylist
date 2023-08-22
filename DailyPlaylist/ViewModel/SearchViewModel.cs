@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace DailyPlaylist.ViewModel
 {
-    public class SearchViewModel : BaseViewModel
+    public class SearchViewModel : BaseViewModel, ISearchViewModel
     {
         private PlaylistViewModel _playlistViewModel;
         private ObservableCollection<Track> _searchResults;
@@ -93,7 +93,7 @@ namespace DailyPlaylist.ViewModel
 
         // CONSTRUCTOR //
 
-        public SearchViewModel(PlaylistViewModel playlistviewmodel)
+        public SearchViewModel()
         {
 
             SearchResults = new ObservableCollection<Track>();
@@ -105,11 +105,6 @@ namespace DailyPlaylist.ViewModel
             NextCommand = new Command<Track>(async (track) => await HandleNext());
             PreviousCommand = new Command<Track>(async (track) => await HandlePrevious());
 
-
-            _playlistViewModel = playlistviewmodel;
-            _playlistViewModel.SelectedPlaylistChanged += LoadSelectedFavoriteTrackUris;
-
-
             ItemSelectedCommand = new Command<Track>(track =>
             {
                 SelectedTrack = track;
@@ -117,7 +112,14 @@ namespace DailyPlaylist.ViewModel
 
             MediaPlayerService.OnItemChanged += SynchronizedSelectedItemSVM;
 
-            LogoutViewModel.OnLogout += Reset;
+        }
+
+        // INTERFACE INITIALIZER //
+
+        public void Initialize(PlaylistViewModel playlistViewModel)
+        {
+            _playlistViewModel = playlistViewModel;
+            _playlistViewModel.SelectedPlaylistChanged += LoadSelectedFavoriteTrackUris;
 
         }
 
@@ -293,19 +295,6 @@ namespace DailyPlaylist.ViewModel
             ArtistName = media.Artist;
             AlbumCover = media.AlbumImageUri;
             
-        }
-
-        public void Reset()
-        {
-            SearchResults = new ObservableCollection<Track>();
-            preStoredIndex = 0;
-            SearchQuery = string.Empty;
-            SelectedTrack = null;
-            _playlistViewModel = null;
-            TrackName = "Song";
-            ArtistName = "Artist";
-            AlbumCover = "music_notes2.png";
-            IsLoading = false;
         }
     }
 }

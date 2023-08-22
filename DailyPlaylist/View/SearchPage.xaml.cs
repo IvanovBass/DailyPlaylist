@@ -8,25 +8,13 @@ public partial class SearchPage : ContentPage
 {
 
     private SearchViewModel _searchViewModel;
-    private PlaylistViewModel _playlistViewModel;
-	public SearchPage()
-	{
-		InitializeComponent();
 
-        var searchVM = ServiceHelper.GetService<SearchViewModel>();
-        if (searchVM != null)
-        {
-            _searchViewModel = searchVM;
-            BindingContext = searchVM;
-        }
-        else
-        {
-            BindingContext = null;
-            Application.Current.MainPage.DisplayAlert("Error", "There was an error loading the Playlist context, you won't be able to add songs to your favorite playlists. Consider logging out and back in", "OK");
-        }
+    public SearchPage(SearchViewModel searchViewModel)
+    {
+        InitializeComponent();
 
-        var playVM = ServiceHelper.GetService<PlaylistViewModel>();
-        _playlistViewModel = playVM;
+        _searchViewModel = searchViewModel;
+        BindingContext = searchViewModel;
 
     }
 
