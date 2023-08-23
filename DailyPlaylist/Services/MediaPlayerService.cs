@@ -9,6 +9,9 @@ namespace DailyPlaylist.Services
         public static int storedIndex = 0;
         public static Action OnItemChanged;
 
+
+        // CONSTRUCTOR //
+
         static MediaPlayerService()
         {
             CrossMediaManager.Current.PositionChanged += async (sender, args) =>
@@ -24,6 +27,8 @@ namespace DailyPlaylist.Services
                 OnItemChanged?.Invoke();
             };
         }
+
+        // STATIC INITIALIZER //
 
         public static void Initialize(List<Track> tracks, bool autoPlay)
         {
@@ -44,6 +49,8 @@ namespace DailyPlaylist.Services
                 CrossMediaManager.Current.Pause();
             }
         }
+
+        // CONTROLS //
 
         public static async Task PlayPauseTaskAsync(int index, bool applyIndex = false)
         {

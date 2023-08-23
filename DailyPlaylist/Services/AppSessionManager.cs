@@ -106,6 +106,8 @@ namespace DailyPlaylist.Services
 
  }
 
+// VM INTERFACES //
+
     public interface IPlaylistViewModel
     {
         public void Initialize(User authUser);

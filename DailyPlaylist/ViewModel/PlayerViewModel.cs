@@ -10,5 +10,7 @@ namespace DailyPlaylist.ViewModel
     {
 
         // I will rather create a service : MediaPlayerService  for instance
+
+        // this could have been a special PLayerPage
     }
 }

@@ -16,6 +16,9 @@ namespace DailyPlaylist.Services
         private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
         private readonly string _apiKey = "19ORABeXOuwTOxF2KEW1tzNcqUpjbbiTee3TuNEgkNtesrk9wIPW7wvUqhda8inT";
 
+
+        // PROPERTIES //
+
         public User ActiveUser
         {
             get => _activeUser;
@@ -25,10 +28,14 @@ namespace DailyPlaylist.Services
             }
         }
 
+        // CONSTRUCTOR //
+
         public AuthService( ) 
         {
 
         }
+
+        // METHODS //
 
         public bool IsAuthenticatedAsync()
         {
@@ -185,7 +192,7 @@ namespace DailyPlaylist.Services
             return null;
         }
 
-
+        // HASH METHODS //
 
         public string HashPassword(string password)
         {
