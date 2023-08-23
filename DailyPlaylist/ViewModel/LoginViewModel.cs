@@ -10,6 +10,9 @@ namespace DailyPlaylist.ViewModel
         private string _email;
         private string _password;
 
+
+        // PROPERTIES //
+
         public string Email
         {
             get => _email;
@@ -30,9 +33,14 @@ namespace DailyPlaylist.ViewModel
             }
         }
 
+        // COMMANDS //
+
         public ICommand LoginCommand { get; }
 
         public ICommand CreateAccountCommand { get; }
+
+
+        // CONSTRUCTOR //
 
         public LoginViewModel(AuthService authService)
         {
@@ -43,6 +51,8 @@ namespace DailyPlaylist.ViewModel
             CreateAccountCommand = new Command(async () => await ExecuteCreateAccountCommand());
 
         }
+
+        // COMMANDS METHODS //
 
         private async Task ExecuteLoginCommand()
         {
@@ -96,6 +106,8 @@ namespace DailyPlaylist.ViewModel
                 return;
             }
         }
+
+        // CHECK BACK-END METHODS //
 
         private bool IsValidEmail(string email)
         {

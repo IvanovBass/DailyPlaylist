@@ -5,6 +5,7 @@ namespace DailyPlaylist.View
 {
     public partial class PlaylistConfigPage : ContentPage
     {
+
         private readonly PlaylistConfigViewModel _viewModel;
 
         public PlaylistConfigPage()
