@@ -91,7 +91,7 @@ public partial class PlaylistPage : ContentPage
                     UserId = _playlistViewModel.ActiveUser.Id,
                     Name = newName,
                     Description = newDescription,
-                    DeezerTrackIds = new List<long>()
+                    DeezerTracks = new List<Track>()
                 };
 
                 var insertedPlaylist = await _playlistViewModel.InsertNewPlaylistAsync(newPlaylist);

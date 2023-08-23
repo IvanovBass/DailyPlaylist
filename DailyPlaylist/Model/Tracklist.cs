@@ -42,8 +42,8 @@ namespace DailyPlaylist.Model
             }
         }
 
-        [JsonProperty(PropertyName = "deezerTrackIds")]
-        public List<long> DeezerTrackIds { get; set; }
+        [JsonProperty(PropertyName = "deezerTracks")]
+        public List<Track> DeezerTracks { get; set; }
 
         [JsonProperty(PropertyName = "dateCreation")]
         public DateTime DateCreation { get; set; } = DateTime.Now;

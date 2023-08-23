@@ -246,12 +246,12 @@ namespace DailyPlaylist.ViewModel
 
             if (track.Favorite)
             {
-                _playlistViewModel.SelectedPlaylist.DeezerTrackIds.Add(track.Id);
+                _playlistViewModel.SelectedPlaylist.DeezerTracks.Add(track);
                 await SnackBarVM.ShowSnackBarShortAsync("'" + track.Title + "' succesfully added to playlist '" + _playlistViewModel.SelectedPlaylist.Name + "' !", "OK", () => { });
             }
             else
             {
-                _playlistViewModel.SelectedPlaylist.DeezerTrackIds.Remove(track.Id);
+                _playlistViewModel.SelectedPlaylist.DeezerTracks.Remove(track);
                 await SnackBarVM.ShowSnackBarShortAsync("'" + track.Title + "' removed from playlist '" + _playlistViewModel.SelectedPlaylist.Name + "' !", "OK", () => { });
             }
 
@@ -283,11 +283,11 @@ namespace DailyPlaylist.ViewModel
         {
             if (_playlistViewModel.SelectedPlaylist == null) { return; }
 
-            var favoriteTrackIds = _playlistViewModel.SelectedPlaylist.DeezerTrackIds;
+            var favoriteTracks = _playlistViewModel.SelectedPlaylist.DeezerTracks;
 
             foreach (var track in SearchResults)
             {
-                if (favoriteTrackIds.Contains(track.Id))
+                if (favoriteTracks.Contains(track))
                 {
                     track.Favorite = true;
                 }

@@ -33,6 +33,8 @@ namespace DailyPlaylist.Services
 
             _authService = ServiceHelper.GetService<AuthService>();
 
+            CrossMediaManager.Current.Queue.Clear();
+
             if (_authService.ActiveUser is null)
             {
                 _authUser = await CheckUserLoggedIn(_authService);
