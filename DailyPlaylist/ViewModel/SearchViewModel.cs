@@ -1,9 +1,7 @@
 ﻿using DailyPlaylist.Services;
 using DailyPlaylist.View;
-using MauiAppDI.Helpers;
 using MediaManager.Library;
 using MediaManager.Media;
-using System.Linq;
 
 namespace DailyPlaylist.ViewModel
 {
@@ -156,7 +154,6 @@ namespace DailyPlaylist.ViewModel
                     if (SearchResults.Any())
                     {
                         SelectedTrack = SearchResults[0];
-                        LoadSelectedFavoriteTrackUris();
                     }
                     NavigationState.LastPlayerUsed = "SVMprevious";
                 }
@@ -175,6 +172,7 @@ namespace DailyPlaylist.ViewModel
             finally
             {
                 await Task.Delay(2000);
+                LoadSelectedFavoriteTrackUris();
                 IsLoading = false;
             }
         }
@@ -281,22 +279,17 @@ namespace DailyPlaylist.ViewModel
 
         public void LoadSelectedFavoriteTrackUris()
         {
-            if (_playlistViewModel.SelectedPlaylist == null) { return; }
+            if (_playlistViewModel.SelectedPlaylist is null) { return; }
 
-            var favoriteTracks = _playlistViewModel.SelectedPlaylist.DeezerTracks;
+            var favoriteTrackIds = new HashSet<long>(_playlistViewModel.SelectedPlaylist.DeezerTracks.Select(t => t.Id));
 
-            foreach (var track in SearchResults)
+            foreach (var track in SearchResults.ToList())
             {
-                if (favoriteTracks.Contains(track))
-                {
-                    track.Favorite = true;
-                }
-                else
-                {
-                    track.Favorite = false;
-                }
+                track.Favorite = favoriteTrackIds.Contains(track.Id);
             }
         }
+        // By using a HashSet, the lookup operation Contains is O(1) on average, making this approach much faster than searching through the list of tracks for each track in SearchResults.
+        // The advantage of a HashSet is its constant-time average complexity for lookups, which makes it efficient regardless of the type of data it contains.
 
         public void SynchronizedSelectedItemSVM()
         {
