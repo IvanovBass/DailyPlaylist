@@ -24,7 +24,6 @@ namespace DailyPlaylist.ViewModel
         private readonly string _apiKey = "19ORABeXOuwTOxF2KEW1tzNcqUpjbbiTee3TuNEgkNtesrk9wIPW7wvUqhda8inT";
         private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
         public event Action SelectedPlaylistChanged;
-        // public event Func<Task> OnUserChanged;
         public event Action PromptEditEvent;
         public event Action PromptCreateEvent;
         public static int attemtps = 0;
@@ -68,7 +67,6 @@ namespace DailyPlaylist.ViewModel
         {
             ActiveUser = activeUser;
 
-            // OnUserChanged += InitializationPlaylistsAsync;
 
             _ = InitializationPlaylistsAsync();
 
@@ -83,7 +81,6 @@ namespace DailyPlaylist.ViewModel
             set
             {
                 _activeUser = value;
-                // OnUserChanged?.Invoke();
             }
         }
 
@@ -240,7 +237,11 @@ namespace DailyPlaylist.ViewModel
 
         private async Task LoadUserPlaylists()
         {
-            UserPlaylists = new ObservableCollection<Tracklist>(await RetrievePlaylistsAsync(_activeUser.Id));
+            var playlists = await RetrievePlaylistsAsync(_activeUser.Id);
+            if (playlists != null)
+            {
+                UserPlaylists = new ObservableCollection<Tracklist>(playlists);
+            }           
         }
 
         private ObservableCollection<Tracklist> OrderPlaylistByDate(ObservableCollection<Tracklist> playlistsToOrder)
@@ -255,20 +256,12 @@ namespace DailyPlaylist.ViewModel
 
         }
 
-        public async void LoadTracksForPlaylist(Tracklist playlist)
+        public void LoadTracksForPlaylist(Tracklist playlist)
         {
             if (playlist == null) { return; }
 
-            var cachedPlaylist = new ObservableCollection<Track>();
+            var cachedPlaylist = new ObservableCollection<Track>(playlist.DeezerTracks);
 
-            foreach (var trackId in playlist.DeezerTrackIds)
-            {
-                var track = await FetchTrackFromDeezer(trackId);
-                if (track != null)
-                {
-                    cachedPlaylist.Add(track);
-                }
-            }
             PlaylistTracks = cachedPlaylist;
 
             if (PlaylistTracks.Any())
@@ -280,23 +273,6 @@ namespace DailyPlaylist.ViewModel
             MediaPlayerService.Initialize(PlaylistTracks.ToList(), false);
             SelectedPlaylistChanged?.Invoke();
             
-        }
-
-
-        private async Task<Track> FetchTrackFromDeezer(long trackId)
-        {
-            var client = _httpClient.Value;
-            var apiUrl = $"https://api.deezer.com/track/{trackId}";
-            try
-            {
-                var response = await client.GetStringAsync(apiUrl);
-                return JsonConvert.DeserializeObject<Track>(response);
-            }
-            catch (HttpRequestException ex)
-            {
-                Debug.WriteLine($"Error fetching track from Deezer: {ex.Message}");
-                return null;
-            }
         }
 
         public async Task<List<Tracklist>> RetrievePlaylistsAsync(string playlistUserId)
@@ -407,7 +383,7 @@ namespace DailyPlaylist.ViewModel
                     userId = newPlaylist.UserId,
                     name = newPlaylist.Name,
                     description = newPlaylist.Description,
-                    deezerTrackIds = newPlaylist.DeezerTrackIds,
+                    deezerTracks = newPlaylist.DeezerTracks,
                     dateCreation = newPlaylist.DateCreation.ToString("s") + "Z",
                     dateUpdated = newPlaylist.DateUpdated.ToString("s") + "Z",
                 }
@@ -439,8 +415,11 @@ namespace DailyPlaylist.ViewModel
         {
             if (updatedPlaylist == null) return false;
 
+            if (PlaylistTracks is  null) return false;  
+
+            var tracks = PlaylistTracks.ToList();
+
             var requestUri = "https://westeurope.azure.data.mongodb-api.com/app/data-bqkhe/endpoint/data/v1/action/updateOne";
-            var stringDeezerIds = updatedPlaylist.DeezerTrackIds.Select(id => id.ToString()).ToList();
             var payload = new
             {
                 collection = "Playlist",
@@ -455,7 +434,7 @@ namespace DailyPlaylist.ViewModel
                     userId = updatedPlaylist.UserId,
                     name = updatedPlaylist.Name,
                     description = updatedPlaylist.Description,
-                    deezerTrackIds = stringDeezerIds,
+                    deezerTracks = tracks,
                     dateCreation = updatedPlaylist.DateCreation.ToString("s") + "Z",
                     dateUpdated = DateTime.Now.ToString("s") + "Z",
                 }
@@ -545,7 +524,7 @@ namespace DailyPlaylist.ViewModel
             if (index >= 0)
             {
 
-                SelectedPlaylist.DeezerTrackIds.Remove(track.Id);
+                SelectedPlaylist.DeezerTracks.Remove(track);
                 PlaylistTracks.RemoveAt(index);
                 if (index < CrossMediaManager.Current.Queue.Count)
                 {
