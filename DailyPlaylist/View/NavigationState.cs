@@ -17,6 +17,10 @@ namespace DailyPlaylist.View
 
         public static bool playlistChanged { get; set; } = false;
 
+        public static bool IsReloggedSVM { get; set; } = false;
+
+        public static bool IsReloggedPVM { get; set; } = false;
+
         public static bool IsRelogged { get; set; } = false;
 
     }

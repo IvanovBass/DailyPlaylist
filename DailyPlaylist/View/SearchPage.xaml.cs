@@ -7,14 +7,21 @@ namespace DailyPlaylist.View;
 public partial class SearchPage : ContentPage
 {
 
+    private AppSessionManager _sessionManager;
     private SearchViewModel _searchViewModel;
 
-    public SearchPage(SearchViewModel searchViewModel)
+
+    public SearchPage()
     {
         InitializeComponent();
 
-        _searchViewModel = searchViewModel;
-        BindingContext = searchViewModel;
+        _sessionManager = ServiceHelper.GetService<AppSessionManager>();
+
+        _searchViewModel = _sessionManager.SearchViewModel;
+
+        BindingContext = _searchViewModel;
+            
+        _searchViewModel.Initialize(_sessionManager.PlaylistViewModel);
 
     }
 
@@ -25,6 +32,19 @@ public partial class SearchPage : ContentPage
         {
             NavigationState.refreshFavoritesNeeded = false;
             _searchViewModel.LoadSelectedFavoriteTrackUris();
+        }
+
+        if (NavigationState.IsReloggedSVM)
+        {
+            _sessionManager = ServiceHelper.GetService<AppSessionManager>();
+
+            _searchViewModel = _sessionManager.SearchViewModel;
+
+            BindingContext = _searchViewModel;
+
+            _searchViewModel.Initialize(_sessionManager.PlaylistViewModel);
+
+            NavigationState.IsReloggedSVM = false;
         }
     }
     private async void ImageButtonClicked(object sender, EventArgs e)

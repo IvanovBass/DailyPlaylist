@@ -1,73 +1,108 @@
 ﻿using DailyPlaylist.ViewModel;
 using MauiAppDI.Helpers;
-using System.Runtime.CompilerServices;
 
 namespace DailyPlaylist.Services
 {
-    public class AppSessionManager : IAppSessionManager
+    public class AppSessionManager
     {
+        private readonly IServiceScopeFactory _scopeFactory;
         private User _authUser;
-        private readonly AuthService _authService;
-        private IPlaylistViewModel _playlistViewModel;
-        private ISearchViewModel _searchViewModel;
+        private AuthService _authService;
+        private IServiceScope _currentScope;
 
-        public AppSessionManager(AuthService authService)
+
+        // CONSTRUCTOR //
+        public AppSessionManager(IServiceScopeFactory scopeFactory)
         {
-            _authService = authService;
+            _scopeFactory = scopeFactory;
+            _authService = ServiceHelper.GetService<AuthService>();
         }
 
-        public async Task StartNewSessionAsync()
+        // PROPERTIES //
+
+        public PlaylistViewModel PlaylistViewModel { get; set; }
+
+        public SearchViewModel SearchViewModel { get; set; }
+
+        // METHODS //
+
+        public async void StartNewSession()
         {
-            EndSession();  // Dispose of the old session
 
-            _playlistViewModel = new PlaylistViewModel(); // Recreate services
-            _searchViewModel = new SearchViewModel();
+            _currentScope = _scopeFactory.CreateScope();
 
+            _authService = ServiceHelper.GetService<AuthService>();
+
+            if (_authService.ActiveUser is null)
+            {
+                _authUser = await CheckUserLoggedIn(_authService);
+            }
+            else
+            {
+                _authUser = _authService.ActiveUser;
+            }
+
+            PlaylistViewModel = new PlaylistViewModel();
+            
+            await Task.Delay(500);
+
+            PlaylistViewModel.Initialize(_authUser);
+
+            await Task.Delay(2000);
+
+            SearchViewModel = new SearchViewModel();
+            // Register the SearchViewModel in the DI scope for other services to consume
+            // _currentScope.ServiceProvider.GetRequiredService<ISearchViewModel>().Initialize(playlistViewModel);
+
+            await Task.Delay(1000);
+
+            SearchViewModel.Initialize(PlaylistViewModel);
+
+        }
+
+        public T GetService<T>()
+        {
+            return _currentScope.ServiceProvider.GetRequiredService<T>();
+        }
+
+        public void DisposeCurrentScope()
+        {
+            _currentScope?.Dispose();
+            PlaylistViewModel = null;
+            SearchViewModel = null;
+        }
+
+        public async Task<User> CheckUserLoggedIn(AuthService authService)
+        {
             try
             {
-                _authUser = await GetAuthenticatedUserAsync();
+                if (authService != null)
+                {
+                    string emailUser = authService.WhoIsAuthenticatedAsync();
+                    User authUser = await authService.RetrieveUserAsync(emailUser);
 
-                if (_authUser != null)
-                {
-                    _playlistViewModel.Initialize(_authUser);
-                    _searchViewModel.Initialize(_playlistViewModel);
-                }
-                else
-                {
-                    await SnackBarVM.ShowSnackBarAsync("Problem retrieving your details and playlists from the server. Please log out and log in again.", "Dismiss", () => { });
+                    if (authUser != null && authUser is User)
+                    {
+                         return authUser;
+                    }
+                    else
+                    {
+                        await SnackBarVM.ShowSnackBarAsync("Problem retrieving your details and playlists from server, please log out and log in again", "Dismiss", () => { });
+                        return null;
+                    }
+
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
             }
+            return null;
         }
-
-        public void EndSession()
-        {
-            _playlistViewModel = null; // Dispose of the services (they will be garbage collected)
-            _searchViewModel = null;
-        }
-
-        private async Task<User> GetAuthenticatedUserAsync()
-        {
-            if (_authService.ActiveUser != null)
-            {
-                return _authService.ActiveUser;
-            }
-
-            string emailUser = _authService.WhoIsAuthenticatedAsync();
-            return await _authService.RetrieveUserAsync(emailUser);
-        }
-
     }
 
 
-    public interface IAppSessionManager
-    {
-        void EndSession();
-
-    }
+ }
 
     public interface IPlaylistViewModel
     {
@@ -80,4 +115,3 @@ namespace DailyPlaylist.Services
         void Initialize(PlaylistViewModel playlistViewModel);
         // ... other members ...
     }
-}
