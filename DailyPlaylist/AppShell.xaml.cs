@@ -20,7 +20,6 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(PlayerPage), typeof(PlayerPage));
         Routing.RegisterRoute(nameof(PlaylistConfigPage), typeof(PlaylistConfigPage));
 
-        var appSessionManager = ServiceHelper.GetService<IAppSessionManager>();
-        BindingContext = new LogoutViewModel(appSessionManager);
+        BindingContext = new LogoutViewModel();
     }
 }

@@ -79,6 +79,18 @@ namespace DailyPlaylist.ViewModel
             set => SetProperty(ref _isLoading, value);
         }
 
+        public PlaylistViewModel PlaylistViewModel
+        {
+            get
+            {
+                return _playlistViewModel;
+            }
+            set
+            {
+                _playlistViewModel = value;
+            }
+        }
+
         // COMMANDS //
 
         public ICommand PlayPauseCommand { get; }

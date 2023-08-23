@@ -23,7 +23,7 @@
                     <Image Source="{Binding SelectedTrackCover}" Aspect="AspectFit" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"/>
                 </StackLayout>
 
-                <Label  Grid.Row="0" Grid.Column="1"  FontSize="32" Padding="0,25,0,0" MaxLines="1" LineBreakMode="TailTruncation"
+                <Label  Grid.Row="0" Grid.Column="1"  FontSize="26" Padding="0,25,0,0" MaxLines="2" LineBreakMode="CharacterWrap"
                     Text="{Binding SelectedTrackArtist}" HorizontalTextAlignment="Center" TextColor="{StaticResource Tertiary}" VerticalOptions="Start"/>
                 <Label  Grid.Row="1"  Grid.Column="1"  FontSize="22"  MaxLines="2"  Padding="10,0" VerticalOptions="Start" LineBreakMode="CharacterWrap"
                    Text="{Binding SelectedTrackTitle}"  HorizontalTextAlignment="Center" TextColor="White"/>

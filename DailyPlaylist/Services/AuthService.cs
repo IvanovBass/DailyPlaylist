@@ -27,9 +27,7 @@ namespace DailyPlaylist.Services
 
         public AuthService( ) 
         {
-            _activeUser = new User();
-            // we could create a dummy User which would have a couple of default playlists to play with
-            // ActiveUser = new User { playlistIds = [23, 27, 59] }
+
         }
 
         public bool IsAuthenticatedAsync()

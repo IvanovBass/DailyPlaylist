@@ -7,15 +7,21 @@ namespace DailyPlaylist.View;
 public partial class PlaylistPage : ContentPage
 {
     private PlaylistViewModel _playlistViewModel;
+    private AppSessionManager _sessionManager;
 
     // CONSTRUCTOR //
-	public PlaylistPage(PlaylistViewModel playlistViewModel)
+	public PlaylistPage()
     {
         InitializeComponent();
 
-        _playlistViewModel = playlistViewModel;
+        _sessionManager = ServiceHelper.GetService<AppSessionManager>();
+
+        _playlistViewModel = _sessionManager.PlaylistViewModel;
 
         BindingContext = _playlistViewModel;
+
+        _playlistViewModel.PromptEditEvent += PromptMessageEditAsync;
+        _playlistViewModel.PromptCreateEvent += PromptCreateAsync;
 
     }
 
@@ -37,6 +43,21 @@ public partial class PlaylistPage : ContentPage
             NavigationState.refreshFavoritesNeeded = false;
             _playlistViewModel.LoadTracksForPlaylist(_playlistViewModel.SelectedPlaylist);
         }
+        if (NavigationState.IsReloggedPVM)
+        {
+            _sessionManager = ServiceHelper.GetService<AppSessionManager>();
+
+            _playlistViewModel = _sessionManager.PlaylistViewModel;
+
+            BindingContext = _playlistViewModel;
+
+            NavigationState.IsReloggedPVM = false;
+
+            _playlistViewModel.PromptEditEvent += PromptMessageEditAsync;
+            _playlistViewModel.PromptCreateEvent += PromptCreateAsync;
+
+        }
+
     }
     public async void PromptMessageEditAsync()
     {

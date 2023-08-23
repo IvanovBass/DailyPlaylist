@@ -1,31 +1,32 @@
 using DailyPlaylist.Services;
+using DailyPlaylist.ViewModel;
 
 namespace DailyPlaylist.View
 {
     public partial class HomePage : ContentPage
     {
         private readonly AppSessionManager _appSessionManager;
-        private readonly AuthService _authService;
 
 
-        public HomePage(AuthService authService)
+        public HomePage(AppSessionManager appSessionManager)
         {
             InitializeComponent();
+ 
+            _appSessionManager = appSessionManager;
+
+            _appSessionManager.StartNewSession();
 
             StartAnimations();
-            
-            _authService = authService;
-
         }
 
         protected override void OnAppearing()
         {
             base.OnAppearing();
 
-            if (NavigationState.LastVisitedPage == nameof(LoadingPage))
+            if (NavigationState.IsRelogged)
             {
-                NavigationState.LastVisitedPage = "";
-                _appSessionManager = new AppSessionManager(IServiceScopeFactory, _authService);
+                _appSessionManager.StartNewSession();
+                NavigationState.IsRelogged = false;
             }
         }
 
