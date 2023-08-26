@@ -21,7 +21,7 @@ namespace DailyPlaylist.ViewModel
         private string _selectedTrackCover = "music_notes.png";
         private string _description = "Describe what makes this playlist special ...";
         private string _name = "Name ...";
-        private readonly string _apiKey = "19ORABeXOuwTOxF2KEW1tzNcqUpjbbiTee3TuNEgkNtesrk9wIPW7wvUqhda8inT";
+        private readonly string _apiKey = "vCiIPt7oomFKFYQ8TWtTDJYl6yLfuMVKe4DY9drXBmUuGtBeTtBqPqA51eaP9X9z";
         private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
         public event Action SelectedPlaylistChanged;
         public event Action PromptEditEvent;
@@ -237,6 +237,7 @@ namespace DailyPlaylist.ViewModel
 
         private async Task LoadUserPlaylists()
         {
+            if (_activeUser == null) { return; }
             var playlists = await RetrievePlaylistsAsync(_activeUser.Id);
             if (playlists != null)
             {

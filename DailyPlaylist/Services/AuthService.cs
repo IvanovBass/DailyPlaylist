@@ -14,7 +14,7 @@ namespace DailyPlaylist.Services
         private const string AuthUserKey = "AuthUser";
         private User _activeUser;
         private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
-        private readonly string _apiKey = "19ORABeXOuwTOxF2KEW1tzNcqUpjbbiTee3TuNEgkNtesrk9wIPW7wvUqhda8inT";
+        private readonly string _apiKey = "vCiIPt7oomFKFYQ8TWtTDJYl6yLfuMVKe4DY9drXBmUuGtBeTtBqPqA51eaP9X9z";
 
 
         // PROPERTIES //

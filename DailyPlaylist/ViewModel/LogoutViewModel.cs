@@ -35,8 +35,10 @@ namespace DailyPlaylist.ViewModel
                     NavigationState.IsReloggedPVM = true;
                     NavigationState.IsRelogged = true;
 
+                    Application.Current.MainPage = new AppShell();
+                    // ça et les 3 /// en dessous , un des 2 a réussi à killer tes instances de pages...
 
-                    await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
+                    await Shell.Current.GoToAsync($"///{nameof(LoginPage)}");
                 }
             });
         }

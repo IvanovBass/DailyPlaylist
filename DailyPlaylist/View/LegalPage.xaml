@@ -4,29 +4,33 @@
              x:Class="DailyPlaylist.View.LegalPage"
              Title="Terms Of Use">
 
-    <VerticalStackLayout Padding="0,15,0,0"  Spacing="15" >
 
-        <StackLayout Orientation="Horizontal" Padding="20,5,20,0" Spacing="10">
-            <Label   Text="Choose your language : "  HeightRequest="40" VerticalTextAlignment="Center" FontSize="Medium" />
-            <Picker x:Name="LanguagePicker" SelectedIndexChanged="OnLanguageChanged" HorizontalOptions="FillAndExpand" HorizontalTextAlignment="Center"
+    <ScrollView VerticalOptions="FillAndExpand" HorizontalOptions="Center"  VerticalScrollBarVisibility="Always">
+        <VerticalStackLayout Padding="0,15,0,0"  Spacing="15" >
+
+            <StackLayout Orientation="Horizontal" Padding="20,5,20,0" Spacing="10">
+                <Label   Text="Choose your language : "  HeightRequest="40" VerticalTextAlignment="Center" FontSize="Medium" />
+                <Picker x:Name="LanguagePicker" SelectedIndexChanged="OnLanguageChanged" HorizontalOptions="FillAndExpand" HorizontalTextAlignment="Center"
                 FontSize="Medium" >
-                <Picker.ItemsSource>
-                    <x:Array Type="{x:Type x:String}">
-                        <x:String>Français</x:String>
-                        <x:String>English</x:String>
-                    </x:Array>
-                </Picker.ItemsSource>
-            </Picker>
-        </StackLayout>
+                    <Picker.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>Français</x:String>
+                            <x:String>English</x:String>
+                        </x:Array>
+                    </Picker.ItemsSource>
+                </Picker>
+            </StackLayout>
 
-        <ScrollView VerticalOptions="FillAndExpand" HorizontalOptions="Center"  VerticalScrollBarVisibility="Always">
-            <StackLayout>
-                <Label x:Name="TermsOfUseLabel" 
+            
+                <StackLayout>
+                    <Label x:Name="TermsOfUseLabel" 
                 VerticalOptions="StartAndExpand" 
                 HorizontalTextAlignment="Center"
                 Padding="15"/>
-            </StackLayout>
-        </ScrollView>
-    </VerticalStackLayout>
+                </StackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
 
 </ContentPage>

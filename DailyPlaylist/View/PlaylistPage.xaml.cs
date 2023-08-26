@@ -10,7 +10,7 @@ public partial class PlaylistPage : ContentPage
     private AppSessionManager _sessionManager;
 
     // CONSTRUCTOR //
-	public PlaylistPage()
+	public PlaylistPage(IPlaylistViewModel playlistViewmodel)
     {
         InitializeComponent();
 

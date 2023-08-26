@@ -109,5 +109,13 @@
 	<ItemGroup>
 	  <None Include="..\.editorconfig" Link=".editorconfig" />
 	</ItemGroup>
+
+	<PropertyGroup Condition="$(TargetFramework.Contains('-android')) and '$(Configuration)' == 'Release'">
+		<AndroidKeyStore>True</AndroidKeyStore>
+		<AndroidSigningKeyStore>..\key.keystore2</AndroidSigningKeyStore>
+		<AndroidSigningStorePass>SubscribeNow</AndroidSigningStorePass>
+		<AndroidSigningKeyAlias>IvanChoDev</AndroidSigningKeyAlias>
+		<AndroidSigningKeyPass>SubscribeNow</AndroidSigningKeyPass>
+	</PropertyGroup>
 	
 </Project>
