@@ -1,10 +1,9 @@
 ﻿using DailyPlaylist.Services;
 using DailyPlaylist.View;
+using MauiAppDI.Helpers;
 using MediaManager.Library;
 using MediaManager.Media;
 using Newtonsoft.Json.Linq;
-using System.Net.Http.Headers;
-using System.Text;
 
 namespace DailyPlaylist.ViewModel
 {
@@ -21,8 +20,7 @@ namespace DailyPlaylist.ViewModel
         private string _selectedTrackCover = "music_notes.png";
         private string _description = "Describe what makes this playlist special ...";
         private string _name = "Name ...";
-        private readonly string _apiKey = "vCiIPt7oomFKFYQ8TWtTDJYl6yLfuMVKe4DY9drXBmUuGtBeTtBqPqA51eaP9X9z";
-        private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
+        private HttpService _httpService;
         public event Action SelectedPlaylistChanged;
         public event Action PromptEditEvent;
         public event Action PromptCreateEvent;
@@ -35,6 +33,8 @@ namespace DailyPlaylist.ViewModel
         public PlaylistViewModel()
         {
             SelectedPlaylistChanged?.Invoke();
+
+            _httpService = ServiceHelper.GetService<HttpService>();
 
             PlayPauseCommand = new Command(async track => await PlayPauseAsync());
             PlayFromPlaylistCollectionCommand = new Command<Track>(async track => await PlayFromPlaylistCollectionAsync(track));
@@ -278,7 +278,7 @@ namespace DailyPlaylist.ViewModel
 
         public async Task<List<Tracklist>> RetrievePlaylistsAsync(string playlistUserId)
         {
-            var requestUri = "https://westeurope.azure.data.mongodb-api.com/app/data-bqkhe/endpoint/data/v1/action/find";
+            var action = "find";
             var payload = new
             {
                 collection = "Playlist",
@@ -287,28 +287,9 @@ namespace DailyPlaylist.ViewModel
                 filter = new { userId = playlistUserId }
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
-
-            var client = _httpClient.Value;
-
-            // client.DefaultRequestHeaders.Clear();
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            client.DefaultRequestHeaders.Add("Access-Control-Request-Headers", "*");
-            client.DefaultRequestHeaders.Add("api-key", _apiKey);
-
-            var response = new HttpResponseMessage();
-            try
-            {
-                response = await client.PostAsync(requestUri, content);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("Error while fetching the Playlists from the server : " + ex.Message);
-                return null;
-            }
+            var response = await _httpService.MakeHttpRequestAsync(action, payload);
 
             var playlists = new List<Tracklist>();
-
 
             if (response.IsSuccessStatusCode)
             {
@@ -320,20 +301,20 @@ namespace DailyPlaylist.ViewModel
                 if (playlistsJson.Contains(playlistUserId))
                 {
                     playlists = JsonConvert.DeserializeObject<List<Tracklist>>(playlistsJson);
-
-                    if (playlists != null && playlists.Any())
-                    {
-                        return playlists;
-                    }
                 }
             }
-            return null;
-        }
+            else
+            {
+                Debug.WriteLine("Error while fetching the Playlists from the server");
+            }
+
+            return playlists;
+
+        }  
 
         public async Task<bool> DeletePlaylistAsync(string playlistId)
         {
-            var requestUri = "https://westeurope.azure.data.mongodb-api.com/app/data-bqkhe/endpoint/data/v1/action/deleteOne";
-
+            var action = "deleteOne";
             var payload = new
             {
                 dataSource = "DailyPlaylistMongoDB",
@@ -345,25 +326,18 @@ namespace DailyPlaylist.ViewModel
                 }
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json"); // Note the content type is `application/ejson`
-
-            var client = _httpClient.Value;
-
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            client.DefaultRequestHeaders.Add("Access-Control-Request-Headers", "*");
-            client.DefaultRequestHeaders.Add("api-key", _apiKey);
-
-            var response = await client.PostAsync(requestUri, content);
+            var response = await _httpService.MakeHttpRequestAsync(action, payload);
 
             if (response.IsSuccessStatusCode)
             {
+                await SnackBarVM.ShowSnackBarAsync("Playlist succesfully deleted", "Dismiss", () => { });
                 return true;
             }
             else
             {
                 var errorResponse = await response.Content.ReadAsStringAsync();
                 Debug.WriteLine($"Error deleting playlist: {errorResponse}");
-                await SnackBarVM.ShowSnackBarAsync("Error while deleting your Playlist in the server, please retry;)", "Dismiss", () => { });
+                await SnackBarVM.ShowSnackBarAsync("Error while deleting your Playlist at server-side, please retry", "Dismiss", () => { });
                 return false;
             }
         }
@@ -372,7 +346,7 @@ namespace DailyPlaylist.ViewModel
         {
             if (newPlaylist == null) return null;
 
-            var requestUri = "https://westeurope.azure.data.mongodb-api.com/app/data-bqkhe/endpoint/data/v1/action/insertOne";
+            var action = "insertOne";
             var payload = new
             {
                 collection = "Playlist",
@@ -390,15 +364,7 @@ namespace DailyPlaylist.ViewModel
                 }
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
-
-            var client = _httpClient.Value;
-            client.DefaultRequestHeaders.Clear();
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            client.DefaultRequestHeaders.Add("Access-Control-Request-Headers", "*");
-            client.DefaultRequestHeaders.Add("api-key", _apiKey);
-
-            var response = await client.PostAsync(requestUri, content);
+            var response = await _httpService.MakeHttpRequestAsync(action, payload);
 
             if (response.IsSuccessStatusCode)
             {
@@ -420,7 +386,7 @@ namespace DailyPlaylist.ViewModel
 
             var tracks = PlaylistTracks.ToList();
 
-            var requestUri = "https://westeurope.azure.data.mongodb-api.com/app/data-bqkhe/endpoint/data/v1/action/updateOne";
+            var action = "updateOne";
             var payload = new
             {
                 collection = "Playlist",
@@ -441,15 +407,7 @@ namespace DailyPlaylist.ViewModel
                 }
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
-
-            var client = _httpClient.Value;
-            client.DefaultRequestHeaders.Clear();
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            client.DefaultRequestHeaders.Add("Access-Control-Request-Headers", "*");
-            client.DefaultRequestHeaders.Add("api-key", _apiKey);
-
-            var response = await client.PostAsync(requestUri, content);
+            var response = await _httpService.MakeHttpRequestAsync(action, payload);
 
             if (response.IsSuccessStatusCode)
             {

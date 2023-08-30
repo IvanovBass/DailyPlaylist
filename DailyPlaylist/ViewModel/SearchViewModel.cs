@@ -1,5 +1,6 @@
 ﻿using DailyPlaylist.Services;
 using DailyPlaylist.View;
+using MauiAppDI.Helpers;
 using MediaManager.Library;
 using MediaManager.Media;
 
@@ -15,7 +16,7 @@ namespace DailyPlaylist.ViewModel
         private string _trackName = "Song";
         private string _artistName = "Artist";
         private string _albumCover = "music_notes2.png";
-        private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
+        private HttpClient _client;
         private bool _isLoading;
 
         // PROPERTIES //
@@ -106,6 +107,8 @@ namespace DailyPlaylist.ViewModel
         public SearchViewModel()
         {
 
+            _client = ServiceHelper.GetService<HttpClient>();
+
             SearchResults = new ObservableCollection<Track>();
 
             SearchCommand = new Command(PerformSearch);
@@ -142,11 +145,9 @@ namespace DailyPlaylist.ViewModel
 
             IsLoading = true;
 
-            var client = _httpClient.Value;
-
             try
             {
-                var jsonResponse = await client.GetStringAsync($"https://api.deezer.com/search/track?q={SearchQuery}&limit=30");
+                var jsonResponse = await _client.GetStringAsync($"https://api.deezer.com/search/track?q={SearchQuery}&limit=30");
                 var searchData = JsonConvert.DeserializeObject<SearchData>(jsonResponse);
                 if (searchData.Data is List<Track> tracks && tracks.Any())
                 {

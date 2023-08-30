@@ -72,6 +72,8 @@ public partial class PlaylistPage : ContentPage
                 _playlistViewModel.SelectedPlaylist.Name = newName;
                 _playlistViewModel.SelectedPlaylist.Description = newDescription;
                 var tempSelectedPlaylist = _playlistViewModel.SelectedPlaylist;
+                await SnackBarVM.ShowSnackBarAsync("Playlist '" + newName + "' successfully edited", "OK", () => { });
+                await Task.Delay(1000);
                 _playlistViewModel.UserPlaylists = tempList;
                 _playlistViewModel.SelectedPlaylist = tempSelectedPlaylist;
             }
@@ -88,7 +90,7 @@ public partial class PlaylistPage : ContentPage
             {
                 var newPlaylist = new Tracklist
                 {
-                    UserId = _playlistViewModel.ActiveUser.Id,
+                    UserId = _playlistViewModel.ActiveUser?.Id,
                     Name = newName,
                     Description = newDescription,
                     DeezerTracks = new List<Track>()
@@ -98,16 +100,15 @@ public partial class PlaylistPage : ContentPage
 
                 if (insertedPlaylist != null)
                 {
-                    _playlistViewModel.UserPlaylists.Add(newPlaylist);
-                    _playlistViewModel.SelectedPlaylist = newPlaylist;
-
                     await SnackBarVM.ShowSnackBarAsync("Playlist '" + newName + "' successfully created!", "OK", () => { });
-                    NavigationState.refreshFavoritesNeeded = true;
                 }
                 else
-                {
-                    await SnackBarVM.ShowSnackBarAsync("Failed to create the playlist. Please try again.", "Dismiss", () => { });
+                {                  
+                    await SnackBarVM.ShowSnackBarAsync("Failed to store the Playlist. Please make sure you are connected and your playlists are sync'd.", "Dismiss", () => { });
                 }
+                _playlistViewModel.UserPlaylists.Add(newPlaylist);
+                _playlistViewModel.SelectedPlaylist = newPlaylist;
+                NavigationState.refreshFavoritesNeeded = true;
             }
         }
     }

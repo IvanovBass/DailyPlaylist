@@ -1,9 +1,10 @@
-﻿using MauiAppDI.Helpers;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using DailyPlaylist.ViewModel;
-using System;
+using dotenv.net;
+using System.Collections;
+using MauiAppDI.Helpers;
 
 namespace DailyPlaylist.Services
 {
@@ -13,8 +14,7 @@ namespace DailyPlaylist.Services
         private const string AuthStateKey = "AuthState";
         private const string AuthUserKey = "AuthUser";
         private User _activeUser;
-        private Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
-        private readonly string _apiKey = "vCiIPt7oomFKFYQ8TWtTDJYl6yLfuMVKe4DY9drXBmUuGtBeTtBqPqA51eaP9X9z";
+        private HttpService _httpService;
 
 
         // PROPERTIES //
@@ -32,7 +32,8 @@ namespace DailyPlaylist.Services
 
         public AuthService( ) 
         {
-
+            _httpService = ServiceHelper.GetService<HttpService>();
+            
         }
 
         // METHODS //
@@ -73,8 +74,6 @@ namespace DailyPlaylist.Services
 
         public async Task<User> CreateAccountAsync(string email, string userPassword)
         {
-
-            var client = _httpClient.Value;
             
             var existingUser = await RetrieveUserAsync(email);
             if (existingUser != null)
@@ -84,7 +83,7 @@ namespace DailyPlaylist.Services
             userPassword = HashPassword(userPassword);
             User createdUser = new User() { Email = email };
 
-            var requestUri = "https://westeurope.azure.data.mongodb-api.com/app/data-bqkhe/endpoint/data/v1/action/insertOne";
+            var action = "insertOne";
             var payload = new
             {
                 collection = "User",
@@ -98,14 +97,7 @@ namespace DailyPlaylist.Services
                 }
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
-
-            client.DefaultRequestHeaders.Clear();
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            client.DefaultRequestHeaders.Add("Access-Control-Request-Headers", "*");
-            client.DefaultRequestHeaders.Add("api-key", _apiKey);
-
-            var response = await client.PostAsync(requestUri, content);
+            var response = await _httpService.MakeHttpRequestAsync(action, payload);
 
             if (response.IsSuccessStatusCode)
             {
@@ -144,7 +136,7 @@ namespace DailyPlaylist.Services
         {
             if (string.IsNullOrEmpty(userEmail)) { return null; }
 
-            var requestUri = "https://westeurope.azure.data.mongodb-api.com/app/data-bqkhe/endpoint/data/v1/action/findOne";
+            var action = "findOne";
             var payload = new
             {
                 collection = "User",
@@ -153,16 +145,7 @@ namespace DailyPlaylist.Services
                 filter = new { email = userEmail }
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
-
-            var client = _httpClient.Value;
-      
-            client.DefaultRequestHeaders.Clear();
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            client.DefaultRequestHeaders.Add("Access-Control-Request-Headers", "*");
-            client.DefaultRequestHeaders.Add("api-key", _apiKey);
-
-            var response = await client.PostAsync(requestUri, content);
+            var response = await _httpService.MakeHttpRequestAsync(action, payload);
 
             if (response.IsSuccessStatusCode)
             {

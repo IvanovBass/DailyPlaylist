@@ -36,6 +36,8 @@ public static class MauiProgram
 
         builder.Services.AddSingleton<HttpClient>();
 
+        builder.Services.AddSingleton<HttpService>();
+
         builder.Services.AddSingleton<AuthService>();
 
         builder.Services.AddSingleton<AppSessionManager>();

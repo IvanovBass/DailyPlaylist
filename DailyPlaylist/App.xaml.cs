@@ -1,4 +1,7 @@
-﻿namespace DailyPlaylist;
+﻿using DailyPlaylist.View;
+using dotenv.net;
+
+namespace DailyPlaylist;
 
 public partial class App : Application
 {
