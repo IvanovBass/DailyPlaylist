@@ -6,7 +6,7 @@ using MediaManager.Media;
 
 namespace DailyPlaylist.ViewModel
 {
-    public class SearchViewModel : BaseViewModel, ISearchViewModel
+    public class SearchViewModel : BaseViewModel
     {
         private PlaylistViewModel _playlistViewModel;
         private ObservableCollection<Track> _searchResults;
@@ -104,10 +104,12 @@ namespace DailyPlaylist.ViewModel
 
         // CONSTRUCTOR //
 
-        public SearchViewModel()
+        public SearchViewModel(PlaylistViewModel playlistViewModel)
         {
 
             _client = ServiceHelper.GetService<HttpClient>();
+
+            _playlistViewModel =  playlistViewModel;
 
             SearchResults = new ObservableCollection<Track>();
 
@@ -123,16 +125,8 @@ namespace DailyPlaylist.ViewModel
                 SelectedTrack = track;
             });
 
-            MediaPlayerService.OnItemChanged += SynchronizedSelectedItemSVM;
-
-        }
-
-        // INTERFACE INITIALIZER //
-
-        public void Initialize(PlaylistViewModel playlistViewModel)
-        {
-            _playlistViewModel = playlistViewModel;
             _playlistViewModel.SelectedPlaylistChanged += LoadSelectedFavoriteTrackUris;
+            MediaPlayerService.OnItemChanged += SynchronizedSelectedItemSVM;
 
         }
 
@@ -241,6 +235,8 @@ namespace DailyPlaylist.ViewModel
 
             track.Favorite = !track.Favorite;
 
+            var id = track.Id;
+
             NavigationState.refreshFavoritesNeeded = true;
 
             if (track.Favorite)
@@ -250,14 +246,19 @@ namespace DailyPlaylist.ViewModel
             }
             else
             {
-                _playlistViewModel.SelectedPlaylist.DeezerTracks.Remove(track);
-                await SnackBarVM.ShowSnackBarShortAsync("'" + track.Title + "' removed from playlist '" + _playlistViewModel.SelectedPlaylist.Name + "' !", "OK", () => { });
-            }
+                var tracks = _playlistViewModel.SelectedPlaylist.DeezerTracks;
 
-            if (NavigationState.LastPlayerUsed == "PVM")
-            {
-                await CrossMediaManager.Current.Queue.UpdateMediaItems();
+                var trackToRemove = tracks.FirstOrDefault(t => t.Id == id);
+                if (trackToRemove != null)
+                {
+                    tracks.Remove(trackToRemove);
+                }
+                await SnackBarVM.ShowSnackBarShortAsync("'" + track.Title + "' removed from playlist '" + _playlistViewModel.SelectedPlaylist.Name + "' !", "OK", () => { });
+
+                _playlistViewModel.SelectedPlaylist.DeezerTracks = tracks;
             }
+            await CrossMediaManager.Current.Queue.UpdateMediaItems();
+
         }
 
         private async Task HandleNext()

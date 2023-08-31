@@ -1,10 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
-using System.Net.Http.Headers;
-using System.Text;
 using DailyPlaylist.ViewModel;
-using dotenv.net;
-using System.Collections;
-using MauiAppDI.Helpers;
+
 
 namespace DailyPlaylist.Services
 {
@@ -30,10 +26,9 @@ namespace DailyPlaylist.Services
 
         // CONSTRUCTOR //
 
-        public AuthService( ) 
+        public AuthService() 
         {
-            _httpService = ServiceHelper.GetService<HttpService>();
-            
+            _httpService = new HttpService();          
         }
 
         // METHODS //

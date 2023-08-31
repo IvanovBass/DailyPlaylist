@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Net.Http;
+﻿using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 using MauiAppDI.Helpers;
-using dotenv.net;
-using System.Collections;
-
 namespace DailyPlaylist.Services
 {
     public class HttpService
@@ -21,16 +13,6 @@ namespace DailyPlaylist.Services
         {
             _client = ServiceHelper.GetService<HttpClient>();
 
-            //DotEnv.Load();
-
-            //string musicTrack = Environment.GetEnvironmentVariable("MUSIC_TRACK");
-
-            //// _apiKey = musicTrack;
-
-            //foreach (DictionaryEntry de in Environment.GetEnvironmentVariables())
-            //{
-            //    Debug.WriteLine($"Key = {de.Key}, Value = {de.Value}");
-            //}
         }
 
         public async Task<HttpResponseMessage> MakeHttpRequestAsync(string action, object payload)
@@ -46,9 +28,6 @@ namespace DailyPlaylist.Services
             return await _client.PostAsync(_requestUri+action, content);
 
         }
-
-
-
 
     }
 }

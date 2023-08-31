@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DailyPlaylist.ViewModel
 {
-    public class PlaylistViewModel : BaseViewModel, IPlaylistViewModel
+    public class PlaylistViewModel : BaseViewModel
     {
         private User _activeUser;
         private ObservableCollection<Tracklist> _userPlaylists;
@@ -30,11 +30,14 @@ namespace DailyPlaylist.ViewModel
 
         // CONSTRUCTOR //
 
-        public PlaylistViewModel()
+        public PlaylistViewModel(User authUser)
         {
-            SelectedPlaylistChanged?.Invoke();
+
+            ActiveUser = authUser;
 
             _httpService = ServiceHelper.GetService<HttpService>();
+
+            SelectedPlaylistChanged?.Invoke();
 
             PlayPauseCommand = new Command(async track => await PlayPauseAsync());
             PlayFromPlaylistCollectionCommand = new Command<Track>(async track => await PlayFromPlaylistCollectionAsync(track));
@@ -61,17 +64,9 @@ namespace DailyPlaylist.ViewModel
 
             MediaPlayerService.OnItemChanged += SynchronizedSelectedItemPVM;
 
-        }
-
-        public void Initialize(User activeUser)
-        {
-            ActiveUser = activeUser;
-
-
             _ = InitializationPlaylistsAsync();
 
-            
-        } 
+        }
 
         // PROPERTIES //
 
@@ -109,7 +104,6 @@ namespace DailyPlaylist.ViewModel
                     _selectedPlaylist = value;
                     OnPropertyChanged(nameof(SelectedPlaylist));
                     LoadTracksForPlaylist(value);
-                    NavigationState.playlistChanged = true;
       
                 }
             }
@@ -484,20 +478,25 @@ namespace DailyPlaylist.ViewModel
             {
 
                 SelectedPlaylist.DeezerTracks.Remove(track);
-                PlaylistTracks.RemoveAt(index);
-                if (index < CrossMediaManager.Current.Queue.Count)
+                PlaylistTracks.Remove(track);
+                if (index < MediaPlayerService._mediaItems.Count)
                 {
-                    CrossMediaManager.Current.Queue.RemoveAt(index);
-                    MediaPlayerService._mediaItems.RemoveAt(index);
+                    var mediaItem = MediaPlayerService._mediaItems[index];
+                    MediaPlayerService._mediaItems.Remove(mediaItem);
+                    var timeSpan = CrossMediaManager.Current.Position;
+                    CrossMediaManager.Current.Queue.Remove(mediaItem);
+                    await CrossMediaManager.Current.Stop();
+                    await CrossMediaManager.Current.Queue.UpdateMediaItems();
+                    await CrossMediaManager.Current.Play();
+                    await CrossMediaManager.Current.SeekTo(timeSpan);
                 }
-                await CrossMediaManager.Current.Queue.UpdateMediaItems();
                 await SnackBarVM.ShowSnackBarShortAsync($"Song '{track.Title}' removed from playlist '{SelectedPlaylist.Name}'!", "OK", () => { });
             }
             else
             {
                 await SnackBarVM.ShowSnackBarShortAsync($"Song '{track.Title}' not found in playlist '{SelectedPlaylist.Name}'", "OK", () => { });
             }
-
+            
             NavigationState.refreshFavoritesNeeded = true;
         }
 

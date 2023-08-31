@@ -1,5 +1,4 @@
-﻿using DailyPlaylist.View;
-using dotenv.net;
+﻿using DailyPlaylist.Services;
 
 namespace DailyPlaylist;
 
@@ -10,6 +9,8 @@ public partial class App : Application
         InitializeComponent();
 
         MainPage = new AppShell();
+
+        new HttpService();
 
     }
 

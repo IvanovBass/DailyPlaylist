@@ -7,18 +7,17 @@ namespace DailyPlaylist.View;
 public partial class PlaylistPage : ContentPage
 {
     private PlaylistViewModel _playlistViewModel;
-    private AppSessionManager _sessionManager;
 
     // CONSTRUCTOR //
-	public PlaylistPage(IPlaylistViewModel playlistViewmodel)
+	public PlaylistPage(AppSessionManager appSessionManager)
     {
         InitializeComponent();
 
-        _sessionManager = ServiceHelper.GetService<AppSessionManager>();
+        var playlistViewModel = appSessionManager.PlaylistViewModel;
 
-        _playlistViewModel = _sessionManager.PlaylistViewModel;
+        _playlistViewModel = playlistViewModel;
 
-        BindingContext = _playlistViewModel;
+        BindingContext = playlistViewModel;
 
         _playlistViewModel.PromptEditEvent += PromptMessageEditAsync;
         _playlistViewModel.PromptCreateEvent += PromptCreateAsync;
@@ -43,20 +42,6 @@ public partial class PlaylistPage : ContentPage
             NavigationState.refreshFavoritesNeeded = false;
             _playlistViewModel.LoadTracksForPlaylist(_playlistViewModel.SelectedPlaylist);
         }
-        if (NavigationState.IsReloggedPVM)
-        {
-            _sessionManager = ServiceHelper.GetService<AppSessionManager>();
-
-            _playlistViewModel = _sessionManager.PlaylistViewModel;
-
-            BindingContext = _playlistViewModel;
-
-            NavigationState.IsReloggedPVM = false;
-
-            _playlistViewModel.PromptEditEvent += PromptMessageEditAsync;
-            _playlistViewModel.PromptCreateEvent += PromptCreateAsync;
-
-        }
 
     }
     public async void PromptMessageEditAsync()
@@ -73,9 +58,10 @@ public partial class PlaylistPage : ContentPage
                 _playlistViewModel.SelectedPlaylist.Description = newDescription;
                 var tempSelectedPlaylist = _playlistViewModel.SelectedPlaylist;
                 await SnackBarVM.ShowSnackBarAsync("Playlist '" + newName + "' successfully edited", "OK", () => { });
-                await Task.Delay(1000);
+                await Task.Delay(400);
                 _playlistViewModel.UserPlaylists = tempList;
                 _playlistViewModel.SelectedPlaylist = tempSelectedPlaylist;
+                return;
             }
         }
     }
@@ -98,6 +84,10 @@ public partial class PlaylistPage : ContentPage
 
                 var insertedPlaylist = await _playlistViewModel.InsertNewPlaylistAsync(newPlaylist);
 
+                _playlistViewModel.UserPlaylists.Add(newPlaylist);
+                _playlistViewModel.SelectedPlaylist = newPlaylist;
+                NavigationState.refreshFavoritesNeeded = true;
+
                 if (insertedPlaylist != null)
                 {
                     await SnackBarVM.ShowSnackBarAsync("Playlist '" + newName + "' successfully created!", "OK", () => { });
@@ -106,9 +96,7 @@ public partial class PlaylistPage : ContentPage
                 {                  
                     await SnackBarVM.ShowSnackBarAsync("Failed to store the Playlist. Please make sure you are connected and your playlists are sync'd.", "Dismiss", () => { });
                 }
-                _playlistViewModel.UserPlaylists.Add(newPlaylist);
-                _playlistViewModel.SelectedPlaylist = newPlaylist;
-                NavigationState.refreshFavoritesNeeded = true;
+                return;
             }
         }
     }

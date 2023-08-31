@@ -25,15 +25,12 @@ namespace DailyPlaylist.ViewModel
 
                     authService.Logout();  // we unlog the authService and the active user in it
 
-                    appSessionManager.DisposeCurrentScope();  // we dispose the current session
+                    appSessionManager.DisposeCurrentScope();  // we dispose the current session and nullify the VM's
 
                     await CrossMediaManager.Current.Stop();
                     CrossMediaManager.Current.Queue.Clear();
                     MediaPlayerService.ResetProperties();
 
-                    NavigationState.IsReloggedSVM = true;
-                    NavigationState.IsReloggedPVM = true;
-                    NavigationState.IsRelogged = true;
 
                     Application.Current.MainPage = new AppShell();
                     // ça et les 3 /// en dessous , un des 2 a réussi à killer tes instances de pages...

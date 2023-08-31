@@ -19,18 +19,6 @@ namespace DailyPlaylist.View
             StartAnimations();
         }
 
-        protected override void OnAppearing()
-        {
-            base.OnAppearing();
-
-            if (NavigationState.IsRelogged)
-            {
-                _appSessionManager.StartNewSession();
-                NavigationState.IsRelogged = false;
-            }
-        }
-
-
         private async void StartAnimations()
         {
             while (true)

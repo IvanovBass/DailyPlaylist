@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Windows.Input;
 using DailyPlaylist.Model;
-
+using MauiAppDI.Helpers;
 
 namespace DailyPlaylist.ViewModel
 {
@@ -9,7 +9,7 @@ namespace DailyPlaylist.ViewModel
     {
 
         private ObservableCollection<Genre> _genres;
-        Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
+        HttpClient _httpClient;
 
         // PROPERTIES //
 
@@ -27,6 +27,7 @@ namespace DailyPlaylist.ViewModel
 
         public PlaylistConfigViewModel()
         {
+            _httpClient = ServiceHelper.GetService<HttpClient>();
             // we can't invoke an async LoadGenres in the constructor ... so ....
             LoadGenresCommand = new Command(async () => await LoadGenres());
         }
@@ -40,11 +41,10 @@ namespace DailyPlaylist.ViewModel
 
         private async Task LoadGenres()
         {
-            var client = _httpClient.Value;
             try
             {
         
-                var jsonResponse = await client.GetStringAsync($"https://api.deezer.com/genre");
+                var jsonResponse = await _httpClient.GetStringAsync($"https://api.deezer.com/genre");
                 var genresData = JsonConvert.DeserializeObject<GenreData>(jsonResponse);
                 Genres = new ObservableCollection<Genre>(genresData.Data);
             
@@ -72,8 +72,7 @@ namespace DailyPlaylist.ViewModel
             var years = GenerateYearsForDecade(decade);
             var yearsQuery = string.Join(",", years);
 
-            var client = _httpClient.Value;
-            var jsonResponse = await client.GetStringAsync($"https://api.deezer.com/search/album?q=genre_id:\"{genreId}\" release_date:{yearsQuery} &order=FANS_DESC");
+            var jsonResponse = await _httpClient.GetStringAsync($"https://api.deezer.com/search/album?q=genre_id:\"{genreId}\" release_date:{yearsQuery} &order=FANS_DESC");
             var searchResults = JsonConvert.DeserializeObject<SearchAlbumsResponse>(jsonResponse);
 
             return searchResults.Albums;
@@ -103,11 +102,9 @@ namespace DailyPlaylist.ViewModel
 
             List<Track> tracks = new List<Track>();
 
-            var client = _httpClient.Value;
-
             foreach (var album in selectedAlbums)
             {
-                var trackResponse = await client.GetStringAsync(album.Tracklist);
+                var trackResponse = await _httpClient.GetStringAsync(album.Tracklist);
                 var trackData = JsonConvert.DeserializeObject<TracksResponse>(trackResponse);
 
                 tracks.AddRange(trackData.Tracks.OrderBy(x => rng.Next()).Take(3));
